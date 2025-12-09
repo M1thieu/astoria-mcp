@@ -9,9 +9,9 @@
 <body>
     <div class="wrapper">
         <div class="top-bar">
-            <!-- Petit espace à gauche, comme une icône/menu -->
-            <div style="width:24px;"></div>
-            <h1 class="title">Liste d'objets</h1>
+            <!-- Lien retour aux catégories -->
+            <a href="categories.html" style="text-decoration: none; color: var(--color-primary); font-size: var(--text-lg);" title="Retour aux catégories">←</a>
+            <h1 class="title" id="pageTitle">Liste d'objets</h1>
             <div class="search-container">
                 <input
                     type="text"
@@ -499,8 +499,34 @@
             }
         }
 
-        // Chargement initial
-        loadTable(allItems);
+        // Filtrage par catégorie depuis l'URL
+        function getUrlCategory() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('category');
+        }
+
+        // Mise à jour du titre en fonction de la catégorie
+        function updatePageTitle(category) {
+            const titles = {
+                'equipement': 'Équipements',
+                'consommable': 'Consommables',
+                'agricole': 'Agricole'
+            };
+            const title = document.getElementById('pageTitle');
+            if (category && titles[category]) {
+                title.textContent = titles[category];
+            }
+        }
+
+        // Chargement initial avec filtre catégorie si présent
+        const urlCategory = getUrlCategory();
+        if (urlCategory) {
+            const filtered = allItems.filter(item => item.category === urlCategory);
+            updatePageTitle(urlCategory);
+            loadTable(filtered);
+        } else {
+            loadTable(allItems);
+        }
     </script>
 </body>
 </html>
