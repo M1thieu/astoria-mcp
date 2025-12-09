@@ -192,7 +192,8 @@
             position: absolute;
             left: 0;
             top: 100%;
-            margin-top: 4px;
+            bottom: auto;
+            transform: translateY(4px);
             z-index: 10;
             background: #ffffff;
             border: 1px solid #ccc;
@@ -203,6 +204,12 @@
             max-width: 380px;
             font-size: 0.85rem;
             white-space: normal;
+        }
+
+        .tooltip-box.tooltip--above {
+            top: auto;
+            bottom: 100%;
+            transform: translateY(-4px);
         }
 
         .tooltip-title {
@@ -514,7 +521,7 @@
                 (effect ? ` | Effet : ${effect}` : "");
 
             const rowHtml = `
-                <tr>
+                <tr class="item-row">
                     <td class="img-cell">
                         ${image ? `<img src="${image}" alt="${escapeForAttribute(name)}" onclick="openItemModal(${index})">` : ""}
                     </td>
@@ -523,7 +530,7 @@
                         <div class="desc-container">
                             <span class="desc-text">${escapeHtml(description)}</span>
                             <button class="more-link" onclick="openItemModal(${index}); return false;">Plus</button>
-                            <div class="tooltip-box">
+                            <div class="tooltip-box tooltip">
                                 <span class="tooltip-title">${escapeHtml(name)}</span>
                                 ${description ? `<span>${escapeHtml(description)}</span>` : ""}
                                 ${priceText ? `<span class="tooltip-price">${escapeHtml(priceText)}</span>` : ""}
@@ -548,6 +555,48 @@
             return rowHtml;
         }
 
+        // Place les infobulles au-dessus si l'espace est insuffisant en dessous
+        function setupTooltipHandlers() {
+            const container = document.querySelector(".table-container");
+            const rows = document.querySelectorAll("#inventoryTable tbody tr");
+
+            rows.forEach((row) => {
+                const tooltip = row.querySelector(".tooltip");
+                if (!tooltip) return;
+
+                row.addEventListener("mouseenter", () => {
+                    const originalDisplay = tooltip.style.display;
+                    const originalVisibility = tooltip.style.visibility;
+
+                    tooltip.style.display = "block";
+                    tooltip.style.visibility = "hidden";
+
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    const rowRect = row.getBoundingClientRect();
+
+                    let limitBottom = window.innerHeight;
+                    if (container) {
+                        const containerRect = container.getBoundingClientRect();
+                        limitBottom = Math.min(limitBottom, containerRect.bottom);
+                    }
+
+                    const spaceBelow = limitBottom - rowRect.bottom;
+                    if (spaceBelow < tooltipRect.height) {
+                        tooltip.classList.add("tooltip--above");
+                    } else {
+                        tooltip.classList.remove("tooltip--above");
+                    }
+
+                    tooltip.style.display = originalDisplay;
+                    tooltip.style.visibility = originalVisibility;
+                });
+
+                row.addEventListener("mouseleave", () => {
+                    tooltip.classList.remove("tooltip--above");
+                });
+            });
+        }
+
         // Construction du tableau
         function loadTable(data) {
             currentData = data.slice();
@@ -555,6 +604,7 @@
             data.forEach((item, index) => {
                 tableBody.insertAdjacentHTML("beforeend", buildRow(item, index));
             });
+            setupTooltipHandlers();
         }
 
         // Modal : ouverture / fermeture
