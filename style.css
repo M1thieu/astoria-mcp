@@ -117,7 +117,7 @@ th {
 
 tbody tr {
     background-color: #ffffff;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    transition: none; /* no delay when moving between items */
 }
 
 tbody tr:nth-child(even) {
@@ -140,12 +140,12 @@ td {
 
 /* Images (illustration) */
 .img-cell {
-    width: 64px;
+    width: 86px; /* scale column to fit 86px thumbnails */
 }
 
 .img-cell img {
-    width: 44px;
-    height: 44px;
+    width: 86px;
+    height: 86px;
     border-radius: 6px;
     object-fit: cover;
     border: 1px solid #ddd;
@@ -168,20 +168,30 @@ td {
     max-width: 420px;
 }
 
+.description-cell {
+    width: 420px;
+    max-width: 420px;
+}
+
 .desc-container {
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0; /* allows inner text to shrink for ellipsis */
 }
 
 .desc-text {
-    display: inline-block;
+    flex: 1;
+    min-width: 0; /* required for text-overflow within flex */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 360px;
 }
 
 .more-link {
     margin-left: 6px;
+    flex-shrink: 0;
     font-size: 0.8rem;
     color: #d81b60;
     cursor: pointer;
