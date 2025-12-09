@@ -1,36 +1,150 @@
-﻿/* --- LOOK & FEEL GENERAL --- */
+/* =================================================================
+   DESIGN SYSTEM - CSS Variables
+   ================================================================= */
+:root {
+    /* === COLOR PALETTE === */
+    --color-primary: #d81b60;
+    --color-primary-dark: #880e4f;
+    --color-primary-light: #f8bbd0;
+    --color-primary-lighter: #fce4ec;
+    --color-primary-pale: #e6b7c9;
+
+    --color-table-header: #f7c3d5;
+    --color-table-header-text: #7a1242;
+    --color-table-row-even: #fff6fa;
+    --color-table-row-hover: #ffe8f4;
+
+    --color-white: #ffffff;
+    --color-gray-100: #eee;
+    --color-gray-200: #ddd;
+    --color-gray-300: #ccc;
+    --color-gray-400: #999;
+    --color-gray-600: #666;
+    --color-gray-700: #555;
+    --color-gray-800: #444;
+    --color-gray-900: #333;
+
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 6px 10px rgba(0, 0, 0, 0.06);
+    --shadow-xl: 0 6px 14px rgba(0, 0, 0, 0.08);
+    --shadow-2xl: 0 6px 16px rgba(0, 0, 0, 0.3);
+    --shadow-primary: 0 4px 10px rgba(216, 27, 96, 0.25);
+    --overlay: rgba(0, 0, 0, 0.5);
+
+    /* === SPACING SCALE === */
+    --space-1: 2px;
+    --space-2: 4px;
+    --space-3: 6px;
+    --space-4: 8px;
+    --space-5: 10px;
+    --space-6: 12px;
+    --space-7: 14px;
+    --space-8: 16px;
+    --space-9: 18px;
+    --space-10: 20px;
+    --space-14: 28px;
+
+    /* === TYPOGRAPHY SCALE === */
+    --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.8rem;
+    --text-sm-plus: 0.82rem;
+    --text-base-minus: 0.85rem;
+    --text-base: 0.9rem;
+    --text-md: 1rem;
+    --text-lg: 1.2rem;
+    --text-xl: 1.3rem;
+    --text-2xl: 1.4rem;
+    --text-3xl: 1.6rem;
+
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+
+    --letter-spacing-wide: 0.08em;
+    --line-height-tight: 1.3;
+    --line-height-normal: 1.5;
+
+    /* === BORDER RADIUS === */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 20px;
+    --radius-full: 50%;
+
+    /* === COMPONENT SIZES === */
+    --img-thumbnail: 86px;
+    --carousel-img: 200px;
+    --carousel-img-min-height: 180px;
+    --carousel-btn: 28px;
+    --carousel-dot: 8px;
+    --action-column: 110px;
+    --header-height: 38px;
+
+    --desc-max-width: 420px;
+    --tooltip-min-width: 280px;
+    --tooltip-max-width: 400px;
+    --modal-max-width: 640px;
+    --wrapper-max-width: 1200px;
+
+    --table-min-width: 760px;
+    --table-min-width-mobile: 720px;
+    --table-max-height: 75vh;
+
+    --search-width: 210px;
+    --search-width-focus: 280px;
+
+    /* === TRANSITIONS === */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.25s ease;
+
+    /* === Z-INDEX === */
+    --z-sticky: 5;
+    --z-tooltip: 99999;
+    --z-modal: 20000;
+}
+
+/* =================================================================
+   BASE STYLES
+   ================================================================= */
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: #ffffff;
+    font-family: var(--font-family);
+    background-color: var(--color-white);
     margin: 0;
-    padding: 20px;
-    color: #333;
+    padding: var(--space-10);
+    color: var(--color-gray-900);
+    line-height: var(--line-height-normal);
 }
 
 .wrapper {
-    max-width: 1200px;
+    max-width: var(--wrapper-max-width);
     margin: 0 auto;
 }
 
-/* En-tete avec Titre et Recherche (style "app") */
+/* =================================================================
+   TOP BAR (Header with Title & Search)
+   ================================================================= */
 .top-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    background-color: #fce4ec; /* rose clair */
-    padding: 12px 18px;
-    border-radius: 8px 8px 0 0;
-    border: 1px solid #f8bbd0;
+    gap: var(--space-8);
+    background-color: var(--color-primary-lighter);
+    padding: var(--space-6) var(--space-9);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border: 1px solid var(--color-primary-light);
 }
 
 .title {
     margin: 0;
     flex: 1;
     text-align: center;
-    color: #d81b60;
-    font-size: 1.6rem;
-    font-weight: 600;
+    color: var(--color-primary);
+    font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
 }
 
 .search-container {
@@ -40,181 +154,198 @@ body {
 }
 
 .search-container input {
-    padding: 6px 28px 6px 12px; /* place pour la croix a droite */
-    border-radius: 20px;
-    border: 1px solid #d81b60;
+    padding: var(--space-3) var(--space-14) var(--space-3) var(--space-6);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-primary);
     outline: none;
-    width: 210px;
-    font-size: 0.9rem;
-    transition: width 0.25s ease;
+    width: var(--search-width);
+    font-size: var(--text-base);
+    font-family: var(--font-family);
+    transition: width var(--transition-medium);
 }
 
 .search-container input:focus {
-    width: 280px;
+    width: var(--search-width-focus);
 }
 
 .clear-search-btn {
     background: transparent;
     border: none;
-    color: #d81b60;
-    font-size: 1rem;
+    color: var(--color-primary);
+    font-size: var(--text-md);
     cursor: pointer;
     padding: 0;
     line-height: 1;
     position: absolute;
-    right: 10px;
+    right: var(--space-5);
     top: 50%;
     transform: translateY(-50%);
-    display: none; /* affichee uniquement quand il y a du texte */
+    display: none;
 }
 
 .clear-search-btn:hover {
-    color: #880e4f;
+    color: var(--color-primary-dark);
 }
 
-/* // TABLE UX : conteneur scrollable + fond blanc */
+/* =================================================================
+   TABLE CONTAINER
+   ================================================================= */
 .table-container {
-    border: 1px solid #f8bbd0;
+    border: 1px solid var(--color-primary-light);
     border-top: none;
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.06);
-    overflow-x: auto; /* scroll horizontal propre si l'iframe est trop etroite */
-    overflow-y: auto; /* garde le scroll vertical et colle l'header */
-    max-height: 75vh;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: var(--table-max-height);
     position: relative;
-    background: #fff;
+    background: var(--color-white);
 }
 
-/* --- TABLEAU --- */
+/* =================================================================
+   TABLE
+   ================================================================= */
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* rend le tableau plus stable et lisible */
-    min-width: 760px; /* garde les colonnes lisibles sur mobile via le scroll horizontal */
+    table-layout: fixed;
+    min-width: var(--table-min-width);
 }
 
 thead {
-    background-color: #f7c3d5; /* // TABLE UX : rose un peu plus soutenu */
-    color: #7a1242;
+    background-color: var(--color-table-header);
+    color: var(--color-table-header-text);
 }
 
 thead tr {
-    height: 38px;
+    height: var(--header-height);
 }
 
 th {
     text-align: left;
-    padding: 12px 16px; /* // TABLE UX : plus d'air */
-    font-size: 0.82rem;
+    padding: var(--space-6) var(--space-8);
+    font-size: var(--text-sm-plus);
+    font-weight: var(--font-bold);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-    position: sticky; /* // TABLE UX : en-tete collant */
+    letter-spacing: var(--letter-spacing-wide);
+    position: sticky;
     top: 0;
-    z-index: 5;
-    background-color: #f7c3d5;
+    z-index: var(--z-sticky);
+    background-color: var(--color-table-header);
 }
 
 tbody tr {
-    background-color: #ffffff;
-    transition: none; /* no delay when moving between items */
+    background-color: var(--color-white);
+    transition: none;
 }
 
 tbody tr:nth-child(even) {
-    background-color: #fff6fa; /* // TABLE UX : alternance douce */
+    background-color: var(--color-table-row-even);
 }
 
 tbody tr:hover {
-    background-color: #ffe8f4;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08); /* // TABLE UX : effet soft */
+    background-color: var(--color-table-row-hover);
+    box-shadow: var(--shadow-xl);
     transform: translateY(-1px);
     cursor: pointer;
 }
 
 td {
-    padding: 12px 16px; /* // TABLE UX : plus de lisibilite */
-    border-bottom: 1px solid #eee;
+    padding: var(--space-6) var(--space-8);
+    border-bottom: 1px solid var(--color-gray-100);
     vertical-align: middle;
-    font-size: 0.9rem;
+    font-size: var(--text-base);
+    line-height: var(--line-height-normal);
 }
 
-/* Images (illustration) */
+/* =================================================================
+   TABLE CELLS - Images
+   ================================================================= */
 .img-cell {
-    width: 86px; /* scale column to fit 86px thumbnails */
+    width: var(--img-thumbnail);
 }
 
 .img-cell img {
-    width: 86px;
-    height: 86px;
-    border-radius: 6px;
+    width: var(--img-thumbnail);
+    height: var(--img-thumbnail);
+    border-radius: var(--radius-md);
     object-fit: cover;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-gray-200);
     display: block;
     cursor: pointer;
 }
 
-/* Nom */
+/* =================================================================
+   TABLE CELLS - Name
+   ================================================================= */
 .name-cell {
-    font-weight: 600;
-    color: #d81b60;
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
     white-space: nowrap;
     cursor: pointer;
+    font-size: var(--text-base);
 }
 
-/* Description + infobulle */
+/* =================================================================
+   TABLE CELLS - Description + Tooltip
+   ================================================================= */
 .desc-cell {
-    font-size: 0.9rem;
-    color: #555;
-    max-width: 420px;
+    font-size: var(--text-base);
+    color: var(--color-gray-700);
+    max-width: var(--desc-max-width);
 }
 
 .description-cell {
-    width: 420px;
-    max-width: 420px;
+    width: var(--desc-max-width);
+    max-width: var(--desc-max-width);
 }
 
 .desc-container {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-width: 0; /* allows inner text to shrink for ellipsis */
+    gap: var(--space-3);
+    min-width: 0;
 }
 
 .desc-text {
     flex: 1;
-    min-width: 0; /* required for text-overflow within flex */
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: var(--text-base);
 }
 
 .more-link {
-    margin-left: 6px;
+    margin-left: var(--space-3);
     flex-shrink: 0;
-    font-size: 0.8rem;
-    color: #d81b60;
+    font-size: var(--text-sm);
+    color: var(--color-primary);
     cursor: pointer;
     text-decoration: underline;
     background: none;
     border: none;
     padding: 0;
+    font-family: var(--font-family);
 }
 
+/* Enhanced Tooltip Styling */
 .tooltip-box {
     display: none;
     position: fixed;
     left: -9999px;
     top: -9999px;
-    z-index: 99999;
-    background: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 6px 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    min-width: 260px;
-    max-width: 380px;
-    font-size: 0.85rem;
+    z-index: var(--z-tooltip);
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    padding: var(--space-6) var(--space-8);
+    box-shadow: var(--shadow-sm);
+    min-width: var(--tooltip-min-width);
+    max-width: var(--tooltip-max-width);
+    font-size: var(--text-base);
+    line-height: var(--line-height-normal);
     white-space: normal;
 }
 
@@ -223,98 +354,118 @@ td {
 }
 
 .tooltip-title {
-    font-weight: 600;
-    color: #d81b60;
-    margin-bottom: 4px;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    color: var(--color-primary);
+    margin-bottom: var(--space-3);
     display: block;
+    line-height: var(--line-height-normal);
 }
 
 .tooltip-price {
     display: block;
-    margin-top: 4px;
-    font-weight: 500;
+    margin-top: var(--space-3);
+    font-weight: var(--font-medium);
+    font-size: var(--text-base-minus);
+    color: var(--color-gray-800);
+    line-height: var(--line-height-normal);
 }
 
 .tooltip-effect {
     display: block;
-    margin-top: 2px;
+    margin-top: var(--space-3);
     font-style: italic;
-    color: #444;
+    font-size: var(--text-base-minus);
+    color: var(--color-gray-700);
+    line-height: var(--line-height-normal);
 }
 
-/* Afficher l'infobulle quand on survole la ligne */
-tbody tr:hover .tooltip-box {
-    display: block;
-}
+/* Tooltip display managed by JavaScript */
 
-/* Prix & Effet */
+/* =================================================================
+   TABLE CELLS - Commerce (Prix)
+   ================================================================= */
 .price-cell {
-    font-size: 0.85rem;
-    color: #444;
+    font-size: var(--text-base-minus);
+    color: var(--color-gray-800);
     white-space: normal;
 }
 
 .commerce-cell {
-    line-height: 1.3;
+    line-height: var(--line-height-tight);
 }
 
 .commerce-line {
     display: block;
     white-space: nowrap;
+    font-size: var(--text-base-minus);
 }
 
+/* =================================================================
+   TABLE CELLS - Effect
+   ================================================================= */
 .effect-cell {
-    font-size: 0.85rem;
-    color: #444;
+    font-size: var(--text-base-minus);
+    color: var(--color-gray-800);
+    line-height: var(--line-height-normal);
 }
 
-/* Action (bouton Copy) */
+/* =================================================================
+   TABLE CELLS - Action (Copy Button)
+   ================================================================= */
 .action-cell {
-    width: 110px;
+    width: var(--action-column);
     text-align: center;
 }
 
 .copy-btn {
-    background: #ffffff;
-    border: 1px solid #ccc;
-    padding: 6px 12px;
-    border-radius: 4px;
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-300);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
+    font-family: var(--font-family);
+    font-weight: var(--font-medium);
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    gap: var(--space-2);
+    transition: background var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast);
 }
 
 .copy-btn:hover {
-    background: #d81b60;
-    color: #ffffff;
-    border-color: #d81b60;
-    box-shadow: 0 4px 10px rgba(216, 27, 96, 0.25);
+    background: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-primary);
 }
 
 .copy-btn.copied {
-    background: #d81b60;
-    color: #ffffff;
-    border-color: #d81b60;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
 }
 
 .copy-btn.copied::after {
     content: "Copie !";
-    margin-left: 4px;
-    font-size: 0.7rem;
+    margin-left: var(--space-2);
+    font-size: var(--text-xs);
 }
 
-/* Modal item (image + details) */
+/* =================================================================
+   MODAL
+   ================================================================= */
 .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 20000; /* keep overlay above page content/text */
+    z-index: var(--z-modal);
 }
 
 .modal.open {
@@ -322,40 +473,44 @@ tbody tr:hover .tooltip-box {
 }
 
 .modal-inner {
-    background: #fff;
-    border-radius: 8px;
-    max-width: 640px;
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    max-width: var(--modal-max-width);
     width: 92%;
-    padding: 16px 18px 18px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    padding: var(--space-8) var(--space-9) var(--space-9);
+    box-shadow: var(--shadow-2xl);
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: var(--space-5);
 }
 
 .modal-title {
     margin: 0;
-    font-size: 1.2rem;
-    color: #d81b60;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
 }
 
 .modal-close {
     background: none;
     border: none;
-    font-size: 1.4rem;
+    font-size: var(--text-2xl);
     cursor: pointer;
+    color: var(--color-gray-600);
 }
 
 .modal-body {
     display: flex;
-    gap: 14px;
+    gap: var(--space-7);
 }
 
-/* // CAPE CAROUSEL : structure et navigation legere */
+/* =================================================================
+   MODAL - Carousel
+   ================================================================= */
 .modal-media {
     display: flex;
     flex-direction: column;
@@ -364,20 +519,20 @@ tbody tr:hover .tooltip-box {
 
 .modal-carousel {
     position: relative;
-    width: 200px;
-    min-height: 180px;
+    width: var(--carousel-img);
+    min-height: var(--carousel-img-min-height);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .modal-carousel img {
-    max-width: 200px;
-    max-height: 200px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
+    max-width: var(--carousel-img);
+    max-height: var(--carousel-img);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-gray-200);
     object-fit: cover;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-md);
 }
 
 .carousel-btn {
@@ -385,21 +540,22 @@ tbody tr:hover .tooltip-box {
     top: 50%;
     transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.9);
-    border: 1px solid #d81b60;
-    color: #d81b60;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    border-radius: var(--radius-full);
+    width: var(--carousel-btn);
+    height: var(--carousel-btn);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-md);
+    transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .carousel-btn:hover {
-    background: #d81b60;
-    color: #fff;
+    background: var(--color-primary);
+    color: var(--color-white);
 }
 
 .carousel-btn.prev {
@@ -412,37 +568,45 @@ tbody tr:hover .tooltip-box {
 
 .carousel-dots {
     display: flex;
-    gap: 6px;
+    gap: var(--space-3);
     justify-content: center;
-    margin-top: 8px;
+    margin-top: var(--space-4);
 }
 
 .carousel-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+    width: var(--carousel-dot);
+    height: var(--carousel-dot);
+    border-radius: var(--radius-full);
     border: none;
-    background: #e6b7c9;
+    background: var(--color-primary-pale);
     cursor: pointer;
+    transition: background var(--transition-fast);
 }
 
 .carousel-dot.active {
-    background: #d81b60;
+    background: var(--color-primary);
 }
 
+/* =================================================================
+   MODAL - Text Content
+   ================================================================= */
 .modal-text {
-    font-size: 0.9rem;
-    color: #444;
+    font-size: var(--text-base);
+    color: var(--color-gray-800);
+    line-height: var(--line-height-normal);
 }
 
 .modal-text p {
-    margin: 4px 0;
+    margin: var(--space-2) 0;
 }
 
 .modal-label {
-    font-weight: 600;
+    font-weight: var(--font-semibold);
 }
 
+/* =================================================================
+   RESPONSIVE - Mobile Modal
+   ================================================================= */
 @media (max-width: 640px) {
     .modal-body {
         flex-direction: column;
@@ -454,10 +618,12 @@ tbody tr:hover .tooltip-box {
     }
 }
 
-/* --- RESPONSIVE GENERAL --- */
+/* =================================================================
+   RESPONSIVE - Tablet & Mobile
+   ================================================================= */
 @media (max-width: 900px) {
     body {
-        padding: 10px;
+        padding: var(--space-5);
     }
 
     .wrapper {
@@ -467,29 +633,29 @@ tbody tr:hover .tooltip-box {
     .top-bar {
         flex-direction: column;
         align-items: stretch;
-        gap: 8px;
+        gap: var(--space-4);
     }
 
     .title {
-        font-size: 1.3rem;
+        font-size: var(--text-xl);
         text-align: left;
     }
 
     table {
-        min-width: 720px; /* permet un scroll horizontal dans l'iframe GSite */
+        min-width: var(--table-min-width-mobile);
     }
 
     th,
     td {
-        padding: 8px 10px;
-        font-size: 0.8rem;
+        padding: var(--space-4) var(--space-5);
+        font-size: var(--text-sm);
     }
 
     .carousel-btn.prev {
-        left: 2px;
+        left: var(--space-1);
     }
 
     .carousel-btn.next {
-        right: 2px;
+        right: var(--space-1);
     }
 }
