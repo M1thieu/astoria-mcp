@@ -53,39 +53,39 @@ const inventoryData = [
         description:
             "Petite clé mécanique rare, composée de rouages de cuivre et d’ailes de chauve-souris taillées dans une pierre obscure. " +
             "Lorsqu’elle est activée, la clé ouvre un passage vers une quête adaptative dont la difficulté s’ajuste au niveau du joueur et de son équipe. " +
-            "Jusqu’à 5 aventuriers peuvent franchir la brèche et entrer dans l’univers qu’elle révèle, un conte vivant d’Astoria aux récompenses uniques adaptées à leur progression. " +
+            "Jusqu’à cinq aventuriers peuvent franchir la brèche et entrer dans l’univers qu’elle révèle, un conte vivant d’Astoria aux récompenses uniques adaptées à leur progression. " +
             "La clé est liée à une seule histoire et disparaît après avoir mené le groupe d'aventuriers à son destin.",
         buyPrice: "",
         sellPrice: "150 Kaels",
         effect:
-            "Ouvre une quête adaptative liée à une histoire unique d’Astoria pour un groupe jusqu’à 5 aventuriers, puis disparaît."
+            "Ouvre une quête adaptative liée à une histoire unique d’Astoria pour un groupe jusqu’à cinq aventuriers, puis disparaît."
     },
     {
         name: "Armure de Vexarion",
         image: "assets/images/Armure de Vexarion.png",
         description:
-            "Armure luxueuse forgée dans les lumières iridescentes du domaine divin, artefact sacré offert par Vexarion, Dieu de la Guerre et de la Stratégie. " +
+            "Cette armure luxueuse, forgée dans les lumières iridescentes du domaine divin, est un artefact sacré offert par Vexarion, Dieu de la Guerre et de la Stratégie. " +
             "Chaque plaque scintille d’un éclat changeant, comme si elle absorbait et reflétait la droiture du porteur. " +
             "Bénie par la Loi d’Honneur de Vexarion, elle déploie autour de son porteur une aura scintillante perceptible par tous les combattants. " +
             "Cette aura réagit uniquement aux actes déloyaux, jugeant la loyauté de ceux qui l’affrontent.",
         buyPrice: "",
         sellPrice: "",
         effect:
-            "Aura d’Honneur : lorsqu’un ennemi porte une attaque déloyale (dans le dos, hors duel, coup bas), la force de l’assaillant est réduite de 10 points pendant 2 tours. " +
+            "Effet : Aura d’Honneur — lorsqu’un ennemi porte une attaque déloyale (dans le dos, hors duel, coup bas), la force de l’assaillant est réduite de 10 points pendant 2 tours. " +
             "L’effet ne se déclenche que si le code d’honneur de Vexarion est bafoué et n’accorde aucun avantage lors d’un combat loyal."
     },
     {
         name: "Sceptre de Krythus",
         image: "assets/images/Sceptre de Krythus.png",
         description:
-            "Artefact sacré façonné dans les glaces du mont le plus haut, incarnant la puissance implacable de Krythus, Dieu de l’Hiver et des Tempêtes de Glace. " +
+            "Artefact sacré façonné dans les glaces du mont le plus haut, le Sceptre de Krythus incarne la puissance implacable de Krythus, Dieu de l’Hiver et des Tempêtes de Glace. " +
             "Sa tige gravée de runes givrées s’allonge d’elle-même pour s’adapter parfaitement à la taille de son porteur, comme si l’arme reconnaissait instinctivement son maître. " +
             "Le cristal à son sommet renferme une bribe de la magie du dieu, amplifiant la magie de glace qui y circule et renforçant chaque sort gelé lancé par le porteur.",
         buyPrice: "",
         sellPrice: "",
         effect:
             "Effet : Ajustement Givré — le sceptre adapte automatiquement la longueur de son manche à la morphologie du porteur, devenant une extension naturelle de son bras. " +
-            "Effet : Faveur Glaciale — augmente la puissance des sorts de glace (+5 stat de Glace, +5 Magie). " +
+            "Effet : Faveur Glaciale — augmente la puissance des sorts de glace (+5 points de Glace, +5 points de Magie). " +
             "Effet : Cœur de Givre — libère une onde glaciale qui fige le sol et l’air dans un rayon de 10 mètres autour du porteur (durée : 3 tours, recharge : 5 tours, 1 tour de charge)."
     },
     {
@@ -107,14 +107,14 @@ const inventoryData = [
         name: "Book Of Aeris",
         image: "assets/images/Book_of_Aeris.png",
         description:
-            "Petit livre rare, d'une teinte bleue ornée d’une larme sur sa couverture. Lorsqu’il est activé, le livre ouvre un passage vers une quête adaptative dont la difficulté s’ajuste au niveau du joueur et de son équipe. " +
-            "Jusqu’à 5 aventuriers peuvent franchir la brèche et entrer dans l’univers qu’il révèle, un conte vivant d’Astoria aux récompenses mystères uniques adaptées à leur progression. " +
+            "Petit livre rare, d’une teinte bleue ornée d’une larme sur sa couverture. Lorsqu’il est activé, le livre ouvre un passage vers une quête adaptative dont la difficulté s’ajuste au niveau du joueur et de son équipe. " +
+            "Jusqu’à cinq aventuriers peuvent franchir la brèche et entrer dans l’univers qu’il révèle, un conte vivant d’Astoria aux récompenses mystères uniques adaptées à leur progression. " +
             "Le livre est lié à une seule histoire et disparaît après avoir mené le groupe d'aventuriers à son histoire. " +
-            "Le Conte d'Aeris raconte, à la troisième personne, une histoire déchirante : l’amour impossible qui condamna une cité des mers entière à disparaître sous le joug d’un tyran.",
+            "Le Conte d'Aeris raconte, à la troisième personne, une histoire déchirante : un amour impossible qui condamna une cité des mers entière à disparaître sous le joug d’un tyran.",
         buyPrice: "",
         sellPrice: "700 Kaels",
         effect:
-            "Ouvre une quête adaptative liée au Conte d’Aeris pour un groupe jusqu’à 5 aventuriers, puis disparaît une fois l’histoire accomplie."
+            "Ouvre une quête adaptative liée au Conte d’Aeris pour un groupe jusqu’à cinq aventuriers, puis disparaît une fois l’histoire accomplie."
     },
     {
         name: "The Queen's Poison",
@@ -135,10 +135,10 @@ const inventoryData = [
         name: "Cloche de Résonnance",
         image: "assets/images/Cloche_de_Resonnance.png",
         description:
-            "Petit artefact rare aux teintes noires et or. Lorsqu’elle est agitée, la cloche permet de révéler par semi‑transparence un décor invisible, comme des chemins secrets, " +
-            "en utilisant un principe d'écholocalisation magique. " +
+            "Petit artefact rare aux teintes noires et or. Lorsqu’elle est agitée, la cloche permet de révéler par semi-transparence un décor invisible, comme des chemins secrets, " +
+            "en utilisant un principe d’écholocalisation magique. " +
             "En seconde propriété, utilisée par un meister ou une arme, elle plonge le duo dans une salle mentale qui leur est propre. " +
-            "Ils y restent enfermés jusqu'à ce que leurs différends soient réglés, faisant de l’objet un outil de rituel pour harmoniser les duos.",
+            "Ils y restent enfermés jusqu’à ce que leurs différends soient réglés, faisant de l’objet un outil de rituel pour harmoniser les duos.",
         buyPrice: "",
         sellPrice: "850 Kaels",
         effect:
@@ -153,7 +153,7 @@ const inventoryData = [
             "éclairant leur environnement quelles que soient les conditions et leur permettant de se repérer dans les ténèbres. " +
             "Cependant, seuls deux utilisateurs peuvent bénéficier de sa lumière avant que le fruit ne perde ses propriétés. " +
             "La durée d'effet dépend du nombre de consommateurs. Aventuriers, êtes-vous prêts à devenir des lumières dans la nuit ? " +
-            "Prenez garde à ne pas perdre vos alliés… ni à les aveugler.",
+            "Prenez garde à ne pas perdre vos alliés ni à les aveugler.",
         buyPrice: "25 Kaels /u",
         sellPrice: "15 Kaels /u (vente), 5 Kaels /u (revente)",
         effect:
@@ -162,7 +162,7 @@ const inventoryData = [
             "Permet d’éclairer la nuit, le brouillard et d’être visible à distance pour les alliés."
     }
     // Pour ajouter / éditer un objet :
-    // - modifiez les champs ci‑dessus (description, prix, effet, image)
+    // - modifiez les champs ci-dessus (description, prix, effet, image)
     // - ou ajoutez un nouveau bloc :
     //   {
     //       name: "Nom de l'objet",

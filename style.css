@@ -1,4 +1,4 @@
-/* --- LOOK & FEEL GÇ%NÇ%RAL --- */
+/* --- LOOK & FEEL GÉNÉRAL --- */
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: #ffffff;
@@ -12,7 +12,7 @@ body {
     margin: 0 auto;
 }
 
-/* En-tÇ¦te avec Titre et Recherche (style "app" comme la capture) */
+/* En-tête avec Titre et Recherche (style "app" comme la capture) */
 .top-bar {
     display: flex;
     align-items: center;
@@ -40,7 +40,7 @@ body {
 }
 
 .search-container input {
-    padding: 6px 28px 6px 12px; /* place pour la croix Çÿ droite */
+    padding: 6px 28px 6px 12px; /* place pour la croix à droite */
     border-radius: 20px;
     border: 1px solid #d81b60;
     outline: none;
@@ -65,21 +65,21 @@ body {
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    display: none; /* affichÇ¸ uniquement quand il y a du texte */
+    display: none; /* affichée uniquement quand il y a du texte */
 }
 
 .clear-search-btn:hover {
     color: #880e4f;
 }
 
-/* Conteneur pour le tableau (avec bord identique Çÿ la top-bar) */
+/* Conteneur pour le tableau (avec bord identique à la top-bar) */
 .table-container {
     border: 1px solid #f8bbd0;
     border-top: none;
     border-radius: 0 0 8px 8px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06);
-    overflow-x: auto; /* scroll horizontal propre si l'iframe est Ç¸troite */
+    overflow-x: auto; /* scroll horizontal propre si l'iframe est trop étroite */
 }
 
 /* --- TABLEAU --- */
@@ -90,7 +90,7 @@ table {
 }
 
 thead {
-    background-color: #f8bbd0; /* en-tÇ¦te rose plus foncÇ¸ */
+    background-color: #f8bbd0; /* en-tête rose plus foncée */
     color: #880e4f;
 }
 
@@ -274,12 +274,12 @@ tbody tr:hover .tooltip-box {
 }
 
 .copy-btn.copied::after {
-    content: "CopiÇ¸ !";
+    content: "Copié !";
     margin-left: 4px;
     font-size: 0.7rem;
 }
 
-/* Modal item (image + dÇ¸tails) */
+/* Modal item (image + détails) */
 .modal {
     position: fixed;
     inset: 0;
@@ -355,7 +355,7 @@ tbody tr:hover .tooltip-box {
     }
 }
 
-/* --- RESPONSIVE GÇ%NÇ%RAL --- */
+/* --- RESPONSIVE GÉNÉRAL --- */
 @media (max-width: 900px) {
     body {
         padding: 10px;
@@ -380,7 +380,8 @@ tbody tr:hover .tooltip-box {
         min-width: 720px; /* permet un scroll horizontal dans l'iframe GSite */
     }
 
-    th, td {
+    th,
+    td {
         padding: 6px 8px;
         font-size: 0.8rem;
     }

@@ -9,11 +9,24 @@
 <body>
     <div class="wrapper">
         <div class="top-bar">
-            <div style="width:24px;"></div> <!-- Petit espace Çÿ gauche, comme une icÇïne/menu -->
+            <!-- Petit espace à gauche, comme une icône/menu -->
+            <div style="width:24px;"></div>
             <h1 class="title">Liste d'objets</h1>
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Rechercher un objet..." onkeyup="filterTable()">
-                <button id="clearSearchBtn" class="clear-search-btn" type="button" onclick="clearSearch()">Ç-</button>
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Rechercher un objet..."
+                    onkeyup="filterTable()"
+                >
+                <button
+                    id="clearSearchBtn"
+                    class="clear-search-btn"
+                    type="button"
+                    onclick="clearSearch()"
+                >
+                    ×
+                </button>
             </div>
         </div>
 
@@ -30,18 +43,17 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal pour voir un item en grand / dÇ¸tails -->
+    <!-- Modal pour voir un item en grand / détails -->
     <div id="itemModal" class="modal" onclick="closeItemModal()">
         <div class="modal-inner" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalName"></h2>
-                <button class="modal-close" onclick="closeItemModal()">Ç-</button>
+                <button class="modal-close" onclick="closeItemModal()">×</button>
             </div>
             <div class="modal-body">
                 <img id="modalImage" alt="">
@@ -54,11 +66,11 @@
         </div>
     </div>
 
-    <!-- DonnÇ¸es des objets -->
+    <!-- Données des objets -->
     <script src="data.js"></script>
 
     <script>
-        // On rÇ¸cupÇùre les donnÇ¸es depuis data.js (inventoryData)
+        // On récupère les données depuis data.js (inventoryData)
         const allItems = (typeof inventoryData !== "undefined") ? inventoryData : [];
         let currentData = allItems.slice();
 
@@ -88,7 +100,7 @@
             const sell = item.sellPrice || "";
 
             if (buy && sell) {
-                return `Achat : ${buy} ƒ?" Vente : ${sell}`;
+                return `Achat : ${buy} / Vente : ${sell}`;
             }
             if (buy) {
                 return `Achat : ${buy}`;
@@ -113,7 +125,7 @@
             }
 
             if (summary.length < plain.length) {
-                summary += " ƒ?İ";
+                summary += " …";
             }
             return summary;
         }
@@ -134,11 +146,13 @@
                 (effect ? ` | Effet : ${effect}` : "");
 
             const rowHtml = `
-                <tr class="item-row">
+                <tr class="item-row" data-index="${index}">
                     <td class="img-cell">
-                        ${image ? `<img src="${image}" alt="${escapeForAttribute(name)}" onclick="openItemModal(${index})">` : ""}
+                        ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(name)}" onclick="openItemModal(${index})">` : ""}
                     </td>
-                    <td class="name-cell">${escapeHtml(name)}</td>
+                    <td class="name-cell" onclick="openItemModal(${index})">
+                        ${escapeHtml(name)}
+                    </td>
                     <td class="desc-cell">
                         <div class="desc-container">
                             <span class="desc-text">${escapeHtml(description)}</span>
@@ -159,7 +173,7 @@
                             class="copy-btn"
                             onclick="copyToClipboard('${escapeForAttribute(copyText)}', this)"
                         >
-                            ĞY"< Copy
+                            Copy
                         </button>
                     </td>
                 </tr>
@@ -242,9 +256,15 @@
                 modalImage.style.display = "none";
             }
 
-            modalDescription.innerHTML = description ? `<span class="modal-label">Description :</span> ${escapeHtml(description)}` : "";
-            modalPrice.innerHTML = priceText ? `<span class="modal-label">Prix :</span> ${escapeHtml(priceText)}` : "";
-            modalEffect.innerHTML = effect ? `<span class="modal-label">Effet :</span> ${escapeHtml(effect)}` : "";
+            modalDescription.innerHTML = description
+                ? `<span class="modal-label">Description :</span> ${escapeHtml(description)}`
+                : "";
+            modalPrice.innerHTML = priceText
+                ? `<span class="modal-label">Prix :</span> ${escapeHtml(priceText)}`
+                : "";
+            modalEffect.innerHTML = effect
+                ? `<span class="modal-label">Effet :</span> ${escapeHtml(effect)}`
+                : "";
 
             modal.classList.add("open");
         }
@@ -276,7 +296,6 @@
                 );
             });
 
-            // Affiche ou cache la croix en fonction du contenu
             const clearBtn = document.getElementById("clearSearchBtn");
             if (clearBtn) {
                 clearBtn.style.display = query ? "inline" : "none";
@@ -314,7 +333,7 @@
                     showCopyFeedback(button);
                 });
             } else {
-                // Fallback trÇùs simple
+                // Fallback très simple
                 const textarea = document.createElement("textarea");
                 textarea.value = text;
                 document.body.appendChild(textarea);
