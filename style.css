@@ -147,6 +147,29 @@ body {
     font-weight: var(--font-semibold);
 }
 
+.category-dropdown {
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-primary);
+    background: var(--color-white);
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+    font-family: var(--font-family);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.category-dropdown:hover {
+    background: var(--color-primary-lighter);
+    border-color: var(--color-primary-dark);
+}
+
+.category-dropdown:focus {
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
 .search-container {
     flex-shrink: 0;
     position: relative;
@@ -166,6 +189,7 @@ body {
 
 .search-container input:focus {
     width: var(--search-width-focus);
+    box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.15);
 }
 
 .clear-search-btn {
@@ -381,6 +405,40 @@ td {
 }
 
 /* Tooltip display managed by JavaScript */
+
+/* =================================================================
+   TABLE ROWS - Hover highlight
+   ================================================================= */
+tbody tr:hover {
+    background-color: var(--color-primary-lighter) !important;
+}
+
+/* =================================================================
+   EMPTY STATE
+   ================================================================= */
+.empty-state {
+    text-align: center;
+    padding: var(--space-12) var(--space-8);
+    color: var(--color-gray-600);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--color-gray-700);
+    margin-bottom: var(--space-2);
+}
+
+.empty-state-message {
+    font-size: var(--text-base);
+    color: var(--color-gray-600);
+}
 
 /* =================================================================
    TABLE CELLS - Commerce (Prix)
@@ -639,6 +697,10 @@ td {
     .title {
         font-size: var(--text-xl);
         text-align: left;
+    }
+
+    .category-dropdown {
+        width: 100%;
     }
 
     table {

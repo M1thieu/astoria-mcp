@@ -11,7 +11,17 @@
         <div class="top-bar">
             <!-- Lien retour aux catégories -->
             <a href="categories.html" style="text-decoration: none; color: var(--color-primary); font-size: var(--text-lg);" title="Retour aux catégories">←</a>
+
             <h1 class="title" id="pageTitle">Liste d'objets</h1>
+
+            <!-- Dropdown catégories -->
+            <select id="categoryFilter" class="category-dropdown" onchange="filterByCategory()">
+                <option value="">Toutes catégories</option>
+                <option value="equipement">⚔️ Équipements</option>
+                <option value="consommable">🧪 Consommables</option>
+                <option value="agricole">🌾 Agricole</option>
+            </select>
+
             <div class="search-container">
                 <input
                     type="text"
@@ -265,6 +275,19 @@
             return summary;
         }
 
+        // Extrait la première phrase seulement (pour tooltips)
+        function getFirstSentence(text) {
+            if (!text) return "";
+            const plain = text.replace(/\s+/g, " ").trim();
+            const dotIndex = plain.indexOf(".");
+
+            if (dotIndex > 0) {
+                return plain.slice(0, dotIndex + 1);
+            }
+            // Si pas de point, limite à 80 caractères
+            return plain.slice(0, 80) + (plain.length > 80 ? "…" : "");
+        }
+
         function buildRow(item, index) {
             const name = item.name || item.nom || "";
             const description = item.description || item.desc || "";
@@ -296,9 +319,8 @@
                             <button class="more-link" onclick="openItemModal(${index}); return false;">Plus</button>
                             <div class="tooltip-box tooltip">
                                 <span class="tooltip-title">${escapeHtml(name)}</span>
-                                ${description ? `<span>${escapeHtml(description)}</span>` : ""}
+                                ${description ? `<span>${escapeHtml(getFirstSentence(description))}</span>` : ""}
                                 ${priceText ? `<span class="tooltip-price">${escapeHtml(priceText)}</span>` : ""}
-                                ${effect ? `<span class="tooltip-effect">${escapeHtml(effect)}</span>` : ""}
                             </div>
                         </div>
                     </td>
@@ -385,6 +407,23 @@
         function loadTable(data) {
             currentData = data.slice();
             tableBody.innerHTML = "";
+
+            if (data.length === 0) {
+                // Empty state
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="padding: 0; border: none;">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔍</div>
+                                <div class="empty-state-title">Aucun objet trouvé</div>
+                                <div class="empty-state-message">Essayez de modifier vos critères de recherche</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
             data.forEach((item, index) => {
                 tableBody.insertAdjacentHTML("beforeend", buildRow(item, index));
             });
@@ -428,47 +467,21 @@
             modal.classList.remove("open");
         }
 
-        // Recherche live sur nom / description / prix / effet
-        function filterTable() {
-            const input = document.getElementById("searchInput");
-            const query = input.value.toLowerCase();
-
-            const filtered = allItems.filter((item) => {
-                const name = (item.name || item.nom || "").toLowerCase();
-                const desc = (item.description || item.desc || "").toLowerCase();
-                const effect = (item.effect || item.effet || "").toLowerCase();
-                const buy = (item.buyPrice || "").toLowerCase();
-                const sell = (item.sellPrice || "").toLowerCase();
-                const price = formatPrice(item).toLowerCase();
-
-                return (
-                    name.includes(query) ||
-                    desc.includes(query) ||
-                    effect.includes(query) ||
-                    buy.includes(query) ||
-                    sell.includes(query) ||
-                    price.includes(query)
-                );
-            });
-
-            const clearBtn = document.getElementById("clearSearchBtn");
-            if (clearBtn) {
-                clearBtn.style.display = query ? "inline" : "none";
+        // Keyboard shortcuts: ESC to close modal, arrows for carousel
+        document.addEventListener("keydown", (e) => {
+            if (modal.classList.contains("open")) {
+                if (e.key === "Escape") {
+                    closeItemModal();
+                } else if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    setCarouselIndex(currentCarouselIndex - 1);
+                } else if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    setCarouselIndex(currentCarouselIndex + 1);
+                }
             }
+        });
 
-            loadTable(filtered);
-        }
-
-        function clearSearch() {
-            const input = document.getElementById("searchInput");
-            input.value = "";
-            const clearBtn = document.getElementById("clearSearchBtn");
-            if (clearBtn) {
-                clearBtn.style.display = "none";
-            }
-            loadTable(allItems);
-            input.focus();
-        }
 
         function showCopyFeedback(button) {
             if (!button) return;
@@ -499,34 +512,91 @@
             }
         }
 
-        // Filtrage par catégorie depuis l'URL
-        function getUrlCategory() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('category');
-        }
+        // Filtrage dynamique par catégorie
+        let currentCategory = '';
 
-        // Mise à jour du titre en fonction de la catégorie
-        function updatePageTitle(category) {
+        function filterByCategory() {
+            const select = document.getElementById('categoryFilter');
+            currentCategory = select.value;
+
+            // Mise à jour du titre
             const titles = {
+                '': 'Liste d\'objets',
                 'equipement': 'Équipements',
                 'consommable': 'Consommables',
                 'agricole': 'Agricole'
             };
-            const title = document.getElementById('pageTitle');
-            if (category && titles[category]) {
-                title.textContent = titles[category];
+            document.getElementById('pageTitle').textContent = titles[currentCategory] || 'Liste d\'objets';
+
+            // Application du filtre
+            applyFilters();
+        }
+
+        // Combine recherche + catégorie
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = allItems;
+
+            // Filtre par catégorie
+            if (currentCategory) {
+                filtered = filtered.filter(item => item.category === currentCategory);
+            }
+
+            // Filtre par recherche
+            if (searchQuery) {
+                filtered = filtered.filter(item => {
+                    const name = (item.name || '').toLowerCase();
+                    const desc = (item.description || '').toLowerCase();
+                    const effect = (item.effect || '').toLowerCase();
+                    const buy = (item.buyPrice || '').toLowerCase();
+                    const sell = (item.sellPrice || '').toLowerCase();
+
+                    return name.includes(searchQuery) ||
+                           desc.includes(searchQuery) ||
+                           effect.includes(searchQuery) ||
+                           buy.includes(searchQuery) ||
+                           sell.includes(searchQuery);
+                });
+            }
+
+            loadTable(filtered);
+
+            // Afficher/masquer le bouton clear
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (clearBtn) {
+                clearBtn.style.display = searchQuery ? 'inline' : 'none';
             }
         }
 
-        // Chargement initial avec filtre catégorie si présent
-        const urlCategory = getUrlCategory();
-        if (urlCategory) {
-            const filtered = allItems.filter(item => item.category === urlCategory);
-            updatePageTitle(urlCategory);
-            loadTable(filtered);
-        } else {
-            loadTable(allItems);
+        // Recherche live
+        function filterTable() {
+            applyFilters();
         }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+            document.getElementById('searchInput').focus();
+        }
+
+        // Initialisation depuis URL (si vient de categories.html)
+        function initFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const urlCategory = params.get('category');
+
+            if (urlCategory) {
+                const select = document.getElementById('categoryFilter');
+                select.value = urlCategory;
+                currentCategory = urlCategory;
+                filterByCategory();
+            } else {
+                loadTable(allItems);
+            }
+        }
+
+        // Chargement initial
+        initFromUrl();
     </script>
 </body>
 </html>
