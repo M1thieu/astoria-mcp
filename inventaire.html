@@ -13,8 +13,8 @@
         <div class="inventory-header">
             <a href="index.html" class="back-link" title="Retour à la liste">←</a>
             <h1 class="inventory-title">Inventaire</h1>
-            <div class="inventory-info">
-                <span id="itemCount">0 objets</span>
+            <div class="inventory-actions">
+                <span id="itemCount" class="inventory-info">0 objets</span>
             </div>
         </div>
 
@@ -69,43 +69,170 @@
     <!-- Inventory-specific JS -->
     <script>
         /**
-         * INVENTORY MODULE
-         * Handles category filtering, item selection, and detail display
-         * Integrates with existing inventoryData from data.js
+         * DYNAMIC INVENTORY MODULE
+         * - Loads all items from data.js (inventoryData)
+         * - Uses localStorage to track quantities/modifications
+         * - Category filtering & item selection
+         * - All items loaded by default with full data
          */
 
-        // --- STATE ---
+        // =================================================================
+        // CONFIGURATION
+        // =================================================================
+
+        /**
+         * IMAGE CONFIGURATION
+         * Maps item names/keys to actual image paths
+         * Add new mappings here as needed
+         */
+        const IMAGE_CONFIG = {
+            basePath: 'assets/images/',
+            // Map item name (normalized) to filename
+            mappings: {
+                'poudrededetracage': 'Poudre_de_Tracage.png',
+                'larmedematera': 'Larme_de_Matera.png',
+                'fruitpapooru': 'Fruit_Papooru.jpg',
+                'fioledevitalite': 'Fiole_de_vitalite.jpg',
+                'parchemindeveil': 'Parchemin_Eveil.jpg',
+                'parcheminascension': 'Parchemin_Ascension.jpg',
+                'clefmanndorf': 'Clef_Manndorf.png',
+                'armuredevexarion': 'Armure_de_Vexarion.png',
+                'sceptredekrythus': 'Sceptre_de_Krythus.png',
+                'capedelaubevermeille': 'Cape_de_lAube_Vermeille_off.jpg',
+                'bookofaeris': 'Book_of_Aeris.png',
+                'thequeenspoison': 'The_Queens_Poison.png',
+                'clochederesonnance': 'Cloche_de_Resonnance.png',
+                'veillenuit': 'VeilleNuit.png'
+            }
+        };
+
+        /**
+         * PLACEHOLDER IMAGE (SVG)
+         * Shown when no image or image fails to load
+         */
+        const PLACEHOLDER_IMAGE =
+            "data:image/svg+xml;utf8," +
+            encodeURIComponent(
+                `<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'>` +
+                `<rect width='80' height='80' fill='#f0f0f0'/>` +
+                `<text x='50%' y='50%' text-anchor='middle' dy='0.3em' fill='#d81b60' font-family='Arial' font-size='14'>?</text>` +
+                `</svg>`
+            );
+
+        // =================================================================
+        // STATE
+        // =================================================================
+
         let currentCategory = 'all';
         let selectedItemIndex = null;
         let inventoryItems = [];
+        let nextItemId = 1; // Auto-increment ID for new items
 
-        // --- DOM REFERENCES ---
+        // =================================================================
+        // DOM REFERENCES
+        // =================================================================
+
         const grid = document.getElementById('inventoryGrid');
         const detailPanel = document.getElementById('itemDetail');
         const emptyState = document.getElementById('emptyState');
         const itemCountEl = document.getElementById('itemCount');
         const categoryButtons = document.querySelectorAll('.category-btn');
 
-        // --- INITIALIZATION ---
-        // Load items from shared data.js (inventoryData)
-        // In real app, you'd fetch from API or localStorage
-        function initInventory() {
-            // Use existing inventoryData from data.js
-            if (typeof inventoryData !== 'undefined') {
-                // Transform items to add quantity (dummy data for now)
-                inventoryItems = inventoryData.map((item, index) => ({
-                    ...item,
-                    id: index,
-                    quantity: Math.floor(Math.random() * 5) + 1 // Random qty 1-5
-                }));
-            } else {
-                inventoryItems = [];
-            }
+        // =================================================================
+        // INITIALIZATION
+        // =================================================================
 
+        /**
+         * Initialize inventory from data.js
+         * - Loads all items from inventoryData (shared data)
+         * - Merges with localStorage quantities if available
+         * - Renders the UI
+         */
+        function initInventory() {
+            console.log('Initializing inventory from data.js...');
+
+            // Load items from shared data.js
+            loadFromDataJS();
+
+            // Render
             renderInventory();
         }
 
-        // --- CATEGORY FILTERING ---
+        // =================================================================
+        // PERSISTENCE - LocalStorage
+        // =================================================================
+
+        /**
+         * Load inventory from data.js (inventoryData)
+         * - Uses all items from shared data
+         * - Merges with localStorage quantities if they exist
+         * - Each item gets quantity: 1 by default
+         */
+        function loadFromDataJS() {
+            try {
+                // Check if inventoryData exists (from data.js)
+                if (typeof inventoryData === 'undefined' || !inventoryData) {
+                    console.warn('inventoryData not found in data.js');
+                    inventoryItems = [];
+                    return;
+                }
+
+                // Load stored quantities from localStorage
+                const stored = localStorage.getItem('astoriaInventoryQuantities');
+                let storedQuantities = {};
+                if (stored) {
+                    storedQuantities = JSON.parse(stored);
+                    console.log('Loaded quantity data from storage');
+                }
+
+                // Transform inventoryData items with quantities
+                inventoryItems = inventoryData.map((item, index) => {
+                    const itemKey = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    return {
+                        ...item,
+                        id: index,
+                        quantity: storedQuantities[itemKey] || 1 // Default quantity: 1
+                    };
+                });
+
+                nextItemId = inventoryItems.length;
+                console.log(`Loaded ${inventoryItems.length} items from data.js`);
+
+            } catch (error) {
+                console.error('Error loading from data.js:', error);
+                inventoryItems = [];
+            }
+        }
+
+        /**
+         * Save quantities to localStorage
+         * - Only saves quantities, not full item data
+         * - Item data always comes from data.js
+         */
+        function saveQuantitiesToStorage() {
+            try {
+                const quantities = {};
+                inventoryItems.forEach(item => {
+                    const itemKey = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    quantities[itemKey] = item.quantity;
+                });
+                localStorage.setItem('astoriaInventoryQuantities', JSON.stringify(quantities));
+                console.log('Quantities saved to localStorage');
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+            }
+        }
+
+        // =================================================================
+        // CATEGORY FILTERING
+        // =================================================================
+
+        /**
+         * Filter inventory by category
+         * - Updates active button
+         * - Clears selection
+         * - Re-renders grid
+         */
         function filterByCategory(category) {
             currentCategory = category;
             selectedItemIndex = null;
@@ -129,7 +256,64 @@
             });
         });
 
-        // --- RENDERING ---
+        // =================================================================
+        // IMAGE RESOLUTION
+        // =================================================================
+
+        /**
+         * Resolve image path from item data
+         * - Checks IMAGE_CONFIG mappings
+         * - Supports direct URLs
+         * - Falls back to placeholder
+         */
+        function resolveImage(item) {
+            if (!item.image) {
+                return PLACEHOLDER_IMAGE;
+            }
+
+            // If it's already a full URL or data URI, use it
+            if (item.image.startsWith('http') || item.image.startsWith('data:')) {
+                return item.image;
+            }
+
+            // If it's a direct filename with extension
+            if (item.image.includes('.')) {
+                return IMAGE_CONFIG.basePath + item.image;
+            }
+
+            // Try to find in mappings (normalize name)
+            const normalized = item.image
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '');
+
+            if (IMAGE_CONFIG.mappings[normalized]) {
+                return IMAGE_CONFIG.basePath + IMAGE_CONFIG.mappings[normalized];
+            }
+
+            // Try the item name as fallback
+            const normalizedName = item.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '');
+
+            if (IMAGE_CONFIG.mappings[normalizedName]) {
+                return IMAGE_CONFIG.basePath + IMAGE_CONFIG.mappings[normalizedName];
+            }
+
+            // No match found, use placeholder
+            return PLACEHOLDER_IMAGE;
+        }
+
+        // =================================================================
+        // RENDERING
+        // =================================================================
+
+        /**
+         * Render the entire inventory grid
+         * - Filters by current category
+         * - Updates item count
+         * - Shows empty state if needed
+         * - Creates item cards
+         */
         function renderInventory() {
             // Filter items by category
             let filtered = inventoryItems;
@@ -137,7 +321,7 @@
                 filtered = inventoryItems.filter(item => item.category === currentCategory);
             }
 
-            // Update count
+            // Update count (shows currently filtered count)
             itemCountEl.textContent = `${filtered.length} objet${filtered.length > 1 ? 's' : ''}`;
 
             // Clear grid
@@ -156,28 +340,31 @@
             emptyState.style.display = 'none';
 
             // Render each item
-            filtered.forEach((item, index) => {
-                const card = createItemCard(item, index);
+            filtered.forEach((item) => {
+                const card = createItemCard(item);
                 grid.appendChild(card);
             });
         }
 
-        function createItemCard(item, index) {
+        /**
+         * Create an item card element
+         * - Resolves image
+         * - Shows quantity if > 1
+         * - Attaches click handler
+         */
+        function createItemCard(item) {
             const card = document.createElement('div');
             card.className = 'inventory-item';
-            card.dataset.index = index;
+            card.dataset.itemId = item.id;
 
-            // Get image path (reuse logic from index.html)
-            const imageSrc = item.image || 'data:image/svg+xml;utf8,' + encodeURIComponent(
-                `<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'>` +
-                `<rect width='80' height='80' fill='#fce4ec'/>` +
-                `<text x='50%' y='50%' text-anchor='middle' fill='#d81b60' font-family='Arial' font-size='12'>?</text>` +
-                `</svg>`
-            );
+            // Resolve image
+            const imageSrc = resolveImage(item);
 
             card.innerHTML = `
                 <div class="item-image">
-                    <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(item.name)}">
+                    <img src="${escapeHtml(imageSrc)}"
+                         alt="${escapeHtml(item.name)}"
+                         onerror="this.src='${PLACEHOLDER_IMAGE}'">
                 </div>
                 <div class="item-info">
                     <div class="item-name">${escapeHtml(item.name)}</div>
@@ -191,7 +378,16 @@
             return card;
         }
 
-        // --- ITEM SELECTION ---
+        // =================================================================
+        // ITEM SELECTION & DETAILS
+        // =================================================================
+
+        /**
+         * Select an item and show its details
+         * - Removes previous selection
+         * - Marks new selection
+         * - Updates detail panel
+         */
         function selectItem(item, cardElement) {
             // Remove previous selection
             document.querySelectorAll('.inventory-item').forEach(el => {
@@ -206,6 +402,11 @@
             showItemDetail(item);
         }
 
+        /**
+         * Show item details in right panel
+         * - Resolves image
+         * - Shows all item properties
+         */
         function showItemDetail(item) {
             const categoryLabels = {
                 'equipement': '⚔️ Équipement',
@@ -216,7 +417,10 @@
             const priceInfo = [];
             if (item.buyPrice) priceInfo.push(`Achat: ${item.buyPrice}`);
             if (item.sellPrice) priceInfo.push(`Vente: ${item.sellPrice}`);
-            const priceText = priceInfo.length > 0 ? priceInfo.join(' | ') : 'Prix inconnu';
+            const priceText = priceInfo.length > 0 ? priceInfo.join(' | ') : 'Prix non défini';
+
+            // Resolve image
+            const imageSrc = resolveImage(item);
 
             detailPanel.innerHTML = `
                 <div class="detail-header">
@@ -224,7 +428,9 @@
                     <span class="detail-category">${categoryLabels[item.category] || 'Autre'}</span>
                 </div>
                 <div class="detail-image">
-                    <img src="${escapeHtml(item.image || '')}" alt="${escapeHtml(item.name)}">
+                    <img src="${escapeHtml(imageSrc)}"
+                         alt="${escapeHtml(item.name)}"
+                         onerror="this.src='${PLACEHOLDER_IMAGE}'">
                 </div>
                 <div class="detail-body">
                     <div class="detail-section">
@@ -251,6 +457,9 @@
             `;
         }
 
+        /**
+         * Show placeholder when no item selected
+         */
         function showDetailPlaceholder() {
             detailPanel.innerHTML = `
                 <div class="detail-placeholder">
@@ -260,7 +469,13 @@
             `;
         }
 
-        // --- UTILITIES ---
+        // =================================================================
+        // UTILITIES
+        // =================================================================
+
+        /**
+         * Escape HTML to prevent XSS
+         */
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -271,16 +486,55 @@
                 .replace(/'/g, '&#039;');
         }
 
-        // --- ENTRY POINT ---
-        // Call this when page loads
-        // Later you can call renderInventory() to refresh with new data
+        // =================================================================
+        // ENTRY POINT
+        // =================================================================
+
+        /**
+         * Initialize on page load
+         */
         window.addEventListener('DOMContentLoaded', initInventory);
 
-        // Expose for external use (if needed)
+        /**
+         * Expose API for external use
+         * - Can be called from index.html or other pages
+         * - Example: InventoryModule.addItemFromExternal(item)
+         */
         window.InventoryModule = {
+            // Current state
+            items: () => inventoryItems,
+
+            // Core functions
             renderInventory,
             filterByCategory,
-            items: inventoryItems
+
+            // Update item quantity
+            updateQuantity: (itemName, newQuantity) => {
+                const item = inventoryItems.find(i => i.name === itemName);
+                if (item) {
+                    item.quantity = Math.max(0, newQuantity);
+                    saveQuantitiesToStorage();
+                    renderInventory();
+                }
+            },
+
+            // Reset quantities to default (1 for all)
+            resetQuantities: () => {
+                if (confirm('Réinitialiser toutes les quantités à 1 ?')) {
+                    inventoryItems.forEach(item => item.quantity = 1);
+                    saveQuantitiesToStorage();
+                    renderInventory();
+                    console.log('Quantities reset to 1');
+                }
+            },
+
+            // Reload from data.js (discards localStorage)
+            reloadFromData: () => {
+                localStorage.removeItem('astoriaInventoryQuantities');
+                loadFromDataJS();
+                renderInventory();
+                console.log('Reloaded from data.js');
+            }
         };
     </script>
 </body>
