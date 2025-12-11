@@ -568,6 +568,44 @@
             }
         }
 
+        // Track currently selected row for keyboard navigation
+        let selectedRowIndex = -1;
+
+        function selectRow(index) {
+            const rows = document.querySelectorAll('.item-row');
+            if (index < 0 || index >= rows.length) return;
+
+            // Remove previous selection
+            rows.forEach(row => row.classList.remove('keyboard-selected'));
+
+            // Add selection to new row
+            selectedRowIndex = index;
+            const selectedRow = rows[index];
+            selectedRow.classList.add('keyboard-selected');
+
+            // Scroll into view if needed
+            selectedRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function navigateRows(direction) {
+            const rows = document.querySelectorAll('.item-row');
+            if (!rows.length) return;
+
+            let newIndex = selectedRowIndex + direction;
+
+            // Wrap around
+            if (newIndex < 0) newIndex = rows.length - 1;
+            if (newIndex >= rows.length) newIndex = 0;
+
+            selectRow(newIndex);
+        }
+
+        function openSelectedRow() {
+            if (selectedRowIndex >= 0) {
+                openItemModal(selectedRowIndex);
+            }
+        }
+
         // Keyboard shortcuts & focus management: ESC to close modal or clear search, Enter to focus search, arrows for carousel, Tab trap in modal
         document.addEventListener("keydown", (e) => {
             if (modal.classList.contains("open")) {
@@ -604,20 +642,40 @@
                         first.focus();
                     }
                 }
-            } else if (e.key === "Escape") {
-                // If search is focused, clear it and blur
+            } else {
+                // When modal is closed, handle table navigation
                 const searchInput = document.getElementById('searchInput');
-                if (searchInput && document.activeElement === searchInput) {
-                    searchInput.value = '';
-                    searchInput.blur();
-                    applyFilters();
-                }
-            } else if (e.key === "Enter") {
-                // Focus search on Enter (if not already focused)
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput && document.activeElement !== searchInput) {
+                const isSearchFocused = document.activeElement === searchInput;
+
+                if (e.key === "Escape") {
+                    // Clear search and remove selection
+                    if (isSearchFocused) {
+                        searchInput.value = '';
+                        searchInput.blur();
+                        applyFilters();
+                    }
+                    // Clear keyboard selection
+                    document.querySelectorAll('.item-row').forEach(row => row.classList.remove('keyboard-selected'));
+                    selectedRowIndex = -1;
+                } else if (e.key === "Enter") {
+                    if (isSearchFocused) {
+                        // Do nothing, let search work
+                        return;
+                    } else if (selectedRowIndex >= 0) {
+                        // Open selected row
+                        e.preventDefault();
+                        openSelectedRow();
+                    } else {
+                        // Focus search
+                        e.preventDefault();
+                        searchInput.focus();
+                    }
+                } else if (e.key === "ArrowDown" && !isSearchFocused) {
                     e.preventDefault();
-                    searchInput.focus();
+                    navigateRows(1);
+                } else if (e.key === "ArrowUp" && !isSearchFocused) {
+                    e.preventDefault();
+                    navigateRows(-1);
                 }
             }
         });
