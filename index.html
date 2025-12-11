@@ -6,14 +6,20 @@
     <meta http-equiv="Cache-Control" content="max-age=604800, public">
     <title>Liste d'objets</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="assets">
+    <!-- Preload first 6 critical images for instant display -->
+    <link rel="preload" as="image" href="assets/images/Poudre_de_Tracage.png">
+    <link rel="preload" as="image" href="assets/images/Larme_de_Matera.png">
+    <link rel="preload" as="image" href="assets/images/Fruit_Papooru.jpg">
+    <link rel="preload" as="image" href="assets/images/Fiole_de_vitalite.jpg">
+    <link rel="preload" as="image" href="assets/images/Parchemin_Eveil.jpg">
+    <link rel="preload" as="image" href="assets/images/Parchemin_Ascension.jpg">
 </head>
 <body>
     <main class="wrapper" aria-labelledby="pageTitle">
         <div class="top-bar">
-            <!-- Lien retour aux catégories -->
+            <!-- Navigation placeholder -->
             <nav aria-label="Navigation principale" class="top-nav">
-                <a href="index.html" style="text-decoration: none; color: var(--color-primary); font-size: var(--text-lg);" title="Retour aux catégories">←</a>
+                <span style="width: 24px;"></span>
             </nav>
 
             <h1 class="title" id="pageTitle">Liste d'objets</h1>
@@ -488,13 +494,10 @@
             const item = currentData[index];
             if (!item) return;
 
-            // Highlight clicked row briefly
-            const rows = document.querySelectorAll('.item-row');
-            rows.forEach(row => row.classList.remove('row-selected'));
+            // Highlight clicked row
+            clearRowHighlights('row-selected');
             const clickedRow = document.querySelector(`.item-row[data-index="${index}"]`);
-            if (clickedRow) {
-                clickedRow.classList.add('row-selected');
-            }
+            if (clickedRow) clickedRow.classList.add('row-selected');
 
             const name = item.name || item.nom || "";
             const description = item.description || item.desc || "";
@@ -530,13 +533,42 @@
 
         function closeItemModal() {
             modal.classList.remove("open");
-            // Remove row highlight when modal closes
-            document.querySelectorAll('.item-row').forEach(row => row.classList.remove('row-selected'));
-
-            if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
-                lastFocusedElement.focus({ preventScroll: true });
-            }
+            clearRowHighlights('row-selected');
+            if (lastFocusedElement?.focus) lastFocusedElement.focus({ preventScroll: true });
         }
+
+        // Track currently selected row for keyboard navigation
+        let selectedRowIndex = -1;
+
+        // Helper: Get all item rows
+        const getItemRows = () => document.querySelectorAll('.item-row');
+
+        // Helper: Clear all row highlights
+        function clearRowHighlights(className = 'keyboard-selected') {
+            getItemRows().forEach(row => row.classList.remove(className));
+        }
+
+        function selectRow(index) {
+            const rows = getItemRows();
+            if (index < 0 || index >= rows.length) return;
+
+            clearRowHighlights();
+            selectedRowIndex = index;
+            const selectedRow = rows[index];
+            selectedRow.classList.add('keyboard-selected');
+            selectedRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function navigateRows(direction) {
+            const rows = getItemRows();
+            if (!rows.length) return;
+
+            const newIndex = selectedRowIndex + direction;
+            // Wrap around
+            selectRow(newIndex < 0 ? rows.length - 1 : newIndex >= rows.length ? 0 : newIndex);
+        }
+
+        const openSelectedRow = () => selectedRowIndex >= 0 && openItemModal(selectedRowIndex);
 
         // Keyboard shortcuts & focus management: ESC to close modal or clear search, Enter to focus search, arrows for carousel, Tab trap in modal
         document.addEventListener("keydown", (e) => {
@@ -574,20 +606,35 @@
                         first.focus();
                     }
                 }
-            } else if (e.key === "Escape") {
-                // If search is focused, clear it and blur
+            } else {
+                // When modal is closed, handle table navigation
                 const searchInput = document.getElementById('searchInput');
-                if (searchInput && document.activeElement === searchInput) {
-                    searchInput.value = '';
-                    searchInput.blur();
-                    applyFilters();
-                }
-            } else if (e.key === "Enter") {
-                // Focus search on Enter (if not already focused)
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput && document.activeElement !== searchInput) {
+                const isSearchFocused = document.activeElement === searchInput;
+
+                if (e.key === "Escape") {
+                    if (isSearchFocused) {
+                        searchInput.value = '';
+                        searchInput.blur();
+                        applyFilters();
+                    }
+                    clearRowHighlights();
+                    selectedRowIndex = -1;
+                } else if (e.key === "Enter" && !isSearchFocused) {
+                    // Open selected row with Enter
+                    if (selectedRowIndex >= 0) {
+                        e.preventDefault();
+                        openSelectedRow();
+                    }
+                } else if (e.key === " " && !isSearchFocused) {
+                    // Focus search with Space
                     e.preventDefault();
                     searchInput.focus();
+                } else if (e.key === "ArrowDown" && !isSearchFocused) {
+                    e.preventDefault();
+                    navigateRows(1);
+                } else if (e.key === "ArrowUp" && !isSearchFocused) {
+                    e.preventDefault();
+                    navigateRows(-1);
                 }
             }
         });

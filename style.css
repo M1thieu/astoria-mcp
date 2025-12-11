@@ -432,9 +432,6 @@ td {
     display: block;
     cursor: pointer;
     transition: transform var(--transition-fast);
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    will-change: transform;
 }
 
 .img-cell img:hover {
@@ -605,6 +602,14 @@ tbody tr:hover {
 tbody tr.row-selected {
     background-color: var(--color-primary-light) !important;
     box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+tbody tr.keyboard-selected {
+    background-color: var(--color-primary-lighter) !important;
+    outline: 3px solid var(--color-primary);
+    outline-offset: -3px;
+    position: relative;
+    z-index: 2;
 }
 
 /* =================================================================
