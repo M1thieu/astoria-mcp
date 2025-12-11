@@ -23,6 +23,8 @@
     --color-gray-700: #555;
     --color-gray-800: #444;
     --color-gray-900: #333;
+    --color-skill-highlight: #f1e7ff;
+    --color-skill-highlight-border: #d8c7ff;
 
     --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.15);
     --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.12);
@@ -2644,4 +2646,35 @@ tbody tr.keyboard-selected {
         flex-direction: column;
         align-items: flex-start;
     }
+}
+
+/* =================================================================
+   SKILLS UI
+   ================================================================= */
+.skill-point-btn {
+    border: 1.5px solid var(--color-primary);
+    color: var(--color-primary-dark);
+    background: var(--color-white);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-4);
+    font-weight: var(--font-semibold);
+    min-width: 32px;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.skill-point-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.skills-line-highlight {
+    background: var(--color-skill-highlight);
+    box-shadow: inset 0 0 0 1px var(--color-skill-highlight-border);
+    transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.skills-confirm-btn--pending {
+    box-shadow: 0 0 0 2px var(--color-primary-light), var(--shadow-primary);
+    background: var(--color-primary);
+    color: var(--color-white);
 }

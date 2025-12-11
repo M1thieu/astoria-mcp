@@ -9,6 +9,8 @@
     const skillsPointsResetEl = document.getElementById("skillsPointsReset");
     const skillsConfirmEl = document.getElementById("skillsConfirmBtn");
     const skillsFeedbackEl = document.getElementById("skillsValidationFeedback");
+    const HIGHLIGHT_LINE_CLASS = "skills-line-highlight";
+    const HIGHLIGHT_CONFIRM_CLASS = "skills-confirm-btn--pending";
 
     // Abort initialization gracefully if core DOM nodes are missing
     if (!skillsTabsContainer || !skillsTitleEl || !skillsListEl) {
@@ -208,7 +210,7 @@
             const decBtn = document.createElement("button");
             decBtn.type = "button";
             decBtn.className = "skill-point-btn";
-            decBtn.textContent = "−";
+            decBtn.textContent = "-";
             decBtn.setAttribute("aria-label", `Retirer un point sur ${skill.name}`);
             decBtn.disabled = allocation <= 0 || isLocked;
 
@@ -237,6 +239,7 @@
 
         updateSkillsPointsDisplay();
         updateLockState(isLocked);
+        updatePendingHighlights(category.id);
     }
 
     function adjustSkillPoints(categoryId, skill, delta, valueEl, decBtn, incBtn) {
@@ -273,6 +276,7 @@
         incBtn.disabled = newTotal >= MAX_SKILL_POINTS || (skillsState.pointsByCategory[categoryId] ?? 0) <= 0 || isLocked;
 
         updateSkillsPointsDisplay();
+        updatePendingHighlights(categoryId);
     }
 
     function renderEmptyMessage(message) {
@@ -346,6 +350,8 @@
             decBtn.disabled = allocation <= 0 || skillsState.locksByCategory[activeCategory.id];
             incBtn.disabled = atMax || currentPoints <= 0 || skillsState.locksByCategory[activeCategory.id];
         });
+
+        updatePendingHighlights(activeCategory.id);
     }
 
     skillsPointsPlusEl.addEventListener("click", () => {
@@ -420,10 +426,34 @@
         } else {
             skillsConfirmEl.classList.remove("is-locked");
         }
+        updatePendingHighlights(skillsState.activeCategoryId);
     }
 
     function announce(message) {
         if (!skillsFeedbackEl) return;
         skillsFeedbackEl.textContent = message;
+    }
+
+    function hasPendingChanges(categoryId) {
+        if (skillsState.locksByCategory[categoryId]) return false;
+        const allocations = getCategoryAllocations(categoryId);
+        return Object.values(allocations).some((points) => Number(points) > 0);
+    }
+
+    function updatePendingHighlights(categoryId) {
+        if (!skillsListEl) return;
+        const allocations = getCategoryAllocations(categoryId);
+        const isLocked = Boolean(skillsState.locksByCategory[categoryId]);
+
+        skillsListEl.querySelectorAll(".skills-line").forEach((line) => {
+            const nameEl = line.querySelector(".skills-name");
+            if (!nameEl) return;
+            const alloc = allocations[nameEl.textContent] || 0;
+            line.classList.toggle(HIGHLIGHT_LINE_CLASS, !isLocked && alloc > 0);
+        });
+
+        if (skillsConfirmEl) {
+            skillsConfirmEl.classList.toggle(HIGHLIGHT_CONFIRM_CLASS, hasPendingChanges(categoryId));
+        }
     }
 })();
