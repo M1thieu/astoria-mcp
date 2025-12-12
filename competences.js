@@ -414,7 +414,17 @@
         const activeCategory = getActiveCategory();
         if (!activeCategory) return;
 
-        // Clear allocations when confirming (points are now committed)
+        // Commit allocations to base values before clearing
+        const allocations = getCategoryAllocations(activeCategory.id);
+        activeCategory.skills.forEach((skill) => {
+            const allocation = allocations[skill.name] || 0;
+            if (allocation > 0) {
+                const currentBase = skill.baseValue ?? skill.value ?? 0;
+                skill.baseValue = Math.min(currentBase + allocation, MAX_SKILL_POINTS);
+            }
+        });
+
+        // Clear allocations now that they're committed
         clearAllocations(activeCategory.id);
 
         skillsState.locksByCategory[activeCategory.id] = true;
