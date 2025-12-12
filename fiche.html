@@ -86,11 +86,27 @@
                             <label class="field-label" for="identitePaysOrigine">Pays d’origine</label>
                             <input id="identitePaysOrigine" class="field-input" type="text" placeholder="Royaume / pays / région d’origine.">
                         </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="identite">Enregistrer</button>
+                        </div>
                     </section>
 
                     <!-- Appartenance -->
                     <section id="tab-appartenance" class="tab-panel" aria-label="Appartenance">
                         <h2 class="section-title">Appartenance</h2>
+
+                        <div class="field-group">
+                            <label class="field-label" for="appRangEtoile">Rang étoilé</label>
+                            <select id="appRangEtoile" class="field-input">
+                                <option value="">Sélectionner...</option>
+                                <option value="sans-etoile">┃├〈⭐》❱→ Sans étoile</option>
+                                <option value="simple">┃├〈⭐》❱→ Simple</option>
+                                <option value="double">┃├〈⭐》❱→ Double</option>
+                                <option value="triple">┃├〈⭐》❱→ Triple</option>
+                                <option value="major">┃├〈🌟》❱→ Major</option>
+                            </select>
+                        </div>
 
                         <div class="field-group field-group--inline">
                             <div class="field-group">
@@ -126,7 +142,13 @@
                             </div>
                             <div class="field-group">
                                 <label class="field-label" for="appHouse">House</label>
-                                <input id="appHouse" class="field-input" type="text" placeholder="Maison, dortoir, faction, etc.">
+                                <select id="appHouse" class="field-input">
+                                    <option value="">Sélectionner...</option>
+                                    <option value="red-spider">┃├〈🕷️》❱→ Red Spider House</option>
+                                    <option value="blue-bear">┃├〈🐻》❱→ Blue Bear House</option>
+                                    <option value="violet-goat">┃├〈🐐》❱→ Violet Goat House</option>
+                                    <option value="green-turtle">┃├〈🐢》❱→ Green Turtle House</option>
+                                </select>
                             </div>
                         </div>
 
@@ -138,6 +160,10 @@
                                 type="text"
                                 placeholder="Intendant, préfet, étudiant, membre du staff, etc."
                             >
+                        </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="appartenance">Enregistrer</button>
                         </div>
                     </section>
 
@@ -183,6 +209,10 @@
                                 type="url"
                                 placeholder="Lien vers une illustration de l’arme (optionnel)."
                             >
+                        </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="combat">Enregistrer</button>
                         </div>
                     </section>
 
@@ -232,6 +262,34 @@
                                     placeholder="Lien vers la fiche détaillée de l’Alice (si séparée)."
                                 >
                             </div>
+
+                            <div class="field-group">
+                                <label class="field-label">Possède un Double Alice</label>
+                                <div class="field-group field-group--inline">
+                                    <div class="field-group">
+                                        <label class="field-label" for="doubleAliceNom">Nom de l'Alice</label>
+                                        <input id="doubleAliceNom" class="field-input" type="text" placeholder="Nom ou titre du Double Alice.">
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label" for="doubleAliceType">Type</label>
+                                        <input id="doubleAliceType" class="field-input" type="text" placeholder="Type du Double Alice.">
+                                    </div>
+                                </div>
+                                <div class="field-group field-group--inline">
+                                    <div class="field-group">
+                                        <label class="field-label" for="doubleAliceForme">Forme</label>
+                                        <input id="doubleAliceForme" class="field-input" type="text" placeholder="Forme ou expression du Double Alice.">
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label" for="doubleAliceFiche">Fiche complète (URL)</label>
+                                        <input id="doubleAliceFiche" class="field-input" type="url" placeholder="Lien vers la fiche complète du Double Alice.">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="alice">Enregistrer</button>
                         </div>
                     </section>
 
@@ -276,6 +334,14 @@
                                     placeholder="Magie cachée ou en latence (si connue de l’équipe)."
                                 >
                             </div>
+
+                            <div class="field-group">
+                                <button type="button" class="btn-secondary" id="addMagieCachee" aria-label="Ajouter une magie cachée">+</button>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="sorcellerie">Enregistrer</button>
                         </div>
                     </section>
 
@@ -291,6 +357,20 @@
                         </div>
 
                         <div id="eater-fields" class="conditional-block" hidden>
+                            <div class="field-group">
+                                <label class="field-label">Compteur d'âmes</label>
+                                <div class="field-group field-group--inline">
+                                    <div class="field-group">
+                                        <label class="field-label" for="eaterAmesConsommation">Âmes de Consommation</label>
+                                        <input id="eaterAmesConsommation" class="field-input" type="number" min="0" value="0">
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label" for="eaterAmesProgression">Âmes de Progression</label>
+                                        <input id="eaterAmesProgression" class="field-input" type="number" min="0" value="0">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="field-group">
                                 <label class="field-label" for="eaterRole">Rôle</label>
                                 <select id="eaterRole" class="field-input">
@@ -350,6 +430,10 @@
                                 ></textarea>
                             </div>
                         </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="eater">Enregistrer</button>
+                        </div>
                     </section>
 
                     <!-- Religion -->
@@ -395,6 +479,10 @@
                                 placeholder="Malédictions, pactes, contreparties, stigmates."
                             ></textarea>
                         </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="religion">Enregistrer</button>
+                        </div>
                     </section>
 
                     <!-- Mental -->
@@ -430,6 +518,10 @@
                                 placeholder="Particularités du comportement, phobies, TOC, habitudes, etc."
                             ></textarea>
                         </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="mental">Enregistrer</button>
+                        </div>
                     </section>
 
                     <!-- Physique -->
@@ -454,6 +546,10 @@
                                 rows="3"
                                 placeholder="Précisez les éventuels problèmes de santé, limitations ou particularités."
                             ></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="physique">Enregistrer</button>
                         </div>
                     </section>
 
@@ -510,6 +606,10 @@
                                 placeholder="Troisième lien d’image (optionnel)."
                             >
                         </div>
+
+                        <div class="field-group">
+                            <button type="button" class="btn-primary tab-save-button" data-tab-target="background">Enregistrer</button>
+                        </div>
                     </section>
                 </form>
             </section>
@@ -555,6 +655,66 @@
                 checkbox.addEventListener('change', updateVisibility);
                 updateVisibility();
             });
+
+            const saveTabData = (tabId) => {
+                const panel = document.getElementById(tabId);
+                if (!panel) return;
+
+                const inputs = panel.querySelectorAll('input, select, textarea');
+                const data = {};
+
+                inputs.forEach((input) => {
+                    if (!input.id) return;
+                    if (input.type === 'checkbox') {
+                        data[input.id] = input.checked;
+                    } else if (input.type === 'radio') {
+                        if (input.checked) data[input.name || input.id] = input.value;
+                    } else {
+                        data[input.id] = input.value;
+                    }
+                });
+
+                console.log(`Enregistrement du contenu de ${tabId}:`, data);
+            };
+
+            document.querySelectorAll('.tab-save-button').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const target = button.dataset.tabTarget;
+                    if (!target) return;
+                    saveTabData(`tab-${target}`);
+                });
+            });
+
+            const addMagieCacheeButton = document.getElementById('addMagieCachee');
+            const baseMagieCacheeInput = document.getElementById('sorcellerieCachee');
+            if (addMagieCacheeButton && baseMagieCacheeInput) {
+                const baseGroup = baseMagieCacheeInput.closest('.field-group');
+                const container = baseGroup?.parentElement;
+                let magieCacheeCount = 1;
+
+                addMagieCacheeButton.addEventListener('click', () => {
+                    if (!baseGroup || !container) return;
+
+                    magieCacheeCount += 1;
+                    const clone = baseGroup.cloneNode(true);
+                    const clonedInput = clone.querySelector('input');
+                    const clonedLabel = clone.querySelector('label');
+
+                    if (clonedInput) {
+                        const newId = `sorcellerieCachee${magieCacheeCount}`;
+                        clonedInput.id = newId;
+                        clonedInput.value = '';
+                        clonedInput.placeholder = baseMagieCacheeInput.placeholder;
+                        clonedInput.setAttribute('aria-label', `${clonedLabel?.textContent?.trim() || 'Magie cachée'} ${magieCacheeCount}`);
+                    }
+
+                    if (clonedLabel && clonedInput) {
+                        clonedLabel.setAttribute('for', clonedInput.id);
+                    }
+
+                    container.insertBefore(clone, addMagieCacheeButton.parentElement);
+                });
+            }
         })();
     </script>
 </body>
