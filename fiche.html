@@ -48,7 +48,10 @@
                 <form class="fiche-form">
                     <!-- Identité -->
                     <section id="tab-identite" class="tab-panel active" aria-label="Identité">
-                        <h2 class="section-title">Identité</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Identité</h2>
+                            <button type="button" class="save-tab-button" data-tab="identite">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label" for="identiteNomPrenom">Nom &amp; prénom</label>
@@ -83,14 +86,17 @@
                         </div>
 
                         <div class="field-group">
-                            <label class="field-label" for="identitePaysOrigine">Pays d’origine</label>
-                            <input id="identitePaysOrigine" class="field-input" type="text" placeholder="Royaume / pays / région d’origine.">
+                            <label class="field-label" for="identitePaysOrigine">Pays d'origine</label>
+                            <input id="identitePaysOrigine" class="field-input" type="text" placeholder="Royaume / pays / région d'origine.">
                         </div>
                     </section>
 
                     <!-- Appartenance -->
                     <section id="tab-appartenance" class="tab-panel" aria-label="Appartenance">
-                        <h2 class="section-title">Appartenance</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Appartenance</h2>
+                            <button type="button" class="save-tab-button" data-tab="appartenance">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group field-group--inline">
                             <div class="field-group">
@@ -125,25 +131,47 @@
                                 </select>
                             </div>
                             <div class="field-group">
-                                <label class="field-label" for="appHouse">House</label>
-                                <input id="appHouse" class="field-input" type="text" placeholder="Maison, dortoir, faction, etc.">
+                                <label class="field-label" for="appRangEtoile">Rang étoilé</label>
+                                <select id="appRangEtoile" class="field-input">
+                                    <option value="">Sélectionner...</option>
+                                    <option value="sans-etoile">┃├〈⭐》❱→ Sans étoile</option>
+                                    <option value="simple">┃├〈⭐》❱→ Simple</option>
+                                    <option value="double">┃├〈⭐》❱→ Double</option>
+                                    <option value="triple">┃├〈⭐》❱→ Triple</option>
+                                    <option value="major">┃├〈🌟》❱→ Major</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="field-group">
-                            <label class="field-label" for="appHierarchie">Hiérarchie</label>
-                            <input
-                                id="appHierarchie"
-                                class="field-input"
-                                type="text"
-                                placeholder="Intendant, préfet, étudiant, membre du staff, etc."
-                            >
+                        <div class="field-group field-group--inline">
+                            <div class="field-group">
+                                <label class="field-label" for="appHouse">House</label>
+                                <select id="appHouse" class="field-input">
+                                    <option value="">Sélectionner...</option>
+                                    <option value="red-spider">┃├〈🕷️》❱→ Red Spider House</option>
+                                    <option value="blue-bear">┃├〈🐻》❱→ Blue Bear House</option>
+                                    <option value="violet-goat">┃├〈🐐》❱→ Violet Goat House</option>
+                                    <option value="green-turtle">┃├〈🐢》❱→ Green Turtle House</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="appHierarchie">Hiérarchie</label>
+                                <input
+                                    id="appHierarchie"
+                                    class="field-input"
+                                    type="text"
+                                    placeholder="Intendant, préfet, étudiant, membre du staff, etc."
+                                >
+                            </div>
                         </div>
                     </section>
 
                     <!-- Combat -->
                     <section id="tab-combat" class="tab-panel" aria-label="Combat">
-                        <h2 class="section-title">Combat</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Combat</h2>
+                            <button type="button" class="save-tab-button" data-tab="combat">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label" for="combatStyle">Style de combat</label>
@@ -166,78 +194,137 @@
                         </div>
 
                         <div class="field-group">
-                            <label class="field-label" for="combatArme">Type d’arme</label>
+                            <label class="field-label" for="combatArme">Type d'arme</label>
                             <input
                                 id="combatArme"
                                 class="field-input"
                                 type="text"
-                                placeholder="Type d’arme principale : épée, faux, arme improvisée, etc."
+                                placeholder="Type d'arme principale : épée, faux, arme improvisée, etc."
                             >
                         </div>
 
                         <div class="field-group">
-                            <label class="field-label" for="combatArmeImage">Image de l’arme (URL)</label>
+                            <label class="field-label" for="combatArmeImage">Image de l'arme (URL)</label>
                             <input
                                 id="combatArmeImage"
                                 class="field-input"
                                 type="url"
-                                placeholder="Lien vers une illustration de l’arme (optionnel)."
+                                placeholder="Lien vers une illustration de l'arme (optionnel)."
                             >
                         </div>
                     </section>
 
                     <!-- Alice -->
                     <section id="tab-alice" class="tab-panel" aria-label="Alice">
-                        <h2 class="section-title">Alice</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Alice</h2>
+                            <button type="button" class="save-tab-button" data-tab="alice">Sauvegarder</button>
+                        </div>
 
-                        <div class="field-group">
-                            <label class="field-label">
+                        <div class="field-group" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <label class="field-label" style="margin: 0;">
                                 <input id="hasAlice" type="checkbox">
                                 Possède une Alice
                             </label>
+                            <label class="field-label" style="margin: 0;">
+                                <input id="hasDoubleAlice" type="checkbox">
+                                Possède un Double Alice
+                            </label>
                         </div>
 
-                        <div id="alice-fields" class="conditional-block" hidden>
-                            <div class="field-group">
-                                <label class="field-label" for="aliceNom">Nom de l’Alice</label>
-                                <input id="aliceNom" class="field-input" type="text" placeholder="Nom ou titre de l’Alice.">
+                        <div id="alice-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;" hidden>
+                            <div id="alice-fields" class="conditional-block">
+                                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Alice principale</h3>
+                                <div class="field-group">
+                                    <label class="field-label" for="aliceNom">Nom de l'Alice</label>
+                                    <input id="aliceNom" class="field-input" type="text" placeholder="Nom ou titre de l'Alice.">
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="aliceType">Type</label>
+                                    <input
+                                        id="aliceType"
+                                        class="field-input"
+                                        type="text"
+                                        placeholder="Type d'Alice : physiologique, mentale, élémentaire, etc."
+                                    >
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="aliceForme">Forme</label>
+                                    <input
+                                        id="aliceForme"
+                                        class="field-input"
+                                        type="text"
+                                        placeholder="Forme(s) ou modalités d'expression de l'Alice."
+                                    >
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="aliceFiche">Fiche complète (URL)</label>
+                                    <input
+                                        id="aliceFiche"
+                                        class="field-input"
+                                        type="url"
+                                        placeholder="Lien vers la fiche détaillée de l'Alice (si séparée)."
+                                    >
+                                </div>
                             </div>
 
-                            <div class="field-group">
-                                <label class="field-label" for="aliceType">Type</label>
-                                <input
-                                    id="aliceType"
-                                    class="field-input"
-                                    type="text"
-                                    placeholder="Type d’Alice : physiologique, mentale, élémentaire, etc."
-                                >
-                            </div>
+                            <div id="alice2-fields" class="conditional-block" hidden>
+                                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Double Alice</h3>
+                                <div class="field-group">
+                                    <label class="field-label" for="alice2Nom">Nom de l'Alice</label>
+                                    <input id="alice2Nom" class="field-input" type="text" placeholder="Nom ou titre de l'Alice.">
+                                </div>
 
-                            <div class="field-group">
-                                <label class="field-label" for="aliceForme">Forme</label>
-                                <input
-                                    id="aliceForme"
-                                    class="field-input"
-                                    type="text"
-                                    placeholder="Forme(s) ou modalités d’expression de l’Alice."
-                                >
-                            </div>
+                                <div class="field-group">
+                                    <label class="field-label" for="alice2Type">Type</label>
+                                    <input
+                                        id="alice2Type"
+                                        class="field-input"
+                                        type="text"
+                                        placeholder="Type d'Alice : physiologique, mentale, élémentaire, etc."
+                                    >
+                                </div>
 
-                            <div class="field-group">
-                                <label class="field-label" for="aliceFiche">Fiche complète (URL)</label>
-                                <input
-                                    id="aliceFiche"
-                                    class="field-input"
-                                    type="url"
-                                    placeholder="Lien vers la fiche détaillée de l’Alice (si séparée)."
-                                >
+                                <div class="field-group">
+                                    <label class="field-label" for="alice2Forme">Forme</label>
+                                    <input
+                                        id="alice2Forme"
+                                        class="field-input"
+                                        type="text"
+                                        placeholder="Forme(s) ou modalités d'expression de l'Alice."
+                                    >
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="alice2Fiche">Fiche complète (URL)</label>
+                                    <input
+                                        id="alice2Fiche"
+                                        class="field-input"
+                                        type="url"
+                                        placeholder="Lien vers la fiche détaillée de l'Alice (si séparée)."
+                                    >
+                                </div>
                             </div>
                         </div>
+
+                        <style>
+                            @media (max-width: 768px) {
+                                #alice-container {
+                                    grid-template-columns: 1fr !important;
+                                }
+                            }
+                        </style>
                     </section>
 
                     <!-- Sorcellerie -->
                     <section id="tab-sorcellerie" class="tab-panel" aria-label="Sorcellerie">
-                        <h2 class="section-title">Sorcellerie</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Sorcellerie</h2>
+                            <button type="button" class="save-tab-button" data-tab="sorcellerie">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label">
@@ -273,24 +360,60 @@
                                     id="sorcellerieCachee"
                                     class="field-input"
                                     type="text"
-                                    placeholder="Magie cachée ou en latence (si connue de l’équipe)."
+                                    placeholder="Magie cachée ou en latence (si connue de l'équipe)."
                                 >
                             </div>
+
+                            <div style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                                <button type="button" id="addMagieSupplementaire" class="field-input" style="width: auto; padding: 0.5rem 1rem; cursor: pointer;">+ Ajouter une magie supplémentaire</button>
+                            </div>
+
+                            <div id="magie-supplementaire-container"></div>
                         </div>
                     </section>
 
                     <!-- Eater -->
                     <section id="tab-eater" class="tab-panel" aria-label="Eater">
-                        <h2 class="section-title">Eater</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Eater</h2>
+                            <button type="button" class="save-tab-button" data-tab="eater">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label">
                                 <input id="hasEater" type="checkbox">
-                                Possède une capacité d’âme
+                                Possède une capacité d'âme
                             </label>
                         </div>
 
                         <div id="eater-fields" class="conditional-block" hidden>
+                            <!-- Soul Counter Panel -->
+                            <div style="background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                                <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem;">Compteur d'âmes</h3>
+                                <div class="field-group field-group--inline">
+                                    <div class="field-group">
+                                        <label class="field-label" for="eaterAmesConso">Âmes de Consommation</label>
+                                        <input
+                                            id="eaterAmesConso"
+                                            class="field-input"
+                                            type="number"
+                                            min="0"
+                                            placeholder="0"
+                                        >
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label" for="eaterAmesProgression">Âmes de Progression</label>
+                                        <input
+                                            id="eaterAmesProgression"
+                                            class="field-input"
+                                            type="number"
+                                            min="0"
+                                            placeholder="0"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="field-group">
                                 <label class="field-label" for="eaterRole">Rôle</label>
                                 <select id="eaterRole" class="field-input">
@@ -301,7 +424,7 @@
                             </div>
 
                             <div class="field-group">
-                                <label class="field-label" for="eaterTypeArme">Type d’arme</label>
+                                <label class="field-label" for="eaterTypeArme">Type d'arme</label>
                                 <select id="eaterTypeArme" class="field-input">
                                     <option value="">Sélectionner...</option>
                                     <option value="classique">Classique</option>
@@ -311,22 +434,22 @@
                             </div>
 
                             <div class="field-group">
-                                <label class="field-label" for="eaterDescriptionArme">Description de l’arme</label>
+                                <label class="field-label" for="eaterDescriptionArme">Description de l'arme</label>
                                 <textarea
                                     id="eaterDescriptionArme"
                                     class="field-input field-textarea"
                                     rows="4"
-                                    placeholder="Description détaillée de l’arme, de ses formes et particularités."
+                                    placeholder="Description détaillée de l'arme, de ses formes et particularités."
                                 ></textarea>
                             </div>
 
                             <div class="field-group">
-                                <label class="field-label" for="eaterImageArme">Image de l’arme (URL)</label>
+                                <label class="field-label" for="eaterImageArme">Image de l'arme (URL)</label>
                                 <input
                                     id="eaterImageArme"
                                     class="field-input"
                                     type="url"
-                                    placeholder="Lien vers une illustration de l’arme (optionnel)."
+                                    placeholder="Lien vers une illustration de l'arme (optionnel)."
                                 >
                             </div>
 
@@ -336,7 +459,7 @@
                                     id="eaterNoyau"
                                     class="field-input field-textarea"
                                     rows="4"
-                                    placeholder="Capacité centrale liée au noyau de l’âme."
+                                    placeholder="Capacité centrale liée au noyau de l'âme."
                                 ></textarea>
                             </div>
 
@@ -354,7 +477,10 @@
 
                     <!-- Religion -->
                     <section id="tab-religion" class="tab-panel" aria-label="Religion">
-                        <h2 class="section-title">Religion</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Religion</h2>
+                            <button type="button" class="save-tab-button" data-tab="religion">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label" for="religionCroyance">Croyance</label>
@@ -399,7 +525,10 @@
 
                     <!-- Mental -->
                     <section id="tab-mental" class="tab-panel" aria-label="Mental">
-                        <h2 class="section-title">Mental</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Mental</h2>
+                            <button type="button" class="save-tab-button" data-tab="mental">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label" for="mentalCaractere">Caractère</label>
@@ -434,7 +563,10 @@
 
                     <!-- Physique -->
                     <section id="tab-physique" class="tab-panel" aria-label="Physique">
-                        <h2 class="section-title">Physique</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Physique</h2>
+                            <button type="button" class="save-tab-button" data-tab="physique">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label" for="physiqueDescription">Description physique</label>
@@ -459,7 +591,10 @@
 
                     <!-- Background -->
                     <section id="tab-background" class="tab-panel" aria-label="Background">
-                        <h2 class="section-title">Background</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="section-title" style="margin: 0;">Background</h2>
+                            <button type="button" class="save-tab-button" data-tab="background">Sauvegarder</button>
+                        </div>
 
                         <div class="field-group">
                             <label class="field-label" for="backgroundFamille">Parents / famille</label>
@@ -497,7 +632,7 @@
                                 id="backgroundImage2"
                                 class="field-input"
                                 type="url"
-                                placeholder="Deuxième lien d’image (optionnel)."
+                                placeholder="Deuxième lien d'image (optionnel)."
                             >
                         </div>
 
@@ -507,7 +642,7 @@
                                 id="backgroundImage3"
                                 class="field-input"
                                 type="url"
-                                placeholder="Troisième lien d’image (optionnel)."
+                                placeholder="Troisième lien d'image (optionnel)."
                             >
                         </div>
                     </section>
@@ -520,7 +655,10 @@
         (function () {
             const tabButtons = Array.from(document.querySelectorAll('.tab-button'));
             const tabPanels = Array.from(document.querySelectorAll('.tab-panel'));
+            const saveButtons = Array.from(document.querySelectorAll('.save-tab-button'));
+            const dirtyTabs = new Set();
 
+            // Tab switching
             tabButtons.forEach((button) => {
                 button.addEventListener('click', () => {
                     const target = button.dataset.tab;
@@ -537,8 +675,25 @@
                 });
             });
 
+            // Alice checkboxes visibility
+            const hasAliceCheckbox = document.getElementById('hasAlice');
+            const hasDoubleAliceCheckbox = document.getElementById('hasDoubleAlice');
+            const aliceContainer = document.getElementById('alice-container');
+            const alice2Fields = document.getElementById('alice2-fields');
+
+            const updateAliceVisibility = () => {
+                const hasAlice = hasAliceCheckbox.checked;
+                const hasDoubleAlice = hasDoubleAliceCheckbox.checked;
+
+                aliceContainer.hidden = !hasAlice;
+                alice2Fields.hidden = !hasDoubleAlice;
+            };
+
+            hasAliceCheckbox.addEventListener('change', updateAliceVisibility);
+            hasDoubleAliceCheckbox.addEventListener('change', updateAliceVisibility);
+
+            // Other conditional visibility
             const conditionalConfigs = [
-                { checkboxId: 'hasAlice', panelId: 'alice-fields' },
                 { checkboxId: 'hasMagic', panelId: 'sorcellerie-fields' },
                 { checkboxId: 'hasEater', panelId: 'eater-fields' }
             ];
@@ -555,6 +710,170 @@
                 checkbox.addEventListener('change', updateVisibility);
                 updateVisibility();
             });
+
+            // Dynamic Magie Supplémentaire
+            const addMagieBtn = document.getElementById('addMagieSupplementaire');
+            const magieContainer = document.getElementById('magie-supplementaire-container');
+            let magieSupCount = 0;
+
+            addMagieBtn.addEventListener('click', () => {
+                magieSupCount++;
+                const fieldGroup = document.createElement('div');
+                fieldGroup.className = 'field-group';
+                fieldGroup.innerHTML = `
+                    <label class="field-label" for="magieSup${magieSupCount}">Magie supplémentaire</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input
+                            id="magieSup${magieSupCount}"
+                            class="field-input magie-supplementaire"
+                            type="text"
+                            placeholder="Magie supplémentaire..."
+                        >
+                        <button type="button" class="remove-magie-btn" style="padding: 0.5rem 1rem; cursor: pointer; background: #f44336; color: white; border: none; border-radius: 4px;">×</button>
+                    </div>
+                `;
+                magieContainer.appendChild(fieldGroup);
+
+                // Remove button handler
+                fieldGroup.querySelector('.remove-magie-btn').addEventListener('click', () => {
+                    fieldGroup.remove();
+                    markTabDirty('sorcellerie');
+                });
+
+                markTabDirty('sorcellerie');
+            });
+
+            // Mark tab as dirty when any input changes
+            function markTabDirty(tabName) {
+                dirtyTabs.add(tabName);
+                const saveBtn = document.querySelector(`.save-tab-button[data-tab="${tabName}"]`);
+                if (saveBtn) {
+                    saveBtn.classList.add('save-button--highlight');
+                }
+            }
+
+            function clearTabDirty(tabName) {
+                dirtyTabs.delete(tabName);
+                const saveBtn = document.querySelector(`.save-tab-button[data-tab="${tabName}"]`);
+                if (saveBtn) {
+                    saveBtn.classList.remove('save-button--highlight');
+                }
+            }
+
+            // Add change listeners to all inputs
+            tabPanels.forEach((panel) => {
+                const tabName = panel.id.replace('tab-', '');
+                const inputs = panel.querySelectorAll('input, select, textarea');
+
+                inputs.forEach((input) => {
+                    input.addEventListener('input', () => markTabDirty(tabName));
+                    input.addEventListener('change', () => markTabDirty(tabName));
+                });
+            });
+
+            // Save button functionality
+            saveButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    saveTab(tabName);
+                    clearTabDirty(tabName);
+                });
+            });
+
+            function saveTab(tabName) {
+                const panel = document.getElementById('tab-' + tabName);
+                if (!panel) return;
+
+                const data = {};
+                const inputs = panel.querySelectorAll('input, select, textarea');
+
+                inputs.forEach((input) => {
+                    if (input.type === 'checkbox') {
+                        data[input.id] = input.checked;
+                    } else {
+                        data[input.id] = input.value;
+                    }
+                });
+
+                // Save dynamic magie supplementaire
+                if (tabName === 'sorcellerie') {
+                    const magieSupInputs = panel.querySelectorAll('.magie-supplementaire');
+                    data.magieSupplementaire = Array.from(magieSupInputs).map(input => input.value);
+                }
+
+                localStorage.setItem('fiche-' + tabName, JSON.stringify(data));
+                console.log('Saved tab:', tabName, data);
+
+                // Visual feedback
+                btn.textContent = 'Sauvegardé ✓';
+                setTimeout(() => {
+                    btn.textContent = 'Sauvegarder';
+                }, 2000);
+            }
+
+            function loadTab(tabName) {
+                const panel = document.getElementById('tab-' + tabName);
+                if (!panel) return;
+
+                const savedData = localStorage.getItem('fiche-' + tabName);
+                if (!savedData) return;
+
+                const data = JSON.parse(savedData);
+
+                Object.keys(data).forEach((key) => {
+                    if (key === 'magieSupplementaire') return; // Handle separately
+
+                    const input = document.getElementById(key);
+                    if (!input) return;
+
+                    if (input.type === 'checkbox') {
+                        input.checked = data[key];
+                    } else {
+                        input.value = data[key];
+                    }
+                });
+
+                // Restore dynamic magie supplementaire
+                if (tabName === 'sorcellerie' && data.magieSupplementaire) {
+                    data.magieSupplementaire.forEach((value) => {
+                        if (!value) return;
+                        magieSupCount++;
+                        const fieldGroup = document.createElement('div');
+                        fieldGroup.className = 'field-group';
+                        fieldGroup.innerHTML = `
+                            <label class="field-label" for="magieSup${magieSupCount}">Magie supplémentaire</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input
+                                    id="magieSup${magieSupCount}"
+                                    class="field-input magie-supplementaire"
+                                    type="text"
+                                    value="${value}"
+                                    placeholder="Magie supplémentaire..."
+                                >
+                                <button type="button" class="remove-magie-btn" style="padding: 0.5rem 1rem; cursor: pointer; background: #f44336; color: white; border: none; border-radius: 4px;">×</button>
+                            </div>
+                        `;
+                        magieContainer.appendChild(fieldGroup);
+
+                        fieldGroup.querySelector('.remove-magie-btn').addEventListener('click', () => {
+                            fieldGroup.remove();
+                            markTabDirty('sorcellerie');
+                        });
+                    });
+                }
+
+                // Trigger visibility updates
+                if (tabName === 'alice') {
+                    updateAliceVisibility();
+                }
+            }
+
+            // Load all tabs on page load
+            const allTabs = ['identite', 'appartenance', 'combat', 'alice', 'sorcellerie', 'eater', 'religion', 'mental', 'physique', 'background'];
+            allTabs.forEach(loadTab);
+
+            // Update conditional visibility after loading
+            updateAliceVisibility();
         })();
     </script>
 </body>

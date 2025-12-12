@@ -8,7 +8,8 @@
       "Bash(ls:*)",
       "Bash(git rm:*)",
       "Bash(start http://localhost:8000/index.html)",
-      "Bash(python -m http.server:*)"
+      "Bash(python -m http.server:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
