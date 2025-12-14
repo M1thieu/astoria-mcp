@@ -282,8 +282,6 @@ export function initProfileTagSelector({ characterId }) {
                 const selector = document.getElementById('characterSelector');
                 if (selector) {
                     selector.focus();
-                } else {
-                    window.location.href = 'characters.html';
                 }
             });
 

@@ -83,6 +83,104 @@
             color: var(--color-gray-600);
             margin-bottom: 2rem;
         }
+
+        .profile-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 2000;
+        }
+
+        .profile-modal-backdrop.open {
+            display: flex;
+        }
+
+        .profile-modal {
+            width: 100%;
+            max-width: 520px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+            padding: 1.25rem;
+            border: 2px solid var(--color-primary-lighter);
+        }
+
+        .profile-modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+        }
+
+        .profile-modal-label {
+            display: block;
+            font-weight: 700;
+            color: var(--color-gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-modal-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--color-gray-300);
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .profile-modal-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .profile-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .profile-modal-button {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 2px solid var(--color-primary);
+            background: var(--color-primary);
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .profile-modal-button:hover {
+            background: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+        }
+
+        .profile-modal-button.secondary {
+            background: white;
+            color: var(--color-primary);
+        }
+
+        .profile-modal-button.secondary:hover {
+            background: var(--color-primary-lighter);
+            border-color: var(--color-primary);
+        }
+
+        .profile-modal-error {
+            display: none;
+            background: #fee;
+            color: #c33;
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-modal-error.visible {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -193,12 +291,40 @@
         </section>
     </main>
 
+    <div class="profile-modal-backdrop" id="createCharacterBackdrop" aria-hidden="true">
+        <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
+            <div class="profile-modal-title" id="createCharacterTitle">Créer un personnage</div>
+            <div class="profile-modal-error" id="createCharacterError" role="alert"></div>
+
+            <form id="createCharacterForm">
+                <div style="margin-bottom:0.75rem;">
+                    <label class="profile-modal-label" for="characterNameInput">Nom</label>
+                    <input class="profile-modal-input" id="characterNameInput" name="name" required autocomplete="off">
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label class="profile-modal-label" for="characterRaceInput">Race (optionnel)</label>
+                    <input class="profile-modal-input" id="characterRaceInput" name="race" autocomplete="off">
+                </div>
+                <div>
+                    <label class="profile-modal-label" for="characterClassInput">Classe (optionnel)</label>
+                    <input class="profile-modal-input" id="characterClassInput" name="class" autocomplete="off">
+                </div>
+
+                <div class="profile-modal-actions">
+                    <button type="button" class="profile-modal-button secondary" id="createCharacterCancel">Annuler</button>
+                    <button type="submit" class="profile-modal-button" id="createCharacterSubmit">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import {
             getCurrentUser,
             getUserCharacters,
             getActiveCharacter,
             setActiveCharacter,
+            createCharacter,
             logout,
             isAdmin
         } from './js/auth.js';
@@ -210,6 +336,35 @@
         let currentUser = null;
         let currentCharacter = null;
         let userCharacters = [];
+
+        const createBackdrop = document.getElementById('createCharacterBackdrop');
+        const createForm = document.getElementById('createCharacterForm');
+        const createError = document.getElementById('createCharacterError');
+        const createName = document.getElementById('characterNameInput');
+        const createRace = document.getElementById('characterRaceInput');
+        const createClass = document.getElementById('characterClassInput');
+        const createCancel = document.getElementById('createCharacterCancel');
+        const createSubmit = document.getElementById('createCharacterSubmit');
+
+        function showCreateCharacterModal() {
+            if (!currentUser) return;
+            createError.classList.remove('visible');
+            createError.textContent = '';
+            createForm.reset();
+            createBackdrop.classList.add('open');
+            createBackdrop.setAttribute('aria-hidden', 'false');
+            createName.focus();
+        }
+
+        function hideCreateCharacterModal() {
+            createBackdrop.classList.remove('open');
+            createBackdrop.setAttribute('aria-hidden', 'true');
+        }
+
+        function showCreateError(message) {
+            createError.textContent = message;
+            createError.classList.add('visible');
+        }
 
         // Initialize page
         async function init() {
@@ -295,7 +450,7 @@
             const placeholderOption = document.createElement('option');
             placeholderOption.value = '';
             placeholderOption.textContent = 'Sélectionner un personnage...';
-            placeholderOption.disabled = true;
+            // Keep the placeholder selectable so we can reset after "Créer un personnage"
             placeholderOption.selected = !currentCharacter;
             selectorHTML.appendChild(placeholderOption);
 
@@ -327,9 +482,12 @@
 
                 if (value === '__create__') {
                     // TODO: Open character creation modal
-                    alert('Création de personnage à venir!');
+                    selectorHTML.value = '';
+                    showCreateCharacterModal();
                     return;
                 }
+
+                if (!value) return;
 
                 // Switch to selected character
                 await setActiveCharacter(value);
@@ -363,6 +521,57 @@
             // TODO: Populate rest of profile sections based on issue #9 requirements
             // - House, Rank, Alice types, etc.
         }
+
+        // Character create modal wiring
+        if (createSubmit) createSubmit.textContent = 'Creer';
+
+        createCancel.addEventListener('click', hideCreateCharacterModal);
+        createBackdrop.addEventListener('pointerdown', (e) => {
+            if (e.target === createBackdrop) hideCreateCharacterModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && createBackdrop.classList.contains('open')) {
+                e.preventDefault();
+                hideCreateCharacterModal();
+            }
+        });
+
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            createError.classList.remove('visible');
+            createError.textContent = '';
+
+            const name = createName.value.trim();
+            const race = createRace.value.trim();
+            const charClass = createClass.value.trim();
+
+            if (!name) {
+                showCreateError('Le nom est requis.');
+                createName.focus();
+                return;
+            }
+
+            createSubmit.disabled = true;
+            createSubmit.textContent = 'Creation...';
+
+            try {
+                const res = await createCharacter(currentUser.id, { name, race, class: charClass });
+                if (!res.success) {
+                    showCreateError(res.error || 'Impossible de creer le personnage.');
+                    return;
+                }
+
+                await setActiveCharacter(res.character.id);
+                hideCreateCharacterModal();
+                window.location.reload();
+            } catch (err) {
+                console.error(err);
+                showCreateError('Impossible de creer le personnage.');
+            } finally {
+                createSubmit.disabled = false;
+                createSubmit.textContent = 'Creer';
+            }
+        });
 
         // Initialize on page load
         init();

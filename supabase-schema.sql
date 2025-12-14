@@ -59,6 +59,11 @@ CREATE POLICY "Users can read own data"
     ON users FOR SELECT
     USING (true); -- Anyone can read for login purposes
 
+-- Users: Anyone can register (prototype: uses anon key + custom auth)
+CREATE POLICY "Anyone can insert users"
+    ON users FOR INSERT
+    WITH CHECK (true);
+
 -- Characters: Users can manage their own characters
 CREATE POLICY "Users can read own characters"
     ON characters FOR SELECT

@@ -62,7 +62,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGc...your-actual-key-here';  // Your anon public
 2. Try logging in with:
    - Username: `admin`
    - Password: `admin123`
-3. You should be redirected to the character selection screen!
+3. You should be redirected to `profil.html`
+4. En haut à droite, utilise le sélecteur pour :
+   - sélectionner un personnage existant
+   - ou `+ Créer un personnage` (limite : 5)
 
 **IMPORTANT: Change the default passwords immediately!**
 
@@ -136,7 +139,12 @@ Let me know if you want this!
 
 ### Creating New Player Accounts
 
-**Option A: Via Supabase Dashboard**
+**Option A: Via `login.html` (Inscription)**
+1. Ouvre `login.html`
+2. Onglet **Inscription**
+3. Crée le compte, puis crée un personnage depuis `profil.html` (max 5)
+
+**Option B: Via Supabase Dashboard**
 1. Go to **Table Editor** → **users**
 2. Click **Insert row**
 3. Fill in:
@@ -144,7 +152,7 @@ Let me know if you want this!
    - `password_hash`: Use the hash generator below
    - `role`: `player`
 
-**Option B: Via Browser Console**
+**Option C: Via Browser Console**
 1. Open your site with `js/auth.js` loaded
 2. Open browser console (F12)
 3. Run:
@@ -213,6 +221,7 @@ hashPassword('player123');  // Replace with actual password
 ### "Failed to fetch" error
 - Check your Supabase URL and anon key in `js/auth.js`
 - Make sure your Supabase project is active (not paused)
+- Assure-toi d'ouvrir le site via un serveur (pas `file://`)
 
 ### "Invalid credentials" error
 - Double-check username and password

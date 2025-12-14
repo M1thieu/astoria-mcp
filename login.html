@@ -6,7 +6,7 @@
     <title>Connexion - Astoria</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .login-container {
+        .auth-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -15,27 +15,56 @@
             padding: var(--space-4);
         }
 
-        .login-card {
+        .auth-card {
             background: white;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             padding: var(--space-8);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            box-sizing: border-box;
         }
 
-        .login-title {
+        .auth-title {
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--color-primary);
             margin-bottom: var(--space-2);
             text-align: center;
         }
 
-        .login-subtitle {
+        .auth-subtitle {
             color: var(--color-gray-600);
             text-align: center;
             margin-bottom: var(--space-6);
+        }
+
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-2);
+            margin-bottom: var(--space-5);
+        }
+
+        .auth-tab {
+            padding: var(--space-2) var(--space-3);
+            border-radius: 10px;
+            border: 2px solid var(--color-gray-300);
+            background: white;
+            color: var(--color-gray-700);
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-tab:hover {
+            border-color: var(--color-primary);
+        }
+
+        .auth-tab.active {
+            border-color: var(--color-primary);
+            background: var(--color-primary-lighter);
+            color: var(--color-primary);
         }
 
         .form-group {
@@ -44,7 +73,7 @@
 
         .form-label {
             display: block;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--color-gray-700);
             margin-bottom: var(--space-2);
         }
@@ -53,9 +82,10 @@
             width: 100%;
             padding: var(--space-3);
             border: 2px solid var(--color-gray-300);
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1rem;
             transition: border-color 0.2s;
+            box-sizing: border-box;
         }
 
         .form-input:focus {
@@ -63,24 +93,24 @@
             border-color: var(--color-primary);
         }
 
-        .login-button {
+        .auth-button {
             width: 100%;
             padding: var(--space-3);
             background: var(--color-primary);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 800;
             cursor: pointer;
             transition: background-color 0.2s;
         }
 
-        .login-button:hover {
+        .auth-button:hover {
             background: var(--color-primary-dark);
         }
 
-        .login-button:disabled {
+        .auth-button:disabled {
             background: var(--color-gray-400);
             cursor: not-allowed;
         }
@@ -89,7 +119,7 @@
             background: #fee;
             color: #c33;
             padding: var(--space-3);
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: var(--space-4);
             display: none;
         }
@@ -98,7 +128,7 @@
             display: block;
         }
 
-        .login-footer {
+        .auth-footer {
             text-align: center;
             margin-top: var(--space-6);
             color: var(--color-gray-600);
@@ -107,60 +137,111 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <h1 class="login-title">Astoria</h1>
-            <p class="login-subtitle">Connectez-vous à votre compte</p>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">Astoria</h1>
+            <p class="auth-subtitle" id="authSubtitle">Connectez-vous</p>
 
-            <div id="errorMessage" class="error-message"></div>
+            <div class="auth-tabs" role="tablist" aria-label="Connexion ou inscription">
+                <button type="button" class="auth-tab active" id="tabLogin" role="tab" aria-selected="true">Connexion</button>
+                <button type="button" class="auth-tab" id="tabRegister" role="tab" aria-selected="false">Inscription</button>
+            </div>
+
+            <div id="errorMessage" class="error-message" role="alert"></div>
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="username" class="form-label">Nom d'utilisateur</label>
-                    <input
-                        type="text"
-                        id="username"
-                        class="form-input"
-                        required
-                        autocomplete="username"
-                        placeholder="Entrez votre nom d'utilisateur"
-                    >
+                    <label for="loginUsername" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" id="loginUsername" class="form-input" required autocomplete="username" placeholder="Votre pseudo">
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="form-label">Mot de passe</label>
-                    <input
-                        type="password"
-                        id="password"
-                        class="form-input"
-                        required
-                        autocomplete="current-password"
-                        placeholder="Entrez votre mot de passe"
-                    >
+                    <label for="loginPassword" class="form-label">Mot de passe</label>
+                    <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password" placeholder="Votre mot de passe">
                 </div>
 
-                <button type="submit" class="login-button" id="loginButton">
-                    Se connecter
-                </button>
+                <button type="submit" class="auth-button" id="loginButton">Se connecter</button>
             </form>
 
-            <div class="login-footer">
-                Astoria - Système de gestion de personnages
-            </div>
+            <form id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label for="registerUsername" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" id="registerUsername" class="form-input" required autocomplete="username" placeholder="Choisir un pseudo">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword" class="form-label">Mot de passe</label>
+                    <input type="password" id="registerPassword" class="form-input" required autocomplete="new-password" placeholder="Choisir un mot de passe">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
+                    <input type="password" id="registerPasswordConfirm" class="form-input" required autocomplete="new-password" placeholder="Répéter le mot de passe">
+                </div>
+
+                <button type="submit" class="auth-button" id="registerButton">Créer le compte</button>
+            </form>
+
+            <div class="auth-footer">Astoria - Prototype (Supabase)</div>
         </div>
     </div>
 
-    <script type="module">
-        import { login, isAuthenticated } from './js/auth.js';
+    <script>
+        // UI toggle (Connexion/Inscription) without relying on ES modules.
+        (function () {
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const subtitle = document.getElementById('authSubtitle');
+            const errorMessage = document.getElementById('errorMessage');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
 
-        // Redirect if already logged in
+            function hideError() {
+                if (!errorMessage) return;
+                errorMessage.textContent = '';
+                errorMessage.classList.remove('visible');
+            }
+
+            function setMode(mode) {
+                const isRegister = mode === 'register';
+                tabLogin.classList.toggle('active', !isRegister);
+                tabRegister.classList.toggle('active', isRegister);
+                tabLogin.setAttribute('aria-selected', String(!isRegister));
+                tabRegister.setAttribute('aria-selected', String(isRegister));
+                loginForm.style.display = isRegister ? 'none' : 'block';
+                registerForm.style.display = isRegister ? 'block' : 'none';
+                subtitle.textContent = isRegister ? 'Créez votre compte' : 'Connectez-vous';
+                hideError();
+                try {
+                    history.replaceState(null, '', isRegister ? '#register' : '#login');
+                } catch {
+                    // ignore
+                }
+
+                const focusTarget = document.getElementById(isRegister ? 'registerUsername' : 'loginUsername');
+                if (focusTarget) focusTarget.focus();
+            }
+
+            tabLogin.addEventListener('click', () => setMode('login'));
+            tabRegister.addEventListener('click', () => setMode('register'));
+
+            window.astoriaAuthUI = { setMode, hideError };
+            setMode(window.location.hash === '#register' ? 'register' : 'login');
+        })();
+    </script>
+
+    <script type="module">
+        import { login, register, isAuthenticated } from './js/auth.js';
+
         if (isAuthenticated()) {
             window.location.href = 'profil.html';
         }
 
-        const form = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
         const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
 
         function showError(message) {
             errorMessage.textContent = message;
@@ -168,15 +249,20 @@
         }
 
         function hideError() {
+            if (window.astoriaAuthUI && window.astoriaAuthUI.hideError) {
+                window.astoriaAuthUI.hideError();
+                return;
+            }
+            errorMessage.textContent = '';
             errorMessage.classList.remove('visible');
         }
 
-        form.addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             hideError();
 
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
             if (!username || !password) {
                 showError('Veuillez remplir tous les champs');
@@ -188,15 +274,13 @@
 
             try {
                 const result = await login(username, password);
-
                 if (result.success) {
-                    // Redirect to profile page
                     window.location.href = 'profil.html';
                 } else {
                     showError(result.error || 'Nom d\'utilisateur ou mot de passe incorrect');
                 }
-            } catch (error) {
-                console.error('Login error:', error);
+            } catch (err) {
+                console.error(err);
                 showError('Erreur de connexion. Veuillez réessayer.');
             } finally {
                 loginButton.disabled = false;
@@ -204,12 +288,59 @@
             }
         });
 
-        // Enter key submit
-        document.getElementById('password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                form.dispatchEvent(new Event('submit'));
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError();
+
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirm = document.getElementById('registerPasswordConfirm').value;
+
+            if (!username || !password || !confirm) {
+                showError('Veuillez remplir tous les champs');
+                return;
+            }
+
+            if (password !== confirm) {
+                showError('Les mots de passe ne correspondent pas');
+                return;
+            }
+
+            registerButton.disabled = true;
+            registerButton.textContent = 'Création...';
+
+            try {
+                const result = await register(username, password);
+                if (result.success) {
+                    window.location.href = 'profil.html';
+                } else {
+                    showError(result.error || 'Impossible de créer le compte');
+                }
+            } catch (err) {
+                console.error(err);
+                showError('Impossible de créer le compte. Veuillez réessayer.');
+            } finally {
+                registerButton.disabled = false;
+                registerButton.textContent = 'Créer le compte';
             }
         });
+    </script>
+
+    <script>
+        // ES modules (imports) do not work over file:// in most browsers.
+        // Show a clear hint instead of a silent broken UI.
+        (function () {
+            if (window.location.protocol !== 'file:') return;
+            const errorMessage = document.getElementById('errorMessage');
+            const loginButton = document.getElementById('loginButton');
+            const registerButton = document.getElementById('registerButton');
+            if (errorMessage) {
+                errorMessage.textContent = 'Ouvre cette page via un serveur local (Live Server) ou GitHub Pages.';
+                errorMessage.classList.add('visible');
+            }
+            if (loginButton) loginButton.disabled = true;
+            if (registerButton) registerButton.disabled = true;
+        })();
     </script>
 </body>
 </html>
