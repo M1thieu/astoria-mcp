@@ -124,6 +124,15 @@
                     <div class="profile-look-card">
                         <span class="profile-look-placeholder">Prévisualisation à venir</span>
                     </div>
+
+                    <div class="profile-tags" id="profileTags" aria-label="Tags de profil">
+                        <div class="profile-tags-header">
+                            <span class="profile-tags-title">Tags</span>
+                            <button type="button" class="profile-tags-toggle" id="tagToggle" aria-expanded="false" aria-haspopup="true">+</button>
+                        </div>
+                        <div class="profile-tags-selected" id="selectedTags" aria-label="Tags sélectionnés"></div>
+                        <div class="profile-tags-dropdown" id="tagDropdown" hidden></div>
+                    </div>
                 </section>
 
                 <section class="profile-panel">
@@ -193,6 +202,7 @@
             logout,
             isAdmin
         } from './auth.js';
+        import { initProfileTagSelector } from './profile-tags.js';
 
         const authControls = document.getElementById('authControls');
         const profileContent = document.getElementById('profileContent');
@@ -268,9 +278,11 @@
             if (!currentCharacter) {
                 // No active character - show placeholder
                 showNoCharacterSelected();
+                initProfileTagSelector({ characterId: null });
             } else {
                 // Display character data
                 displayCharacter(currentCharacter);
+                initProfileTagSelector({ characterId: currentCharacter.id });
             }
         }
 
@@ -357,4 +369,3 @@
     </script>
 </body>
 </html>
-
