@@ -219,19 +219,22 @@ export function initProfileTagSelector({ characterId }) {
         const menuWidth = menu.offsetWidth || 360;
         const menuHeight = menu.offsetHeight || 320;
 
-        const preferredLeft = rect.right - menuWidth;
-        const left = Math.min(
-            Math.max(padding, preferredLeft),
-            Math.max(padding, window.innerWidth - menuWidth - padding)
-        );
+        const gap = 8;
 
-        const spaceBelow = window.innerHeight - rect.bottom - padding;
-        const openUpwards = spaceBelow < Math.min(260, menuHeight) && rect.top > spaceBelow;
-        const preferredTop = openUpwards ? rect.top - menuHeight - 8 : rect.bottom + 8;
-        const top = Math.min(
-            Math.max(padding, preferredTop),
-            Math.max(padding, window.innerHeight - menuHeight - padding)
-        );
+        const rightSideLeft = rect.right + gap;
+        const leftSideLeft = rect.left - menuWidth - gap;
+
+        let left = rightSideLeft;
+        if (rightSideLeft + menuWidth + padding > window.innerWidth) {
+            left = leftSideLeft;
+        }
+        left = Math.min(Math.max(padding, left), Math.max(padding, window.innerWidth - menuWidth - padding));
+
+        let top = rect.top;
+        if (top + menuHeight + padding > window.innerHeight) {
+            top = window.innerHeight - menuHeight - padding;
+        }
+        top = Math.max(padding, top);
 
         menu.style.left = `${left}px`;
         menu.style.top = `${top}px`;
