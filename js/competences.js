@@ -1,4 +1,4 @@
-(function () {
+(async function () {
     // Compatibilité : navigateurs modernes uniquement (ES2015+), sans polyfills ni transpilation.
     const skillsTabsContainer = document.getElementById("skillsTabs");
     const skillsTitleEl = document.getElementById("skillsCategoryTitle");
@@ -18,27 +18,57 @@
         return;
     }
 
-    const skillsCategories = Array.isArray(window.skillsCategories)
-        ? window.skillsCategories
-        : [];
+    const skillsCategories = Array.isArray(window.skillsCategories) ? window.skillsCategories : [];
 
     const MAX_SKILL_POINTS = 40;
 
     const skillsStorageKey = "skillsPointsByCategory";
     const skillsAllocStorageKey = "skillsAllocationsByCategory";
     const skillsBaseValuesKey = "skillsBaseValuesByCategory";
+    const skillsLocksKey = "skillsLocksByCategory";
+
+    const DEFAULT_CATEGORY_POINTS = {
+        arts: 75,
+        connaissances: 75,
+        combat: 25,
+        pouvoirs: 5,
+        social: 75,
+        artisanat: 10,
+        nature: 60,
+        physique: 55,
+        reputation: 25,
+    };
+
+    const persistState = {
+        mode: "local", // 'local' | 'character'
+        characterId: null,
+        auth: null,
+        saveTimer: null,
+        inFlight: null,
+    };
+
+    function storageKey(rawKey) {
+        return persistState.characterId ? `astoria_competences_${persistState.characterId}:${rawKey}` : rawKey;
+    }
 
     const skillsState = {
         activeCategoryId: skillsCategories[0]?.id || "",
         pointsByCategory: loadFromStorage(skillsStorageKey),
         allocationsByCategory: loadFromStorage(skillsAllocStorageKey),
         baseValuesByCategory: loadFromStorage(skillsBaseValuesKey),
-        locksByCategory: {},
-        isAdmin: document.body.dataset.admin === "true" || !document.body.hasAttribute("data-admin")
+        locksByCategory: loadFromStorage(skillsLocksKey),
+        isAdmin: document.body.dataset.admin === "true",
     };
 
     // Placeholder minimal pour l'état de chargement
     addLoadingPlaceholder();
+    await initPersistence();
+
+    if (!skillsState.isAdmin) {
+        if (skillsPointsMinusEl) skillsPointsMinusEl.hidden = true;
+        if (skillsPointsPlusEl) skillsPointsPlusEl.hidden = true;
+        if (skillsPointsValueEl) skillsPointsValueEl.readOnly = true;
+    }
 
     if (!skillsCategories.length) {
         renderEmptyMessage("Aucune compétence disponible");
@@ -55,7 +85,7 @@
     // -----------------------------------------------------------------
     function loadFromStorage(key) {
         try {
-            const raw = localStorage.getItem(key);
+            const raw = localStorage.getItem(storageKey(key));
             return raw ? JSON.parse(raw) : {};
         } catch (error) {
             console.warn("Impossible de charger", key, error);
@@ -65,10 +95,138 @@
 
     function saveToStorage(key, value) {
         try {
-            localStorage.setItem(key, JSON.stringify(value));
+            localStorage.setItem(storageKey(key), JSON.stringify(value));
         } catch (error) {
             console.warn("Impossible d'enregistrer", key, error);
         }
+
+        if (persistState.mode === "character") {
+            scheduleProfileSave();
+        }
+    }
+
+    function buildDefaultCompetences() {
+        const pointsByCategory = {};
+        const baseValuesByCategory = {};
+        const allocationsByCategory = {};
+        const locksByCategory = {};
+
+        skillsCategories.forEach((category) => {
+            pointsByCategory[category.id] = DEFAULT_CATEGORY_POINTS[category.id] ?? 0;
+            allocationsByCategory[category.id] = {};
+            locksByCategory[category.id] = false;
+            baseValuesByCategory[category.id] = {};
+            (category.skills || []).forEach((skill) => {
+                baseValuesByCategory[category.id][skill.name] = 0;
+            });
+        });
+
+        return { version: 1, pointsByCategory, allocationsByCategory, baseValuesByCategory, locksByCategory };
+    }
+
+    async function initPersistence() {
+        persistState.mode = "local";
+        persistState.characterId = null;
+        persistState.auth = null;
+        document.body.dataset.admin = "false";
+
+        try {
+            persistState.auth = await import("./auth.js");
+            const user = persistState.auth.getCurrentUser?.();
+            const character = persistState.auth.getActiveCharacter?.();
+
+            if (user && character && character.id) {
+                persistState.mode = "character";
+                persistState.characterId = character.id;
+                document.body.dataset.admin = persistState.auth.isAdmin?.() ? "true" : "false";
+                skillsState.isAdmin = document.body.dataset.admin === "true";
+
+                const profileData = character.profile_data || {};
+                const persisted = profileData.competences || null;
+                const fallback = buildDefaultCompetences();
+
+                const merged = {
+                    version: 1,
+                    pointsByCategory: persisted?.pointsByCategory || fallback.pointsByCategory,
+                    allocationsByCategory: persisted?.allocationsByCategory || fallback.allocationsByCategory,
+                    baseValuesByCategory: persisted?.baseValuesByCategory || fallback.baseValuesByCategory,
+                    locksByCategory: persisted?.locksByCategory || fallback.locksByCategory,
+                };
+
+                skillsState.pointsByCategory = merged.pointsByCategory;
+                skillsState.allocationsByCategory = merged.allocationsByCategory;
+                skillsState.baseValuesByCategory = merged.baseValuesByCategory;
+                skillsState.locksByCategory = merged.locksByCategory;
+
+                saveToStorage(skillsStorageKey, skillsState.pointsByCategory);
+                saveToStorage(skillsAllocStorageKey, skillsState.allocationsByCategory);
+                saveToStorage(skillsBaseValuesKey, skillsState.baseValuesByCategory);
+                saveToStorage(skillsLocksKey, skillsState.locksByCategory);
+
+                if (!persisted) {
+                    await flushProfileSave();
+                }
+            }
+        } catch (error) {
+            // Keep local mode fallback.
+            persistState.mode = "local";
+            persistState.characterId = null;
+            persistState.auth = null;
+            document.body.dataset.admin = "false";
+            skillsState.isAdmin = false;
+        }
+
+        // Allow app-shell header to flush before switching character.
+        window.astoriaBeforeCharacterChange = async () => {
+            await flushProfileSave();
+        };
+    }
+
+    function scheduleProfileSave() {
+        if (persistState.mode !== "character" || !persistState.auth) return;
+        if (persistState.saveTimer) {
+            clearTimeout(persistState.saveTimer);
+        }
+
+        persistState.saveTimer = setTimeout(() => {
+            persistState.saveTimer = null;
+            void flushProfileSave();
+        }, 350);
+    }
+
+    async function flushProfileSave() {
+        if (persistState.mode !== "character" || !persistState.auth) return;
+        if (persistState.saveTimer) {
+            clearTimeout(persistState.saveTimer);
+            persistState.saveTimer = null;
+        }
+
+        if (persistState.inFlight) return persistState.inFlight;
+
+        const character = persistState.auth.getActiveCharacter?.();
+        if (!character || !character.id) return;
+
+        const profileData = character.profile_data || {};
+        const nextProfileData = {
+            ...profileData,
+            competences: {
+                version: 1,
+                pointsByCategory: skillsState.pointsByCategory,
+                allocationsByCategory: skillsState.allocationsByCategory,
+                baseValuesByCategory: skillsState.baseValuesByCategory,
+                locksByCategory: skillsState.locksByCategory,
+            },
+        };
+
+        persistState.inFlight = (async () => {
+            try {
+                await persistState.auth.updateCharacter?.(character.id, { profile_data: nextProfileData });
+            } finally {
+                persistState.inFlight = null;
+            }
+        })();
+
+        return persistState.inFlight;
     }
 
     // -----------------------------------------------------------------
@@ -191,7 +349,7 @@
         category.skills.forEach((skill) => {
             const allocation = allocations[skill.name] || 0;
             const savedBase = skillsState.baseValuesByCategory[category.id]?.[skill.name];
-            const base = savedBase ?? skill.baseValue ?? skill.value ?? 0;
+            const base = savedBase ?? 0;
             const totalValue = base + allocation;
             const cappedTotal = Math.min(totalValue, MAX_SKILL_POINTS);
             const isMaxed = cappedTotal >= MAX_SKILL_POINTS;
@@ -252,7 +410,7 @@
         const currentAlloc = allocations[skill.name] || 0;
         const available = skillsState.pointsByCategory[categoryId] ?? 0;
         const savedBase = skillsState.baseValuesByCategory[categoryId]?.[skill.name];
-        const base = savedBase ?? skill.baseValue ?? skill.value ?? 0;
+        const base = savedBase ?? 0;
         const currentTotal = base + currentAlloc;
 
         if (delta > 0 && (available <= 0 || currentTotal >= MAX_SKILL_POINTS)) return;
@@ -345,7 +503,7 @@
             if (!nameEl || !incBtn || !decBtn) return;
             const skill = activeCategory.skills.find((item) => item.name === nameEl.textContent);
             const savedBase = skillsState.baseValuesByCategory[activeCategory.id]?.[nameEl.textContent];
-            const base = savedBase ?? skill?.baseValue ?? skill?.value ?? 0;
+            const base = savedBase ?? 0;
             const allocation = allocations[nameEl.textContent] || 0;
             const total = Math.min(base + allocation, MAX_SKILL_POINTS);
             if (valueEl) {
@@ -402,8 +560,16 @@
 
     skillsPointsResetEl.addEventListener("click", () => {
         if (skillsState.locksByCategory[skillsState.activeCategoryId]) return;
-        setCurrentCategoryPoints(0);
-        clearAllocations(skillsState.activeCategoryId);
+
+        const categoryId = skillsState.activeCategoryId;
+        const allocations = getCategoryAllocations(categoryId);
+        const spent = Object.values(allocations).reduce((sum, value) => {
+            const n = Number(value);
+            return sum + (Number.isFinite(n) ? n : 0);
+        }, 0);
+
+        setCurrentCategoryPoints(getCurrentCategoryPoints() + spent);
+        clearAllocations(categoryId);
         renderSkillsCategory(getActiveCategory());
     });
 
@@ -430,7 +596,7 @@
             const allocation = allocations[skill.name] || 0;
             if (allocation > 0) {
                 const savedBase = skillsState.baseValuesByCategory[activeCategory.id][skill.name];
-                const currentBase = savedBase ?? skill.baseValue ?? skill.value ?? 0;
+                const currentBase = savedBase ?? 0;
                 const newBase = Math.min(currentBase + allocation, MAX_SKILL_POINTS);
                 skillsState.baseValuesByCategory[activeCategory.id][skill.name] = newBase;
             }
@@ -443,6 +609,7 @@
         clearAllocations(activeCategory.id);
 
         skillsState.locksByCategory[activeCategory.id] = true;
+        saveToStorage(skillsLocksKey, skillsState.locksByCategory);
         updateLockState(true);
         renderSkillsCategory(activeCategory);
         announce(`Points verrouillés pour ${activeCategory.label}`);

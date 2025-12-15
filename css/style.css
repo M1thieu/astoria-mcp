@@ -1275,6 +1275,106 @@ tbody tr.keyboard-selected {
     margin: 0;
 }
 
+/* =====================================================================
+   SHARED: TOPBAR (logged-in character switcher)
+   ===================================================================== */
+.app-topbar {
+    position: sticky;
+    top: var(--space-4);
+    margin: var(--space-4) auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(216, 27, 96, 0.25);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(12px);
+    z-index: calc(var(--z-modal) + 5);
+    max-width: min(920px, calc(100vw - var(--space-6) * 2));
+}
+
+.app-topbar-select {
+    min-width: min(360px, 45vw);
+    height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 2px solid rgba(216, 27, 96, 0.55);
+    background: rgba(255, 255, 255, 0.85);
+    font-family: var(--font-family);
+    font-size: var(--text-sm-plus);
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+    box-sizing: border-box;
+}
+
+.app-topbar-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.22);
+}
+
+.app-topbar-badge {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: var(--color-white);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    letter-spacing: var(--letter-spacing-wide);
+    white-space: nowrap;
+}
+
+.app-topbar-label {
+    color: var(--color-gray-800);
+    font-weight: var(--font-semibold);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+.app-topbar-logout {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(216, 27, 96, 0.55);
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--color-primary);
+    font-family: var(--font-family);
+    font-size: var(--text-sm-plus);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: transform var(--transition-fast), background var(--transition-fast);
+    white-space: nowrap;
+}
+
+.app-topbar-logout:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+}
+
+.app-topbar-logout:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+    .app-topbar {
+        margin: var(--space-3);
+        max-width: none;
+        justify-content: space-between;
+    }
+
+    .app-topbar-select {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .app-topbar-label {
+        display: none;
+    }
+}
+
 @media (max-width: 640px) {
     .page-header {
         flex-direction: column;
