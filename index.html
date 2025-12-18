@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="max-age=604800, public">
-    <title>Liste d'objets</title>
+    <title>Inventaire BDUF</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- Preload first 6 critical images for instant display -->
     <link rel="preload" as="image" href="assets/images/Poudre_de_Tracage.png">
@@ -14,47 +14,92 @@
     <link rel="preload" as="image" href="assets/images/Parchemin_Eveil.jpg">
     <link rel="preload" as="image" href="assets/images/Parchemin_Ascension.jpg">
 </head>
-<body>
+<body class="bduf-theme">
+    <div class="bg-ornament bg-ornament--glow"></div>
+    <div class="bg-ornament bg-ornament--grid"></div>
     <main class="wrapper" aria-labelledby="pageTitle">
-        <div class="top-bar">
-            <!-- Navigation placeholder -->
-            <nav aria-label="Navigation principale" class="top-nav">
-                <span style="width: 24px;"></span>
-            </nav>
-
-            <h1 class="title" id="pageTitle">Liste d'objets</h1>
-            <span class="stats-badge" id="statsBadge">0 objet</span>
-
-            <!-- Dropdown catégories -->
-            <select id="categoryFilter" class="category-dropdown" onchange="filterByCategory()">
-                <option value="">Toutes catégories</option>
-                <option value="equipement">⚔️ Équipements</option>
-                <option value="consommable">🧪 Consommables</option>
-                <option value="agricole">🌾 Agricole</option>
-            </select>
-
-            <div class="search-container">
-                <input
-                    type="text"
-                    id="searchInput"
-                    placeholder="Rechercher un objet..."
-                    onkeyup="filterTable()"
-                    onfocus="showRecentSearches()"
-                    onblur="hideRecentSearches()"
-                >
-                <button
-                    id="clearSearchBtn"
-                    class="clear-search-btn"
-                    type="button"
-                    onclick="clearSearch()"
-                >
-                    ×
-                </button>
-                <div class="recent-searches-dropdown" id="recentSearchesDropdown"></div>
+        <header class="page-hero" aria-labelledby="pageTitle">
+            <p class="hero-eyebrow">BDUF • Nouvelle charte immersive</p>
+            <div class="hero-heading">
+                <div>
+                    <h1 class="title" id="pageTitle">Inventaire BDUF</h1>
+                    <p class="hero-subtitle">Interface revisitée : blocs vitrées, transitions fluides et lecture plus confortable.</p>
+                </div>
+                <div class="hero-badges">
+                    <span class="pill pill-ghost">Navigation guidée</span>
+                    <span class="pill pill-strong" id="statsBadge">0 objet</span>
+                </div>
             </div>
-        </div>
+            <div class="hero-grid">
+                <article class="hero-card">
+                    <p class="card-eyebrow">Navigation</p>
+                    <h2 class="hero-card-title">Filtres remaniés</h2>
+                    <p class="hero-card-text">Catégories, recherches et tags restent visibles, avec un focus renforcé sur les interactions clés.</p>
+                </article>
+                <article class="hero-card hero-card-accent">
+                    <p class="card-eyebrow">Confort</p>
+                    <h2 class="hero-card-title">Univers BDUF</h2>
+                    <p class="hero-card-text">Palette froide, halos lumineux et badges dorés pour mettre en avant les données importantes.</p>
+                </article>
+            </div>
+        </header>
 
-        <div class="filter-chips" id="filterChips"></div>
+        <section class="control-panel" aria-label="Filtres et recherche">
+            <div class="control-row">
+                <div class="control-field">
+                    <p class="control-label">Catégories</p>
+                    <div class="control-shell">
+                        <select id="categoryFilter" class="category-dropdown" onchange="filterByCategory()">
+                            <option value="">Toutes catégories</option>
+                            <option value="equipement">⚔️ Équipements</option>
+                            <option value="consommable">🧪 Consommables</option>
+                            <option value="agricole">🌾 Agricole</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-field control-field--stretch">
+                    <p class="control-label">Recherche et accès rapide</p>
+                    <div class="search-container search-elevated">
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Rechercher un objet..."
+                            onkeyup="filterTable()"
+                            onfocus="showRecentSearches()"
+                            onblur="hideRecentSearches()"
+                        >
+                        <button
+                            id="clearSearchBtn"
+                            class="clear-search-btn"
+                            type="button"
+                            onclick="clearSearch()"
+                        >
+                            ×
+                        </button>
+                        <div class="recent-searches-dropdown" id="recentSearchesDropdown"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-row meta-row" aria-label="Notes de design BDUF">
+                <div class="meta-card">
+                    <div class="meta-icon">✨</div>
+                    <div class="meta-copy">
+                        <p class="meta-title">Look modernisé</p>
+                        <p class="meta-text">Cartes vitrées, profondeur maîtrisée et repères visuels renforcés.</p>
+                    </div>
+                </div>
+                <div class="meta-card">
+                    <div class="meta-icon">🎯</div>
+                    <div class="meta-copy">
+                        <p class="meta-title">Focus immédiat</p>
+                        <p class="meta-text">Filtre, tri et recherche restent accessibles sans distraire la lecture.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-chips" id="filterChips"></div>
+        </section>
 
         <div class="table-container">
             <table id="inventoryTable">
@@ -134,8 +179,8 @@
             "data:image/svg+xml;utf8," +
             encodeURIComponent(
                 `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'>` +
-                    `<rect width='200' height='200' fill='#fce4ec'/>` +
-                    `<text x='50%' y='50%' text-anchor='middle' fill='#d81b60' font-family='Segoe UI, Arial' font-size='16'>Image</text>` +
+                    `<rect width='200' height='200' fill='#eef2ff'/>` +
+                    `<text x='50%' y='50%' text-anchor='middle' fill='#4457d0' font-family='Segoe UI, Arial' font-size='16'>Image</text>` +
                     `</svg>`
             );
 
