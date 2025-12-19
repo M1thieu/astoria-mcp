@@ -132,6 +132,9 @@
 
         try {
             persistState.auth = await import("./auth.js");
+            if (typeof persistState.auth.refreshSessionUser === "function") {
+                await persistState.auth.refreshSessionUser();
+            }
             const user = persistState.auth.getCurrentUser?.();
             const character = persistState.auth.getActiveCharacter?.();
 
@@ -489,11 +492,15 @@
 
         skillsPointsMinusEl.disabled = !skillsState.isAdmin || !hasPoints || isLocked;
         skillsPointsPlusEl.disabled = !skillsState.isAdmin || isLocked;
-        skillsPointsResetEl.disabled = !hasPoints || isLocked;
 
         const activeCategory = getActiveCategory();
         if (!activeCategory) return;
         const allocations = getCategoryAllocations(activeCategory.id);
+        const baseValues = skillsState.baseValuesByCategory[activeCategory.id] || {};
+        const hasAllocations = Object.values(allocations).some((value) => Number(value) > 0);
+        const hasBaseValues = Object.values(baseValues).some((value) => Number(value) > 0);
+        const canReset = skillsState.isAdmin && (hasPoints || hasAllocations || hasBaseValues);
+        skillsPointsResetEl.disabled = !canReset;
 
         skillsListEl.querySelectorAll(".skills-line").forEach((line) => {
             const nameEl = line.querySelector(".skills-name");
@@ -559,18 +566,30 @@
     }
 
     skillsPointsResetEl.addEventListener("click", () => {
-        if (skillsState.locksByCategory[skillsState.activeCategoryId]) return;
+        if (!skillsState.isAdmin) return;
 
         const categoryId = skillsState.activeCategoryId;
         const allocations = getCategoryAllocations(categoryId);
+        const baseValues = skillsState.baseValuesByCategory[categoryId] || {};
         const spent = Object.values(allocations).reduce((sum, value) => {
             const n = Number(value);
             return sum + (Number.isFinite(n) ? n : 0);
         }, 0);
+        const spentBase = Object.values(baseValues).reduce((sum, value) => {
+            const n = Number(value);
+            return sum + (Number.isFinite(n) ? n : 0);
+        }, 0);
+        const restored = spent + spentBase;
 
-        setCurrentCategoryPoints(getCurrentCategoryPoints() + spent);
+        setCurrentCategoryPoints(getCurrentCategoryPoints() + restored);
         clearAllocations(categoryId);
+        skillsState.baseValuesByCategory[categoryId] = {};
+        skillsState.locksByCategory[categoryId] = false;
+        saveToStorage(skillsBaseValuesKey, skillsState.baseValuesByCategory);
+        saveToStorage(skillsLocksKey, skillsState.locksByCategory);
+        updateLockState(false);
         renderSkillsCategory(getActiveCategory());
+        announce("Points réinitialisés pour cette catégorie.");
     });
 
     function clearAllocations(categoryId) {

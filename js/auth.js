@@ -210,6 +210,129 @@ export function isAdmin() {
     return user && user.role === 'admin';
 }
 
+/**
+ * Refresh session user from Supabase (sync role changes).
+ */
+export async function refreshSessionUser() {
+    if (!isAuthenticated()) return { success: false };
+
+    let session = null;
+    try {
+        session = JSON.parse(localStorage.getItem('astoria_session'));
+    } catch {
+        return { success: false };
+    }
+
+    const userId = session?.user?.id;
+    if (!userId) return { success: false };
+
+    try {
+        await initSupabase();
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, username, role')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            console.error('Error refreshing session user:', error);
+            return { success: false };
+        }
+
+        session.user = {
+            id: data.id,
+            username: data.username,
+            role: data.role
+        };
+        session.timestamp = Date.now();
+        localStorage.setItem('astoria_session', JSON.stringify(session));
+        return { success: true, user: session.user };
+    } catch (error) {
+        console.error('Error refreshing session user:', error);
+        return { success: false };
+    }
+}
+
+/**
+ * Admin helper: update a user's role.
+ */
+export async function setUserRoleByUsername(username, role) {
+    if (!isAdmin()) {
+        return { success: false, error: 'Accès non autorisé' };
+    }
+
+    const cleanUsername = String(username || '').trim();
+    if (!cleanUsername) {
+        return { success: false, error: "Nom d'utilisateur requis" };
+    }
+
+    const nextRole = role === 'admin' ? 'admin' : 'player';
+
+    try {
+        await initSupabase();
+        const { data, error } = await supabase
+            .from('users')
+            .update({ role: nextRole })
+            .eq('username', cleanUsername)
+            .select('id, username, role')
+            .single();
+
+        if (error) {
+            console.error('Error updating user role:', error);
+            return { success: false, error: 'Impossible de modifier le rôle' };
+        }
+
+        const current = getCurrentUser();
+        if (current && current.id === data.id) {
+            localStorage.setItem('astoria_session', JSON.stringify({
+                user: { id: data.id, username: data.username, role: data.role },
+                timestamp: Date.now()
+            }));
+        }
+
+        return { success: true, user: data };
+    } catch (error) {
+        console.error('Error in setUserRoleByUsername:', error);
+        return { success: false, error: 'Impossible de modifier le rôle' };
+    }
+}
+
+/**
+ * Admin helper: reset a user's password (hash stays in DB).
+ */
+export async function resetUserPassword(username, newPassword) {
+    if (!isAdmin()) {
+        return { success: false, error: 'Accès non autorisé' };
+    }
+
+    const cleanUsername = String(username || '').trim();
+    const cleanPassword = String(newPassword || '').trim();
+    if (!cleanUsername || !cleanPassword) {
+        return { success: false, error: 'Nom d’utilisateur et mot de passe requis' };
+    }
+
+    try {
+        await initSupabase();
+        const passwordHash = await simpleHash(cleanPassword);
+        const { data, error } = await supabase
+            .from('users')
+            .update({ password_hash: passwordHash })
+            .eq('username', cleanUsername)
+            .select('id, username')
+            .single();
+
+        if (error) {
+            console.error('Error resetting user password:', error);
+            return { success: false, error: 'Impossible de réinitialiser le mot de passe' };
+        }
+
+        return { success: true, user: data };
+    } catch (error) {
+        console.error('Error in resetUserPassword:', error);
+        return { success: false, error: 'Impossible de réinitialiser le mot de passe' };
+    }
+}
+
 // ============================================================================
 // CHARACTER FUNCTIONS
 // ============================================================================

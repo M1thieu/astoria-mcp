@@ -126,6 +126,20 @@ body {
     line-height: var(--line-height-normal);
 }
 
+.ui-control,
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+input,
+select,
+textarea {
+    box-sizing: border-box;
+}
+
 .wrapper {
     max-width: var(--wrapper-max-width);
     margin: 0 auto;

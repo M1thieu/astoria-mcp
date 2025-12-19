@@ -5,6 +5,7 @@ import {
   setActiveCharacter,
   logout,
   isAdmin,
+  refreshSessionUser,
 } from "../auth.js";
 
 function el(tag, className, text) {
@@ -17,6 +18,10 @@ function el(tag, className, text) {
 async function run() {
   // profil.html already renders its own auth controls for now.
   if (document.getElementById("authControls")) return;
+
+  try {
+    await refreshSessionUser();
+  } catch {}
 
   const user = getCurrentUser();
   if (!user) return;

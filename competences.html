@@ -94,7 +94,7 @@
         /* Colonne d'onglets ronds à gauche */
         .skills-sidebar {
             flex: 0 0 clamp(130px, 18vw, 180px);
-            padding: var(--space-5);
+            padding: calc(var(--space-5) + var(--space-2)) var(--space-5);
             border-right: none;
             display: flex;
             flex-direction: column;
@@ -177,13 +177,31 @@
         /* Panneau de droite */
         .skills-panel {
             flex: 1;
-            padding: var(--space-3) var(--space-9) var(--space-6);
+            --skills-panel-safe-x: calc(var(--space-10) + var(--space-6));
+            --skills-panel-safe-y: var(--space-6);
+            --skills-panel-content-width: min(100%, 760px);
+            --skills-panel-content-inset: var(--space-6);
+            padding: var(--skills-panel-safe-y) var(--skills-panel-safe-x) var(--space-6);
             display: flex;
             flex-direction: column;
+            align-items: center;
             background-image: url('assets/images/Long_Chatbox_purple.png');
             background-repeat: no-repeat;
             background-position: center;
             background-size: 100% 100%;
+        }
+
+        .skills-panel-header,
+        .skills-list,
+        .skills-validation,
+        .skills-actions {
+            width: 100%;
+            max-width: var(--skills-panel-content-width);
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: var(--skills-panel-content-inset);
+            padding-right: var(--skills-panel-content-inset);
+            box-sizing: border-box;
         }
 
         .skills-panel-header {
