@@ -126,6 +126,13 @@ body {
     line-height: var(--line-height-normal);
 }
 
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
 .ui-control,
 button,
 input,

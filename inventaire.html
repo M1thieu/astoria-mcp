@@ -112,7 +112,7 @@
                     <div class="form-group">
                         <label>Aperçu</label>
                         <div class="item-preview-card">
-                            <img id="previewImage" src="" alt="" style="width: 80px; height: 80px; object-fit: contain;">
+                            <img id="previewImage" src="" alt="" loading="lazy" decoding="async" style="width: 80px; height: 80px; object-fit: contain;">
                             <div>
                                 <div style="font-weight: 600;" id="previewName"></div>
                                 <div style="font-size: 14px; color: #666;" id="previewDescription"></div>
@@ -768,6 +768,8 @@
                 <div class="item-image">
                     <img src="${escapeHtml(imageSrc)}"
                          alt="${escapeHtml(item.name)}"
+                         loading="lazy"
+                         decoding="async"
                          onerror="this.src='${PLACEHOLDER_IMAGE}'">
                 </div>
                 <div class="item-info">
@@ -851,6 +853,8 @@
                 <div class="detail-image">
                     <img src="${escapeHtml(imageSrc)}"
                          alt="${escapeHtml(item.name)}"
+                         loading="lazy"
+                         decoding="async"
                          onerror="this.src='${PLACEHOLDER_IMAGE}'">
                 </div>
                 <div class="detail-body">
