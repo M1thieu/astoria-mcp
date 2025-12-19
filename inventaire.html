@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="css/inventaire.css">
 </head>
 <body>
-    <!-- Main inventory wrapper -->
+            <!-- Main inventory wrapper -->
     <main class="inventory-wrapper" aria-labelledby="inventoryTitle">
-        <!-- Header with title and back button -->
+                <!-- Header with title and back button -->
         <div class="inventory-header">
-            <a href="index.html" class="back-link" title="Retour à la liste">←</a>
+            <a href="index.html" class="back-link" title="Retour à la liste">&#x2190;</a>
             <h1 class="inventory-title" id="inventoryTitle">Inventaire</h1>
             <div class="inventory-actions">
                 <span id="itemCount" class="inventory-info">0 objets</span>
@@ -26,19 +26,19 @@
         <!-- Category filter bar -->
         <nav class="inventory-categories" aria-label="Catégories d'inventaire">
             <button class="category-btn active" data-category="all">
-                <span class="category-icon">📦</span>
+                <span class="category-icon">&#x1F4E6;</span>
                 <span class="category-label">Tous</span>
             </button>
             <button class="category-btn" data-category="equipement">
-                <span class="category-icon">⚔️</span>
+                <span class="category-icon">&#x2694;&#xFE0F;</span>
                 <span class="category-label">Équipements</span>
             </button>
             <button class="category-btn" data-category="consommable">
-                <span class="category-icon">🧪</span>
+                <span class="category-icon">&#x1F9EA;</span>
                 <span class="category-label">Consommables</span>
             </button>
             <button class="category-btn" data-category="agricole">
-                <span class="category-icon">🌾</span>
+                <span class="category-icon">&#x1F33E;</span>
                 <span class="category-label">Agricole</span>
             </button>
         </nav>
@@ -46,25 +46,53 @@
         <!-- Main content area: grid + details -->
         <div class="inventory-content">
             <!-- Items grid (left side) -->
-            <div class="inventory-grid-container">
+                        <div class="inventory-grid-container">
                 <div class="inventory-grid" id="inventoryGrid">
                     <!-- Items will be rendered here by JS -->
                 </div>
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 <div class="empty-inventory is-hidden" id="emptyState">
                     <div class="empty-state-icon">📦</div>
+=======
+                <div class="empty-inventory" id="emptyState" style="display: none;">
+                    <div class="empty-state-icon">&#x1F4E6;</div>
+>>>>>>> Stashed changes
+=======
+                <div class="empty-inventory" id="emptyState" style="display: none;">
+                    <div class="empty-state-icon">&#x1F4E6;</div>
+>>>>>>> Stashed changes
                     <div class="empty-state-title">Aucun objet</div>
                     <div class="empty-state-message">Votre inventaire est vide dans cette catégorie</div>
                 </div>
             </div>
 
             <!-- Item detail panel (right side) -->
-            <div class="inventory-detail" id="itemDetail">
+                        <div class="inventory-detail" id="itemDetail">
                 <div class="detail-placeholder">
-                    <div class="placeholder-icon">👆</div>
-                    <p>Sélectionnez un objet pour voir ses détails</p>
+                    <div class="placeholder-icon">&#x1F446;</div>
+                    <p>S\u00E9lectionnez un objet pour voir ses d\u00E9tails</p>
                 </div>
                 <!-- Details will be rendered here when item is selected -->
             </div>
+
+            <!-- Scroll types panel (right-most side) -->
+            <aside class="scroll-types-panel" id="scrollTypesPanel" aria-hidden="true">
+                <div class="scroll-panel-header">
+                    <h3 id="scrollPanelTitle">Types de parchemins</h3>
+                    <button class="scroll-panel-add-btn" id="scrollPanelAddBtn" type="button" title="Ajouter des parchemins" aria-label="Ajouter des parchemins" aria-expanded="false" aria-controls="scrollPanelAdd" disabled>+</button>
+                </div>
+                <div class="scroll-panel-body" id="scrollPanelBody">
+                    <div class="scroll-panel-add" id="scrollPanelAdd" aria-hidden="true">
+                        <div class="scroll-add-search">
+                            <input type="text" id="scrollTypeSearch" placeholder="Rechercher un type">
+                        </div>
+                        <div class="scroll-suggestions" id="scrollTypeSuggestions"></div>
+                    </div>
+                    <p class="scroll-panel-empty" id="scrollPanelEmpty">Aucun type de parchemin disponible.</p>
+                    <div class="scroll-panel-list" id="scrollPanelList"></div>
+                </div>
+            </aside>
         </div>
     </main>
 
@@ -86,14 +114,14 @@
                     </select>
                 </div>
 
-                <!-- Category selector -->
+                                <!-- Category selector -->
                 <div class="form-group">
                     <label for="categorySelect">Catégorie *</label>
                     <select id="categorySelect" required>
-                        <option value="all">📦 Toutes catégories</option>
-                        <option value="equipement">⚔️ Équipement</option>
-                        <option value="consommable">🧪 Consommable</option>
-                        <option value="agricole">🌾 Agricole</option>
+                        <option value="all">&#x1F4E6; Toutes catégories</option>
+                        <option value="equipement">&#x2694;&#xFE0F; Équipement</option>
+                        <option value="consommable">&#x1F9EA; Consommable</option>
+                        <option value="agricole">&#x1F33E; Agricole</option>
                     </select>
                 </div>
 
@@ -101,7 +129,7 @@
                 <div class="form-group">
                     <label for="quantityInput">Quantité *</label>
                     <div class="quantity-control">
-                        <button type="button" class="qty-btn" id="qtyMinus">−</button>
+                        <button type="button" class="qty-btn" id="qtyMinus">-</button>
                         <input type="number" id="quantityInput" min="1" value="1">
                         <button type="button" class="qty-btn" id="qtyPlus">+</button>
                     </div>
@@ -140,7 +168,7 @@
                 <div class="form-group">
                     <label for="deleteQuantityInput">Quantité à supprimer</label>
                     <div class="quantity-control">
-                        <button type="button" class="qty-btn" id="deleteQtyMinus">−</button>
+                        <button type="button" class="qty-btn" id="deleteQtyMinus">-</button>
                         <input type="number" id="deleteQuantityInput" min="1" value="1">
                         <button type="button" class="qty-btn" id="deleteQtyPlus">+</button>
                     </div>
@@ -189,6 +217,81 @@
         const INVENTORY_IMAGE_HELPERS = window.astoriaImageHelpers || {};
         const PLACEHOLDER_IMAGE = INVENTORY_IMAGE_HELPERS.smallPlaceholder;
 
+        const SCROLL_TYPES = [
+            { key: 'feu', emoji: '🔥', label: 'Feu', matchers: ['feu'] },
+            { key: 'eau', emoji: '💧', label: 'Eau', matchers: ['eau'] },
+            { key: 'vent', emoji: '🌪️', label: 'Vent', matchers: ['vent'] },
+            { key: 'terre', emoji: '🌱', label: 'Terre', matchers: ['terre'] },
+            { key: 'nature', emoji: '🍃', label: 'Nature', matchers: ['nature'] },
+            { key: 'roche', emoji: '🪨', label: 'Roche', matchers: ['roche'] },
+            { key: 'metaux', emoji: '⚙️', label: 'Métaux', matchers: ['metaux', 'métaux'] },
+            { key: 'cryo', emoji: '❄️', label: 'Cryo (glace)', matchers: ['cryo', 'glace'] },
+            { key: 'foudre', emoji: '⚡', label: 'Foudre', matchers: ['foudre'] },
+            { key: 'lumiere', emoji: '☀️', label: 'Lumière', matchers: ['lumiere', 'lumière'] },
+            { key: 'tenebres', emoji: '🌑', label: 'Ténèbres', matchers: ['tenebres', 'ténèbres'] },
+            { key: 'bois', emoji: '🌲', label: 'Bois', matchers: ['bois'] },
+            { key: 'boue', emoji: '🟫', label: 'Boue', matchers: ['boue'] },
+            { key: 'lave', emoji: '🌋', label: 'Lave', matchers: ['lave'] },
+            { key: 'acide', emoji: '☣️', label: 'Acide', matchers: ['acide'] },
+            { key: 'cristal', emoji: '💎', label: 'Cristal', matchers: ['cristal'] },
+            { key: 'gravite', emoji: '🌀', label: 'Gravité', matchers: ['gravite', 'gravité'] },
+            { key: 'osmose', emoji: '🧿', label: 'Osmose', matchers: ['osmose'] },
+            { key: 'telekinesie', emoji: '🧠', label: 'Télékinésie', matchers: ['telekinesie', 'télékinésie'] },
+            { key: 'invisibilite', emoji: '👁️', label: 'Invisibilité', matchers: ['invisibilite', 'invisibilité'] },
+            { key: 'vol', emoji: '🕊️', label: 'Vol', matchers: ['vol'] },
+            { key: 'soin', emoji: '💗', label: 'Soin', matchers: ['soin'] },
+            { key: 'amelioration-sens', emoji: '👂', label: 'Amélioration des sens', matchers: ['amelioration des sens', 'amélioration des sens'] },
+            { key: 'reve', emoji: '💭', label: 'Rêve', matchers: ['reve', 'rêve'] },
+            { key: 'controle-mental', emoji: '🧿', label: 'Contrôle mental', matchers: ['controle mental', 'contrôle mental'] },
+            { key: 'controle-temps', emoji: '⏳', label: 'Contrôle du Temps', matchers: ['controle du temps', 'controle temps', 'contrôle du temps', 'contrôle temps'] },
+            { key: 'portals', emoji: '🌀', label: 'Portals', matchers: ['portals', 'portal', 'portail', 'portails'] },
+            { key: 'monde-poche', emoji: '🧳', label: 'Monde de poche', matchers: ['monde de poche'] },
+            { key: 'teleportation', emoji: '🧭', label: 'Téléportation', matchers: ['teleportation', 'téléportation'] },
+            { key: 'mana-brut', emoji: '💥', label: 'Mana brut', matchers: ['mana brut'] },
+            { key: 'ordre', emoji: '⚖️', label: 'Ordre', matchers: ['ordre'] },
+            { key: 'antimagie', emoji: '⛔', label: 'Antimagie', matchers: ['antimagie'] },
+            { key: 'amelioration-runique', emoji: '🔷', label: 'Amélioration runique', matchers: ['amelioration runique', 'amélioration runique'] },
+            { key: 'invocation-energie', emoji: '✨', label: 'Invocation d’énergie', matchers: ['invocation d energie', 'invocation energie', 'invocation d’énergie'] },
+            { key: 'amplification-elementaire', emoji: '📣', label: 'Amplification élémentaire', matchers: ['amplification elementaire', 'amplification élémentaire'] },
+            { key: 'rotation', emoji: '↩️', label: 'Rotation', matchers: ['rotation'] },
+            { key: 'magnetisme', emoji: '🧲', label: 'Magnétisme', matchers: ['magnetisme', 'magnétisme'] },
+            { key: 'fil', emoji: '🧵', label: 'Fil', matchers: ['fil'] },
+            { key: 'sable', emoji: '🏜️', label: 'Sable', matchers: ['sable'] },
+            { key: 'ombres-solides', emoji: '🧱', label: 'Ombres solides', matchers: ['ombres solides'] },
+            { key: 'verre', emoji: '🟣', label: 'Verre', matchers: ['verre'] },
+            { key: 'cendres', emoji: '⚫', label: 'Cendres', matchers: ['cendres'] },
+            { key: 'argile', emoji: '🧱', label: 'Argile', matchers: ['argile'] },
+            { key: 'invocation-animale', emoji: '🐾', label: 'Invocation animale', matchers: ['invocation animale'] },
+            { key: 'invocation-armes', emoji: '⚔️', label: 'Invocation d’armes', matchers: ['invocation d armes', 'invocation armes', 'invocation d’armes'] },
+            { key: 'invocation-golems', emoji: '🪨', label: 'Invocation de golems', matchers: ['invocation de golems', 'invocation golems'] },
+            { key: 'esprits-elementaires', emoji: '🧚', label: 'Esprits élémentaires', matchers: ['esprits elementaires', 'esprits élémentaires'] },
+            { key: 'pantins', emoji: '🧸', label: 'Pantins', matchers: ['pantins'] },
+            { key: 'fabrication-familiers', emoji: '🧸', label: 'Fabrication de familiers', matchers: ['fabrication de familiers', 'familiers'] },
+            { key: 'metamorphose-animale', emoji: '🦎', label: 'Métamorphose animale', matchers: ['metamorphose animale', 'métamorphose animale'] },
+            { key: 'mutations', emoji: '🧬', label: 'Mutations', matchers: ['mutations'] },
+            { key: 'regeneration-avancee', emoji: '🩹', label: 'Régénération avancée', matchers: ['regeneration avancee', 'régénération avancée'] },
+            { key: 'microbiologie', emoji: '🦠', label: 'MicroBiologie', matchers: ['microbiologie'] },
+            { key: 'son', emoji: '🎵', label: 'Son', matchers: ['son'] },
+            { key: 'illusion', emoji: '🎭', label: 'Illusion', matchers: ['illusion'] },
+            { key: 'sang', emoji: '🩸', label: 'Sang', matchers: ['sang'] },
+            { key: 'chance', emoji: '🍀', label: 'Chance / Malchance', matchers: ['chance', 'malchance'] },
+            { key: 'lien', emoji: '🔗', label: 'Lien', matchers: ['lien'] },
+            { key: 'detection', emoji: '🧿', label: 'Détection', matchers: ['detection', 'détection'] },
+            { key: 'silence', emoji: '🤫', label: 'Silence', matchers: ['silence'] },
+            { key: 'corruption', emoji: '🟣', label: 'Corruption', matchers: ['corruption'] },
+            { key: 'cercle-demoniaque', emoji: '🕯️', label: 'Cercle démoniaque', matchers: ['cercle demoniaque', 'cercle démoniaque'] },
+            { key: 'devoreur-ames', emoji: '💀', label: 'Dévoreur d’âmes', matchers: ['devoreur d ames', 'devoreur ames', 'dévoreur d’âmes'] },
+            { key: 'rouille', emoji: '🧪', label: 'Rouille', matchers: ['rouille'] },
+            { key: 'berserker', emoji: '🔥', label: 'Berserker', matchers: ['berserker'] },
+            { key: 'maledictions', emoji: '☠️', label: 'Malédictions', matchers: ['maledictions', 'malédictions'] },
+            { key: 'variation-masse', emoji: '🧍', label: 'Variation de masse', matchers: ['variation de masse'] },
+            { key: 'meteorologie', emoji: '🌦️', label: 'Météorologie', matchers: ['meteorologie', 'météorologie'] },
+            { key: 'chimie-magique', emoji: '⚗️', label: 'Chimie magique', matchers: ['chimie magique'] },
+            { key: 'magie-astral', emoji: '🌌', label: 'Magie astral', matchers: ['magie astral', 'magie astrale'] },
+            { key: 'elasticite', emoji: '🧶', label: 'Élasticité', matchers: ['elasticite', 'élasticité'] }
+        ];
+
+        // =================================================================
         // =================================================================
         // STATE
         // =================================================================
@@ -200,8 +303,14 @@
         let inventoryStorageMode = 'local'; // 'local' | 'character'
         let authApi = null;
         let pendingProfileSaveTimer = null;
+        let scrollPanelOpen = false;
+        let scrollPanelCategory = null;
+        let scrollPanelToggleBtn = null;
+        let scrollAddOpen = false;
+        let currentScrollItem = null;
+        let selectedScrollTypeKey = null;
+        let lastScrollItemId = null;
 
-        // =================================================================
         // DOM REFERENCES
         // =================================================================
 
@@ -210,6 +319,17 @@
         const emptyState = document.getElementById('emptyState');
         const itemCountEl = document.getElementById('itemCount');
         const categoryButtons = document.querySelectorAll('.category-btn');
+        const inventoryContent = document.querySelector('.inventory-content');
+        const scrollTypesPanel = document.getElementById('scrollTypesPanel');
+        const scrollPanelTitle = document.getElementById('scrollPanelTitle');
+        const scrollPanelBody = document.getElementById('scrollPanelBody');
+        const scrollPanelHeader = document.querySelector('.scroll-panel-header');
+        const scrollPanelAddBtn = document.getElementById('scrollPanelAddBtn');
+        const scrollPanelEmpty = document.getElementById('scrollPanelEmpty');
+        const scrollPanelList = document.getElementById('scrollPanelList');
+        const scrollPanelAdd = document.getElementById('scrollPanelAdd');
+        const scrollTypeSearch = document.getElementById('scrollTypeSearch');
+        const scrollTypeSuggestions = document.getElementById('scrollTypeSuggestions');
 
         // Add panel elements
         const addPanel = document.getElementById('addPanel');
@@ -571,7 +691,7 @@
             }
 
             if (quantity < 1) {
-                alert('La quantité doit être au moins 1');
+                alert('La quantit\u00E9 doit \u00EAtre au moins 1');
                 return;
             }
 
@@ -643,6 +763,78 @@
         qtyMinusBtn.addEventListener('click', decreaseQuantity);
         qtyPlusBtn.addEventListener('click', increaseQuantity);
 
+        if (scrollPanelAddBtn) {
+            scrollPanelAddBtn.addEventListener('click', () => {
+                if (scrollPanelAddBtn.disabled) return;
+                setScrollAddOpen(!scrollAddOpen);
+                renderScrollSuggestions(scrollTypeSearch?.value || '');
+                syncScrollPanelHeights();
+            });
+        }
+
+        if (scrollTypeSearch) {
+            scrollTypeSearch.addEventListener('input', (event) => {
+                renderScrollSuggestions(event.target.value);
+                syncScrollPanelHeights();
+            });
+        }
+
+        if (scrollTypeSuggestions) {
+            scrollTypeSuggestions.addEventListener('click', (event) => {
+                const addButton = event.target.closest('.scroll-suggestion-add');
+                if (!addButton) return;
+                const row = addButton.closest('.scroll-suggestion-row');
+                if (!row) return;
+                const qtyInput = row.querySelector('.scroll-suggestion-qty');
+                addScrollTypeCount(row.dataset.typeKey, qtyInput?.value);
+                if (qtyInput) qtyInput.value = 1;
+            });
+        }
+
+        if (scrollPanelList) {
+            scrollPanelList.addEventListener('click', (event) => {
+                const addButton = event.target.closest('.scroll-type-add');
+                const qtyButton = event.target.closest('.scroll-type-qty-btn');
+                const item = event.target.closest('.scroll-type-item');
+                if (!item) return;
+                const typeKey = item.dataset.typeKey;
+                if (addButton) {
+                    const qtyInput = item.querySelector('.scroll-type-qty-input');
+                    addScrollTypeCount(typeKey, qtyInput?.value);
+                    if (qtyInput) qtyInput.value = 1;
+                    return;
+                }
+                if (qtyButton) {
+                    const qtyInput = item.querySelector('.scroll-type-qty-input');
+                    if (!qtyInput) return;
+                    const current = parseInt(qtyInput.value, 10) || 1;
+                    const action = qtyButton.dataset.action;
+                    qtyInput.value = Math.max(1, action === 'minus' ? current - 1 : current + 1);
+                    return;
+                }
+                const row = event.target.closest('.scroll-type-row');
+                if (row) {
+                    selectedScrollTypeKey = typeKey;
+                    if (currentScrollItem && scrollPanelCategory) {
+                        const { counts } = loadScrollCounts(scrollPanelCategory, currentScrollItem);
+                        renderScrollPanelList(scrollPanelCategory, counts);
+                    }
+                }
+            });
+
+            scrollPanelList.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter') return;
+                const input = event.target.closest('.scroll-type-qty-input');
+                if (!input) return;
+                const item = input.closest('.scroll-type-item');
+                if (!item) return;
+                addScrollTypeCount(item.dataset.typeKey, input.value);
+                input.value = 1;
+            });
+        }
+
+        window.addEventListener('resize', syncScrollPanelHeights);
+
         // =================================================================
         // CATEGORY FILTERING
         // =================================================================
@@ -708,6 +900,272 @@
         }
 
         // =================================================================
+        // SCROLL TYPES PANEL
+        // =================================================================
+
+        function normalizeText(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
+        }
+
+        function getScrollCategory(item) {
+            if (!item || !item.name) return null;
+            const name = normalizeText(item.name);
+            if (!name.includes('parchemin') && !name.includes('scroll')) return null;
+            if (name.includes('eveil') || name.includes('eveille') || (name.includes('veil') && name.includes('parchemin'))) return 'eveil';
+            if (name.includes('ascension')) return 'ascension';
+            return null;
+        }
+
+        function getScrollTypeKey(item) {
+            const haystack = normalizeText(
+                [item?.name, item?.description, item?.effect]
+                    .filter(Boolean)
+                    .join(' ')
+            );
+
+            for (const type of SCROLL_TYPES) {
+                for (const matcher of type.matchers) {
+                    if (haystack.includes(normalizeText(matcher))) {
+                        return type.key;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        const SCROLL_STORAGE_PREFIX = 'astoriaScrollTypes:v1';
+
+        function getEmptyScrollCounts() {
+            const counts = {};
+            SCROLL_TYPES.forEach((type) => {
+                counts[type.key] = 0;
+            });
+            return counts;
+        }
+
+        function getScrollStorageKey(category, item) {
+            const idPart = item?.id ?? item?.name ?? 'unknown';
+            return `${SCROLL_STORAGE_PREFIX}:${category}:${idPart}`;
+        }
+
+        function loadScrollCounts(category, item) {
+            const counts = getEmptyScrollCounts();
+            if (!category || !item) {
+                return { counts, hasStored: false };
+            }
+
+            const key = getScrollStorageKey(category, item);
+            const raw = localStorage.getItem(key);
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object' && parsed.counts) {
+                        Object.keys(counts).forEach((typeKey) => {
+                            const value = Number(parsed.counts[typeKey]);
+                            counts[typeKey] = Number.isFinite(value) && value > 0 ? value : 0;
+                        });
+                        return { counts, hasStored: true };
+                    }
+                } catch (error) {
+                    console.warn('Scroll counts parse failed:', error);
+                }
+            }
+
+            const seededTypeKey = getScrollTypeKey(item);
+            const seededQty = Math.max(0, Number(item.quantity) || 0);
+            if (seededTypeKey && seededQty > 0) {
+                counts[seededTypeKey] = seededQty;
+                saveScrollCounts(category, item, counts);
+                return { counts, hasStored: true };
+            }
+
+            return { counts, hasStored: false };
+        }
+
+        function saveScrollCounts(category, item, counts) {
+            if (!category || !item) return;
+            const key = getScrollStorageKey(category, item);
+            const payload = {
+                counts,
+                updatedAt: Date.now()
+            };
+            localStorage.setItem(key, JSON.stringify(payload));
+        }
+
+        function sumScrollCounts(counts) {
+            return Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
+        }
+
+        function syncScrollPanelHeights() {
+            if (!scrollTypesPanel || !detailPanel || !scrollPanelHeader || !scrollPanelBody) return;
+            const detailHeight = detailPanel.offsetHeight;
+            if (!detailHeight) return;
+            scrollTypesPanel.style.maxHeight = `${detailHeight}px`;
+            const panelStyles = window.getComputedStyle(scrollTypesPanel);
+            const paddingTop = parseFloat(panelStyles.paddingTop) || 0;
+            const paddingBottom = parseFloat(panelStyles.paddingBottom) || 0;
+            const headerHeight = scrollPanelHeader.offsetHeight;
+            const maxBodyHeight = Math.max(160, detailHeight - headerHeight - paddingTop - paddingBottom);
+            scrollPanelBody.style.maxHeight = `${maxBodyHeight}px`;
+        }
+
+        function setScrollPanelOpen(isOpen) {
+            scrollPanelOpen = isOpen;
+            if (inventoryContent) {
+                inventoryContent.classList.toggle('scroll-panel-open', isOpen);
+            }
+            if (scrollTypesPanel) {
+                scrollTypesPanel.classList.toggle('open', isOpen);
+                scrollTypesPanel.setAttribute('aria-hidden', String(!isOpen));
+            }
+            if (scrollPanelToggleBtn) {
+                scrollPanelToggleBtn.setAttribute('aria-expanded', String(isOpen));
+            }
+            if (!isOpen) {
+                setScrollAddOpen(false);
+            }
+            syncScrollPanelHeights();
+        }
+
+        function setScrollPanelEmpty(message) {
+            if (!scrollPanelTitle || !scrollPanelEmpty || !scrollPanelList) return;
+            scrollPanelTitle.textContent = 'Types de parchemins';
+            scrollPanelEmpty.textContent = message;
+            scrollPanelEmpty.style.display = 'block';
+            scrollPanelList.innerHTML = '';
+            scrollPanelList.style.display = 'none';
+        }
+
+        function renderScrollPanelList(category, counts) {
+            if (!scrollPanelTitle || !scrollPanelList || !scrollPanelEmpty) return;
+
+            const titleText = category === 'eveil' ? 'Éveil' : 'Ascension';
+            scrollPanelTitle.textContent = titleText;
+            scrollPanelEmpty.style.display = 'none';
+            scrollPanelList.style.display = 'grid';
+            const rows = SCROLL_TYPES.map((type) => {
+                const count = counts[type.key] || 0;
+                const isSelected = type.key === selectedScrollTypeKey;
+                return `
+                    <div class="scroll-type-item${isSelected ? ' selected' : ''}" data-type-key="${type.key}">
+                        <div class="scroll-type-row">
+                            <span class="scroll-type-label">${escapeHtml(type.emoji)} ${escapeHtml(type.label)}</span>
+                            <span class="scroll-type-count">x${count}</span>
+                        </div>
+                        ${isSelected ? `
+                        <div class="scroll-type-controls">
+                            <button type="button" class="scroll-type-qty-btn" data-action="minus">-</button>
+                            <input type="number" min="1" value="1" class="scroll-type-qty-input">
+                            <button type="button" class="scroll-type-qty-btn" data-action="plus">+</button>
+                            <button type="button" class="scroll-type-add">Ajouter</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            scrollPanelList.innerHTML = rows;
+        }
+
+        function setScrollAddOpen(isOpen) {
+            scrollAddOpen = isOpen;
+            if (!scrollPanelAdd || !scrollPanelAddBtn) return;
+            scrollPanelAdd.classList.toggle('open', isOpen);
+            scrollPanelAdd.setAttribute('aria-hidden', String(!isOpen));
+            scrollPanelAddBtn.setAttribute('aria-expanded', String(isOpen));
+            if (!isOpen && scrollTypeSearch) {
+                scrollTypeSearch.value = '';
+            }
+        }
+
+        function renderScrollSuggestions(filterText) {
+            if (!scrollTypeSuggestions) return;
+            const term = normalizeText(filterText);
+            const filtered = SCROLL_TYPES.filter((type) => {
+                if (!term) return true;
+                if (normalizeText(type.label).includes(term)) return true;
+                if (normalizeText(type.key).includes(term)) return true;
+                return type.matchers?.some((matcher) => normalizeText(matcher).includes(term));
+            });
+            if (filtered.length === 0) {
+                scrollTypeSuggestions.innerHTML = '<div class="scroll-suggestion-empty">Aucun type trouvé.</div>';
+                return;
+            }
+            scrollTypeSuggestions.innerHTML = filtered.map((type) => {
+                return `
+                    <div class="scroll-suggestion-row" data-type-key="${type.key}">
+                        <span class="scroll-suggestion-label">${escapeHtml(type.emoji)} ${escapeHtml(type.label)}</span>
+                        <div class="scroll-suggestion-controls">
+                            <input type="number" min="1" value="1" class="scroll-suggestion-qty">
+                            <button type="button" class="scroll-suggestion-add">Ajouter</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addScrollTypeCount(typeKey, qty) {
+            if (!currentScrollItem || !scrollPanelCategory) return;
+            const safeQty = Math.max(0, Math.floor(Number(qty) || 0));
+            if (safeQty < 1) return;
+            const { counts } = loadScrollCounts(scrollPanelCategory, currentScrollItem);
+            counts[typeKey] = (counts[typeKey] || 0) + safeQty;
+            saveScrollCounts(scrollPanelCategory, currentScrollItem, counts);
+            const total = sumScrollCounts(counts);
+            currentScrollItem.quantity = total;
+            persistInventory();
+            renderInventory();
+            showItemDetail(currentScrollItem);
+        }
+
+        function updateScrollPanelForItem(item) {
+            const category = getScrollCategory(item);
+            scrollPanelCategory = category;
+            currentScrollItem = item || null;
+            const nextItemId = item?.id ?? null;
+            if (nextItemId !== lastScrollItemId) {
+                selectedScrollTypeKey = null;
+                scrollAddOpen = true;
+                lastScrollItemId = nextItemId;
+            }
+            if (!category) {
+                if (scrollPanelToggleBtn) {
+                    scrollPanelToggleBtn.disabled = true;
+                    scrollPanelToggleBtn.setAttribute('aria-expanded', 'false');
+                }
+                if (scrollPanelAddBtn) {
+                    scrollPanelAddBtn.disabled = true;
+                }
+                setScrollPanelOpen(false);
+                setScrollPanelEmpty('Aucun type de parchemin disponible.');
+                return;
+            }
+
+            if (scrollPanelToggleBtn) {
+                scrollPanelToggleBtn.disabled = false;
+            }
+            if (scrollPanelAddBtn) {
+                scrollPanelAddBtn.disabled = false;
+            }
+
+            const { counts, hasStored } = loadScrollCounts(category, item);
+            if (hasStored) {
+                const total = sumScrollCounts(counts);
+                if (Number.isFinite(total) && item.quantity !== total) {
+                    item.quantity = total;
+                    persistInventory();
+                }
+            }
+
+            renderScrollPanelList(category, counts);
+            setScrollAddOpen(scrollAddOpen);
+            renderScrollSuggestions(scrollTypeSearch?.value || '');
+            syncScrollPanelHeights();
+        }
+        // =================================================================
         // RENDERING
         // =================================================================
 
@@ -760,6 +1218,9 @@
             const card = document.createElement('div');
             card.className = 'inventory-item';
             card.dataset.itemId = item.id;
+            if (item.id === selectedItemIndex) {
+                card.classList.add('selected');
+            }
 
             // Resolve image
             const imageSrc = resolveImage(item);
@@ -774,7 +1235,7 @@
                 </div>
                 <div class="item-info">
                     <div class="item-name">${escapeHtml(item.name)}</div>
-                    ${item.quantity > 1 ? `<div class="item-quantity">×${item.quantity}</div>` : ''}
+                    ${item.quantity > 1 ? `<div class="item-quantity">x${item.quantity}</div>` : ''}
                 </div>
             `;
 
@@ -815,15 +1276,27 @@
          */
         function showItemDetail(item) {
             const categoryLabels = {
-                'equipement': '⚔️ Équipement',
-                'consommable': '🧪 Consommable',
-                'agricole': '🌾 Agricole'
+                equipement: '&#x2694;&#xFE0F; \u00C9quipement',
+                consommable: '&#x1F9EA; Consommable',
+                agricole: '&#x1F33E; Agricole'
             };
+
+            const scrollCategory = getScrollCategory(item);
+            if (scrollCategory) {
+                const { counts, hasStored } = loadScrollCounts(scrollCategory, item);
+                if (hasStored) {
+                    const total = sumScrollCounts(counts);
+                    if (Number.isFinite(total) && item.quantity !== total) {
+                        item.quantity = total;
+                        persistInventory();
+                    }
+                }
+            }
 
             const priceInfo = [];
             if (item.buyPrice) priceInfo.push(`Achat: ${item.buyPrice}`);
             if (item.sellPrice) priceInfo.push(`Vente: ${item.sellPrice}`);
-            const priceText = priceInfo.length > 0 ? priceInfo.join(' | ') : 'Prix non défini';
+            const priceText = priceInfo.length > 0 ? priceInfo.join(' | ') : 'Prix non d\u00E9fini';
 
             // Resolve image
             const imageSrc = resolveImage(item);
@@ -840,14 +1313,25 @@
                                 title="Utiliser l'objet"
                                 ${item.quantity < 1 ? 'disabled' : ''}
                                 aria-label="Utiliser l'objet">
-                            ✓
+                            &#x2728;
                         </button>
-                        <button class="item-action-delete"
-                                onclick="openDeleteModal(${item.id})"
-                                title="Supprimer l'objet"
-                                aria-label="Supprimer l'objet">
-                            🗑
-                        </button>
+                        <div class="action-stack">
+                            <button class="item-action-delete"
+                                    onclick="openDeleteModal(${item.id})"
+                                    title="Supprimer l'objet"
+                                    aria-label="Supprimer l'objet">
+                                &#x1F5D1;&#xFE0F;
+                            </button>
+                            <button class="item-action-scroll-toggle"
+                                    type="button"
+                                    id="scrollTypesToggle"
+                                    title="Types de parchemins"
+                                    aria-label="Afficher les types de parchemins"
+                                    aria-expanded="false"
+                                    aria-controls="scrollTypesPanel">
+                                &#x25BE;
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="detail-image">
@@ -874,24 +1358,47 @@
                     </div>
                     ${item.quantity > 1 ? `
                     <div class="detail-section">
-                        <span class="detail-label">Quantité</span>
-                        <p class="detail-text">×${item.quantity}</p>
+                        <span class="detail-label">Quantit\u00E9</span>
+                        <p class="detail-text">x${item.quantity}</p>
                     </div>
                     ` : ''}
                 </div>
             `;
+            scrollPanelToggleBtn = detailPanel.querySelector("#scrollTypesToggle");
+            if (scrollPanelToggleBtn) {
+                scrollPanelToggleBtn.addEventListener("click", () => {
+                    if (scrollPanelToggleBtn.disabled) return;
+                    setScrollPanelOpen(!scrollPanelOpen);
+                    if (scrollPanelOpen && scrollPanelCategory && currentScrollItem) {
+                        const { counts } = loadScrollCounts(scrollPanelCategory, currentScrollItem);
+                        renderScrollPanelList(scrollPanelCategory, counts);
+                    }
+                });
+            }
+
+            setScrollPanelOpen(scrollPanelOpen);
+            updateScrollPanelForItem(item);
         }
 
-        /**
-         * Show placeholder when no item selected
-         */
         function showDetailPlaceholder() {
             detailPanel.innerHTML = `
                 <div class="detail-placeholder">
-                    <div class="placeholder-icon">👆</div>
-                    <p>Sélectionnez un objet pour voir ses détails</p>
+                    <div class="placeholder-icon">&#x1F446;</div>
+                    <p>S\u00E9lectionnez un objet pour voir ses d\u00E9tails</p>
                 </div>
             `;
+            scrollPanelToggleBtn = null;
+            scrollPanelCategory = null;
+            selectedScrollTypeKey = null;
+            lastScrollItemId = null;
+            currentScrollItem = null;
+            scrollAddOpen = false;
+            if (scrollPanelAddBtn) {
+                scrollPanelAddBtn.disabled = true;
+            }
+            setScrollAddOpen(false);
+            setScrollPanelOpen(false);
+            setScrollPanelEmpty("Aucun type de parchemin disponible.");
         }
 
         // =================================================================
@@ -925,7 +1432,7 @@
             const item = inventoryItems[itemIndex];
 
             if (item.quantity < 1) {
-                alert('Quantité insuffisante pour utiliser cet objet');
+                alert('Quantit\u00E9 insuffisante pour utiliser cet objet');
                 return;
             }
 
@@ -997,7 +1504,7 @@
             const qtyToDelete = parseInt(deleteQuantityInput.value) || 1;
 
             if (qtyToDelete < 1) {
-                alert('La quantité doit être au moins 1');
+                alert('La quantit\u00E9 doit \u00EAtre au moins 1');
                 return;
             }
 
@@ -1191,3 +1698,31 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
