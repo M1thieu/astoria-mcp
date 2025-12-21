@@ -103,7 +103,7 @@
             border-right: none;
             display: flex;
             flex-direction: column;
-            gap: var(--space-3);
+            gap: 0px;
             align-items: center;
             background-image: url('assets/images/Long_Chatbox_purple.png');
             background-repeat: no-repeat;
@@ -122,11 +122,11 @@
         }
 
         .skills-tab-btn:nth-child(odd) {
-            align-self: flex-start;
+            transform: translateX(-30px);
         }
 
         .skills-tab-btn:nth-child(even) {
-            align-self: flex-end;
+            transform: translateX( 30px);
         }
 
         .skills-tab-btn:focus-visible {
