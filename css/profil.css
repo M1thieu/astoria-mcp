@@ -332,6 +332,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    flex-wrap: wrap;
 }
 
 .profile-cropper-controls label {
@@ -341,6 +342,12 @@
 
 .profile-cropper-controls input[type="range"] {
     flex: 1;
+    min-width: 180px;
+}
+
+.profile-cropper-hint {
+    font-size: var(--text-xs);
+    color: var(--color-gray-600);
 }
 
 .profile-cropper-actions {

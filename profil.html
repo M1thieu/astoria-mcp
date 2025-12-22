@@ -336,7 +336,8 @@
                 </div>
                 <div class="profile-cropper-controls">
                     <label for="avatarZoomRange">Zoom</label>
-                    <input type="range" id="avatarZoomRange" min="1" max="3" step="0.01" value="1">
+                    <input type="range" id="avatarZoomRange" min="0.2" max="3" step="0.01" value="1">
+                    <span class="profile-cropper-hint">Molette pour zoomer.</span>
                 </div>
             </div>
             <div class="profile-cropper-actions">
@@ -385,6 +386,7 @@
         let avatarCropper = null;
         let avatarPreviewUrl = '';
         let pendingAvatarFile = null;
+        let isCropperZoomSync = false;
 
         const AVATAR_BUCKET = 'avatars';
         const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
@@ -487,6 +489,7 @@
 
         function openAvatarCropper(file) {
             if (!cropperBackdrop || !cropperImage || !window.Cropper) {
+                alert('Recadrage indisponible, upload direct.');
                 uploadAvatar(file);
                 return;
             }
@@ -505,14 +508,31 @@
                 background: false,
                 autoCropArea: 1,
                 responsive: true,
-                checkOrientation: false
+                checkOrientation: false,
+                ready() {
+                    if (cropperZoom && avatarCropper) {
+                        const ratio = avatarCropper.getImageData().ratio || 1;
+                        cropperZoom.value = String(ratio);
+                    }
+                },
+                zoom(event) {
+                    if (!cropperZoom || isCropperZoomSync) return;
+                    const ratio = event.detail?.ratio ?? 1;
+                    const min = Number(cropperZoom.min || 0);
+                    const max = Number(cropperZoom.max || 3);
+                    const clamped = Math.min(max, Math.max(min, ratio));
+                    cropperZoom.value = String(clamped);
+                }
             });
 
             if (cropperZoom) {
-                cropperZoom.value = '1';
                 cropperZoom.oninput = () => {
                     if (avatarCropper) {
+                        isCropperZoomSync = true;
                         avatarCropper.zoomTo(Number(cropperZoom.value));
+                        requestAnimationFrame(() => {
+                            isCropperZoomSync = false;
+                        });
                     }
                 };
             }
