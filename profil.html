@@ -225,9 +225,10 @@
                     <p class="profile-subtitle">Espace personnel - version de base.</p>
                 </div>
                 <div class="profile-summary-card" aria-label="Résumé du joueur">
-                    <div class="profile-avatar-large">
+                    <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
+                        <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
                         <span class="profile-avatar-placeholder" id="characterInitial">Avatar</span>
-                    </div>
+                    </button>
                     <div class="profile-summary-infos">
                         <span class="profile-username" id="characterName">Nom du personnage</span>
                         <span class="profile-role" id="characterRole">Rôle / Classe</span>
@@ -239,6 +240,7 @@
                     </div>
                 </div>
             </div>
+            <input class="profile-avatar-input" id="avatarUploadInput" type="file" accept="image/*">
         </header>
 
         <section class="profile-layout">
@@ -328,6 +330,8 @@
             getActiveCharacter,
             setActiveCharacter,
             createCharacter,
+            getSupabaseClient,
+            updateCharacter,
             logout,
             isAdmin
         } from './js/auth.js';
@@ -338,12 +342,19 @@
         const authControls = document.getElementById('authControls');
         const profileContent = document.getElementById('profileContent');
         const shortcutsPanel = document.getElementById('profileShortcutsPanel');
+        const avatarTrigger = document.getElementById('avatarUploadTrigger');
+        const avatarInput = document.getElementById('avatarUploadInput');
+        const avatarImg = document.getElementById('characterAvatarImg');
+        const avatarPlaceholder = document.getElementById('characterInitial');
 
         let currentUser = null;
         let currentCharacter = null;
         let userCharacters = [];
         let userLinkButton = null;
         let panelHost = null;
+
+        const AVATAR_BUCKET = 'avatars';
+        const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 
         const createBackdrop = document.getElementById('createCharacterBackdrop');
         const createForm = document.getElementById('createCharacterForm');
@@ -384,6 +395,34 @@
                 character: currentCharacter,
                 isAdmin: isAdmin(),
             };
+        }
+
+        function canEditProfile() {
+            const ownerId = currentCharacter && currentCharacter.user_id ? currentCharacter.user_id : null;
+            return !!currentUser && (!ownerId || ownerId === currentUser.id);
+        }
+
+        function updateAvatarUI(url) {
+            if (avatarImg) {
+                if (url) {
+                    avatarImg.src = url;
+                    avatarImg.hidden = false;
+                } else {
+                    avatarImg.hidden = true;
+                    avatarImg.src = '';
+                }
+            }
+            if (avatarPlaceholder) {
+                avatarPlaceholder.hidden = !!url;
+            }
+        }
+
+        function updateAvatarControls() {
+            if (!avatarTrigger || !avatarInput) return;
+            const editable = canEditProfile();
+            avatarTrigger.classList.toggle('is-editable', editable);
+            avatarTrigger.disabled = !editable;
+            avatarInput.disabled = !editable;
         }
 
         function updateShortcutsVisibility() {
@@ -536,6 +575,7 @@
                 updateAuthUserLabel();
             }
             updateShortcutsVisibility();
+            updateAvatarControls();
         }
 
         function renderCharacterSelector() {
@@ -574,6 +614,7 @@
                     updateAuthUserLabel();
                     rerenderOpenPanelIfAny();
                     updateShortcutsVisibility();
+                    updateAvatarControls();
                 });
             } else {
                 selectorEl.replaceChildren();
@@ -659,6 +700,7 @@
             document.getElementById('characterInitial').textContent = '?';
             document.getElementById('characterName').textContent = 'Aucun personnage sélectionné';
             document.getElementById('characterRole').textContent = 'Sélectionnez un personnage ci-dessus';
+            updateAvatarUI('');
         }
 
         function displayCharacter(character) {
@@ -678,8 +720,75 @@
             document.getElementById('statDico').textContent = profileData.dico || 0;
             document.getElementById('statPopularity').textContent = profileData.popularity || 0;
 
+            updateAvatarUI(profileData.avatar_url || '');
+
             // TODO: Populate rest of profile sections based on issue #9 requirements
             // - House, Rank, Alice types, etc.
+        }
+
+        async function uploadAvatar(file) {
+            if (!currentCharacter || !canEditProfile()) return;
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Image invalide.');
+                return;
+            }
+            if (file.size > MAX_AVATAR_SIZE) {
+                alert('Image trop lourde (max 2 Mo).');
+                return;
+            }
+
+            avatarTrigger.classList.add('is-uploading');
+
+            try {
+                const supabase = await getSupabaseClient();
+                const safeName = String(file.name || 'avatar')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9_.-]/g, '_');
+                const filePath = `characters/${currentCharacter.id}/${Date.now()}_${safeName}`;
+                const { error: uploadError } = await supabase.storage
+                    .from(AVATAR_BUCKET)
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: true,
+                        contentType: file.type
+                    });
+
+                if (uploadError) {
+                    console.error(uploadError);
+                    alert('Upload impossible. Vérifiez le bucket avatars.');
+                    return;
+                }
+
+                const { data: publicData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath);
+                const publicUrl = publicData?.publicUrl;
+                if (!publicUrl) {
+                    alert('URL avatar introuvable.');
+                    return;
+                }
+
+                const profileData = currentCharacter.profile_data || {};
+                const res = await updateCharacter(currentCharacter.id, {
+                    profile_data: {
+                        ...profileData,
+                        avatar_url: publicUrl,
+                        avatar_path: filePath
+                    }
+                });
+
+                if (!res || !res.success) {
+                    alert('Enregistrement avatar impossible.');
+                    return;
+                }
+
+                currentCharacter = res.character;
+                updateAvatarUI(publicUrl);
+            } catch (error) {
+                console.error(error);
+                alert('Erreur lors de l\'upload.');
+            } finally {
+                avatarTrigger.classList.remove('is-uploading');
+                avatarInput.value = '';
+            }
         }
 
         // Character create modal wiring
@@ -694,6 +803,24 @@
                 hideCreateCharacterModal();
             }
         });
+
+        if (avatarTrigger && avatarInput) {
+            avatarTrigger.addEventListener('click', () => {
+                if (!canEditProfile()) return;
+                avatarInput.click();
+            });
+            avatarTrigger.addEventListener('keydown', (event) => {
+                if (!canEditProfile()) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    avatarInput.click();
+                }
+            });
+            avatarInput.addEventListener('change', () => {
+                const file = avatarInput.files && avatarInput.files[0];
+                if (file) uploadAvatar(file);
+            });
+        }
 
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
