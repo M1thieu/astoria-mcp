@@ -398,8 +398,13 @@
         }
 
         function canEditProfile() {
-            const ownerId = currentCharacter && currentCharacter.user_id ? currentCharacter.user_id : null;
-            return !!currentUser && (!ownerId || ownerId === currentUser.id);
+            if (!currentUser || !currentCharacter) return false;
+            const ownerId = currentCharacter.user_id || null;
+            if (ownerId && ownerId === currentUser.id) return true;
+            if (Array.isArray(userCharacters)) {
+                return userCharacters.some((char) => char.id === currentCharacter.id);
+            }
+            return false;
         }
 
         function updateAvatarUI(url) {

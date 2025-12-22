@@ -67,10 +67,44 @@
     appearance: none;
     padding: 0;
     cursor: default;
+    position: relative;
+    overflow: hidden;
 }
 
 .profile-avatar-large.is-editable {
     cursor: pointer;
+}
+
+.profile-avatar-large::after {
+    content: '+';
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease;
+    pointer-events: none;
+}
+
+.profile-avatar-large.is-editable::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.profile-avatar-large.is-editable:hover::after {
+    filter: brightness(0.95);
 }
 
 .profile-avatar-large.is-uploading {
