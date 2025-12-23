@@ -301,7 +301,7 @@
                     <div class="profile-presentation-content" id="presentationContent" hidden></div>
                     <div class="profile-presentation-editor" id="presentationEditor" hidden>
                         <label class="profile-modal-label" for="presentationInput">Texte (Markdown simple)</label>
-                        <textarea class="profile-modal-input profile-presentation-input" id="presentationInput" rows="6" placeholder="Ecris ici..."></textarea>
+                        <textarea class="profile-modal-input profile-presentation-input" id="presentationInput" rows="2" placeholder="Ecris ici..."></textarea>
                         <div class="profile-presentation-hint">*italique* / **gras** / [lien](https://exemple.com)</div>
                         <div class="profile-modal-actions">
                             <button type="button" class="profile-modal-button secondary" id="presentationCancel">Annuler</button>
@@ -552,6 +552,7 @@
             if (presentationContent) presentationContent.hidden = true;
             presentationEditor.hidden = false;
             presentationInput.value = getPresentationValue();
+            autoGrowPresentation();
             presentationInput.focus();
         }
 
@@ -583,6 +584,12 @@
                 console.error(error);
                 alert('Impossible de sauvegarder la presentation.');
             }
+        }
+
+        function autoGrowPresentation() {
+            if (!presentationInput) return;
+            presentationInput.style.height = 'auto';
+            presentationInput.style.height = `${presentationInput.scrollHeight}px`;
         }
 
         function destroyAvatarCropper() {
@@ -1082,6 +1089,10 @@
 
         if (presentationSave) {
             presentationSave.addEventListener('click', savePresentation);
+        }
+
+        if (presentationInput) {
+            presentationInput.addEventListener('input', autoGrowPresentation);
         }
 
         if (avatarTrigger && avatarInput) {
