@@ -748,6 +748,16 @@
 
         const openSelectedRow = () => selectedRowIndex >= 0 && openItemModal(selectedRowIndex);
 
+        const adminItemBackdrop = document.getElementById('adminItemBackdrop');
+        const adminCropperBackdrop = document.getElementById('itemCropperBackdrop');
+
+        function isAdminModalOpen() {
+            return (
+                (adminItemBackdrop && adminItemBackdrop.classList.contains('open')) ||
+                (adminCropperBackdrop && adminCropperBackdrop.classList.contains('open'))
+            );
+        }
+
         // Keyboard shortcuts & focus management: ESC to close modal or clear search, Enter to focus search, arrows for carousel, Tab trap in modal
         document.addEventListener("keydown", (e) => {
             if (modal.classList.contains("open")) {
@@ -785,6 +795,9 @@
                     }
                 }
             } else {
+                if (isAdminModalOpen()) {
+                    return;
+                }
                 // When modal is closed, handle table navigation
                 const searchInput = document.getElementById('searchInput');
                 const isSearchFocused = document.activeElement === searchInput;
