@@ -113,6 +113,7 @@
                 <button type="button" class="codex-admin-close" id="adminItemClose" aria-label="Fermer">x</button>
             </div>
             <div class="codex-admin-error" id="adminItemError" role="alert"></div>
+            <div class="codex-admin-note" id="adminItemNote"></div>
             <form id="adminItemForm">
                 <div class="codex-admin-section">
                     <div class="codex-admin-section-title">Infos</div>
@@ -1160,6 +1161,14 @@
                     allItems.push(item);
                     getOrCreateItemMeta(item, allItems.length - 1);
                 });
+                applyFilters();
+                populateCategoryCounts();
+            },
+            removeItemByRef(itemRef) {
+                if (!itemRef) return;
+                const index = allItems.indexOf(itemRef);
+                if (index < 0) return;
+                allItems.splice(index, 1);
                 applyFilters();
                 populateCategoryCounts();
             },

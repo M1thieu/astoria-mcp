@@ -28,6 +28,7 @@ const dom = {
     imagePreview: document.getElementById('adminItemImagePreview'),
     imageTag: document.getElementById('adminItemImage'),
     imagePlaceholder: document.querySelector('#adminItemImagePreview .codex-admin-image-placeholder'),
+    note: document.getElementById('adminItemNote'),
     cancelBtn: document.getElementById('adminItemCancel'),
     saveBtn: document.getElementById('adminItemSave'),
     cropperBackdrop: document.getElementById('itemCropperBackdrop'),
@@ -131,8 +132,13 @@ function setImagePreview(url) {
 function openAdminModal(item) {
     editingItem = item || null;
     setError('');
+    if (dom.note) dom.note.textContent = '';
     if (dom.modalTitle) {
-        dom.modalTitle.textContent = editingItem ? 'Modifier un objet' : 'Ajouter un objet';
+        const isDbItem = editingItem && editingItem._dbId;
+        dom.modalTitle.textContent = isDbItem ? 'Modifier un objet' : 'Ajouter un objet';
+        if (editingItem && !isDbItem && dom.note) {
+            dom.note.textContent = "Objet local: l'enregistrement creera une copie modifiable en base.";
+        }
     }
     if (dom.form) dom.form.reset();
     resetImagePreview();
@@ -338,6 +344,9 @@ async function saveItem(event) {
         if (editingItem && editingItem._dbId) {
             window.astoriaCodex?.updateItemById(editingItem._dbId, mapped);
         } else {
+            if (editingItem) {
+                window.astoriaCodex?.removeItemByRef(editingItem);
+            }
             window.astoriaCodex?.addItems([mapped]);
         }
         closeAdminModal();
@@ -368,9 +377,10 @@ async function loadDbItems() {
 function updateEditButton(detail) {
     if (!dom.editBtn || !dom.modalActions) return;
     const item = detail?.item || null;
-    if (adminMode && item && item._dbId) {
+    if (adminMode && item) {
         dom.modalActions.hidden = false;
         dom.editBtn.hidden = false;
+        dom.editBtn.textContent = item._dbId ? 'Modifier' : 'Importer pour modifier';
         dom.editBtn.onclick = () => {
             if (typeof window.closeItemModal === 'function') {
                 window.closeItemModal();
