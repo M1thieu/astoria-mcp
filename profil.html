@@ -282,7 +282,7 @@
                         </li>
 
                         <li><a href="hdv.html">Hôtel de vente</a></li>
-                        <li><a href="codex.html">Objets</a></li>
+                        <li><a href="codex.html">Codex</a></li>
                     </ul>
                 </section>
             </aside>
@@ -291,12 +291,23 @@
             <section class="profile-main" aria-label="Contenu du profil">
                 <section class="profile-section">
                     <header class="profile-section-header">
-                        <h2 class="profile-section-title">Présentation</h2>
+                        <h2 class="profile-section-title">Presentation</h2>
+                        <button type="button" class="profile-edit-btn" id="presentationEditBtn" hidden>Modifier</button>
                     </header>
-                    <p class="profile-placeholder-text">
-                        Zone de présentation du joueur et de son personnage. On pourra y coller du contenu HTML libre, des blocs de texte,
-                        ou des extraits de la fiche personnage. Pour l’instant, ceci n’est qu’un gabarit de base.
+                    <p class="profile-placeholder-text" id="presentationPlaceholder">
+                        Zone de presentation du joueur et de son personnage. On pourra y coller du contenu HTML libre, des blocs de texte,
+                        ou des extraits de la fiche personnage. Pour l'instant, ceci n'est qu'un gabarit de base.
                     </p>
+                    <div class="profile-presentation-content" id="presentationContent" hidden></div>
+                    <div class="profile-presentation-editor" id="presentationEditor" hidden>
+                        <label class="profile-modal-label" for="presentationInput">Texte (Markdown simple)</label>
+                        <textarea class="profile-modal-input profile-presentation-input" id="presentationInput" rows="6" placeholder="Ecris ici..."></textarea>
+                        <div class="profile-presentation-hint">*italique* / **gras** / [lien](https://exemple.com)</div>
+                        <div class="profile-modal-actions">
+                            <button type="button" class="profile-modal-button secondary" id="presentationCancel">Annuler</button>
+                            <button type="button" class="profile-modal-button" id="presentationSave">Enregistrer</button>
+                        </div>
+                    </div>
                 </section>
             </section>
         </section>
@@ -405,6 +416,13 @@
         const createClass = document.getElementById('characterClassInput');
         const createCancel = document.getElementById('createCharacterCancel');
         const createSubmit = document.getElementById('createCharacterSubmit');
+        const presentationEditBtn = document.getElementById('presentationEditBtn');
+        const presentationPlaceholder = document.getElementById('presentationPlaceholder');
+        const presentationContent = document.getElementById('presentationContent');
+        const presentationEditor = document.getElementById('presentationEditor');
+        const presentationInput = document.getElementById('presentationInput');
+        const presentationSave = document.getElementById('presentationSave');
+        const presentationCancel = document.getElementById('presentationCancel');
 
         function showCreateCharacterModal() {
             if (!currentUser) return;
@@ -474,6 +492,97 @@
         function updateAdminShortcut() {
             if (!adminShortcut) return;
             adminShortcut.hidden = !isAdmin();
+        }
+
+        function escapePresentationHtml(raw) {
+            return String(raw || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function renderPresentationMarkdown(raw) {
+            let html = escapePresentationHtml(raw);
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        function getPresentationValue() {
+            const profileData = currentCharacter?.profile_data || {};
+            return String(profileData.presentation_md || '').trim();
+        }
+
+        function renderPresentation() {
+            if (!presentationPlaceholder || !presentationContent) return;
+            if (!currentCharacter) {
+                presentationPlaceholder.hidden = false;
+                presentationContent.hidden = true;
+                presentationContent.innerHTML = '';
+                return;
+            }
+
+            const raw = getPresentationValue();
+            if (!raw) {
+                presentationPlaceholder.hidden = false;
+                presentationContent.hidden = true;
+                presentationContent.innerHTML = '';
+                return;
+            }
+
+            presentationPlaceholder.hidden = true;
+            presentationContent.hidden = false;
+            presentationContent.innerHTML = renderPresentationMarkdown(raw);
+        }
+
+        function updatePresentationControls() {
+            if (presentationEditBtn) {
+                presentationEditBtn.hidden = !canEditProfile();
+            }
+            if (!canEditProfile()) {
+                presentationEditor?.setAttribute('hidden', 'true');
+            }
+        }
+
+        function openPresentationEditor() {
+            if (!presentationEditor || !presentationInput) return;
+            if (presentationPlaceholder) presentationPlaceholder.hidden = true;
+            if (presentationContent) presentationContent.hidden = true;
+            presentationEditor.hidden = false;
+            presentationInput.value = getPresentationValue();
+            presentationInput.focus();
+        }
+
+        function closePresentationEditor() {
+            if (!presentationEditor) return;
+            presentationEditor.hidden = true;
+            renderPresentation();
+        }
+
+        async function savePresentation() {
+            if (!currentCharacter || !canEditProfile()) return;
+            const nextValue = (presentationInput?.value || '').trim();
+            const profileData = currentCharacter.profile_data || {};
+            const nextProfileData = {
+                ...profileData,
+                presentation_md: nextValue
+            };
+
+            try {
+                const res = await updateCharacter(currentCharacter.id, { profile_data: nextProfileData });
+                if (!res || !res.success) {
+                    alert('Impossible de sauvegarder la presentation.');
+                    return;
+                }
+                currentCharacter = res.character;
+                renderPresentation();
+                closePresentationEditor();
+            } catch (error) {
+                console.error(error);
+                alert('Impossible de sauvegarder la presentation.');
+            }
         }
 
         function destroyAvatarCropper() {
@@ -847,6 +956,8 @@
             document.getElementById('characterName').textContent = 'Aucun personnage sélectionné';
             document.getElementById('characterRole').textContent = 'Sélectionnez un personnage ci-dessus';
             updateAvatarUI('');
+            renderPresentation();
+            updatePresentationControls();
         }
 
         function displayCharacter(character) {
@@ -867,6 +978,8 @@
             document.getElementById('statPopularity').textContent = profileData.popularity || 0;
 
             updateAvatarUI(profileData.avatar_url || '');
+            renderPresentation();
+            updatePresentationControls();
 
             // TODO: Populate rest of profile sections based on issue #9 requirements
             // - House, Rank, Alice types, etc.
@@ -955,6 +1068,21 @@
                 closeAvatarCropper();
             }
         });
+
+        if (presentationEditBtn) {
+            presentationEditBtn.addEventListener('click', () => {
+                if (!canEditProfile()) return;
+                openPresentationEditor();
+            });
+        }
+
+        if (presentationCancel) {
+            presentationCancel.addEventListener('click', closePresentationEditor);
+        }
+
+        if (presentationSave) {
+            presentationSave.addEventListener('click', savePresentation);
+        }
 
         if (avatarTrigger && avatarInput) {
             avatarTrigger.addEventListener('click', () => {

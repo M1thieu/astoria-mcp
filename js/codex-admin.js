@@ -1,0 +1,446 @@
+import {
+    getSupabaseClient,
+    getCurrentUser,
+    isAdmin,
+    refreshSessionUser
+} from './auth.js';
+
+const ITEMS_BUCKET = 'items';
+const IMAGE_SIZE = 256;
+
+const dom = {
+    addBtn: document.getElementById('adminAddItemBtn'),
+    modalActions: document.getElementById('modalAdminActions'),
+    editBtn: document.getElementById('adminEditBtn'),
+    backdrop: document.getElementById('adminItemBackdrop'),
+    modalTitle: document.getElementById('adminItemTitle'),
+    closeBtn: document.getElementById('adminItemClose'),
+    form: document.getElementById('adminItemForm'),
+    error: document.getElementById('adminItemError'),
+    nameInput: document.getElementById('adminItemName'),
+    categoryInput: document.getElementById('adminItemCategory'),
+    buyInput: document.getElementById('adminItemBuy'),
+    sellInput: document.getElementById('adminItemSell'),
+    descriptionInput: document.getElementById('adminItemDescription'),
+    effectInput: document.getElementById('adminItemEffect'),
+    imageBtn: document.getElementById('adminItemImageBtn'),
+    imageInput: document.getElementById('adminItemImageInput'),
+    imagePreview: document.getElementById('adminItemImagePreview'),
+    imageTag: document.getElementById('adminItemImage'),
+    imagePlaceholder: document.querySelector('#adminItemImagePreview .codex-admin-image-placeholder'),
+    cancelBtn: document.getElementById('adminItemCancel'),
+    saveBtn: document.getElementById('adminItemSave'),
+    cropperBackdrop: document.getElementById('itemCropperBackdrop'),
+    cropperImage: document.getElementById('itemCropperImage'),
+    cropperZoom: document.getElementById('itemCropperZoom'),
+    cropperClose: document.getElementById('itemCropperClose'),
+    cropperCancel: document.getElementById('itemCropperCancel'),
+    cropperConfirm: document.getElementById('itemCropperConfirm')
+};
+
+let supabase = null;
+let adminMode = false;
+let editingItem = null;
+let imageBlob = null;
+let imagePreviewUrl = '';
+let cropper = null;
+let syncZoom = false;
+
+function setError(message) {
+    if (!dom.error) return;
+    if (!message) {
+        dom.error.textContent = '';
+        dom.error.classList.remove('visible');
+        return;
+    }
+    dom.error.textContent = message;
+    dom.error.classList.add('visible');
+}
+
+function safeJson(value) {
+    if (!value) return {};
+    if (typeof value === 'object') return value;
+    if (typeof value === 'string') {
+        try {
+            return JSON.parse(value);
+        } catch {
+            return {};
+        }
+    }
+    return {};
+}
+
+function mapDbItem(row) {
+    const images = safeJson(row.images);
+    const primary = images.primary || images.url || '';
+    const buyText = row.price_pa ? `${row.price_pa} pa` : '';
+    const sellText = row.price_po ? `${row.price_po} po` : '';
+    return {
+        _dbId: row.id,
+        source: 'db',
+        name: row.name || '',
+        description: row.description || '',
+        effect: row.effect || '',
+        category: row.category || '',
+        buyPrice: buyText,
+        sellPrice: sellText,
+        image: primary,
+        images: images
+    };
+}
+
+function parsePrice(raw) {
+    const digits = String(raw || '').replace(/[^0-9]/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+}
+
+function openBackdrop(backdrop) {
+    if (!backdrop) return;
+    backdrop.classList.add('open');
+    backdrop.setAttribute('aria-hidden', 'false');
+}
+
+function closeBackdrop(backdrop) {
+    if (!backdrop) return;
+    backdrop.classList.remove('open');
+    backdrop.setAttribute('aria-hidden', 'true');
+}
+
+function resetImagePreview() {
+    if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+        imagePreviewUrl = '';
+    }
+    imageBlob = null;
+    if (dom.imageTag) {
+        dom.imageTag.hidden = true;
+        dom.imageTag.src = '';
+    }
+    if (dom.imagePlaceholder) {
+        dom.imagePlaceholder.hidden = false;
+    }
+}
+
+function setImagePreview(url) {
+    if (!dom.imageTag || !dom.imagePlaceholder) return;
+    dom.imageTag.hidden = !url;
+    dom.imageTag.src = url || '';
+    dom.imagePlaceholder.hidden = !!url;
+}
+
+function openAdminModal(item) {
+    editingItem = item || null;
+    setError('');
+    if (dom.modalTitle) {
+        dom.modalTitle.textContent = editingItem ? 'Modifier un objet' : 'Ajouter un objet';
+    }
+    if (dom.form) dom.form.reset();
+    resetImagePreview();
+
+    if (editingItem) {
+        dom.nameInput.value = editingItem.name || '';
+        dom.categoryInput.value = editingItem.category || '';
+        dom.buyInput.value = editingItem.buyPrice || '';
+        dom.sellInput.value = editingItem.sellPrice || '';
+        dom.descriptionInput.value = editingItem.description || '';
+        dom.effectInput.value = editingItem.effect || '';
+        if (editingItem.image) {
+            setImagePreview(editingItem.image);
+        }
+    }
+
+    openBackdrop(dom.backdrop);
+    dom.nameInput?.focus();
+}
+
+function closeAdminModal() {
+    closeBackdrop(dom.backdrop);
+    resetImagePreview();
+    editingItem = null;
+}
+
+function destroyCropper() {
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+        imagePreviewUrl = '';
+    }
+}
+
+function closeCropper() {
+    closeBackdrop(dom.cropperBackdrop);
+    destroyCropper();
+    if (dom.imageInput) dom.imageInput.value = '';
+}
+
+function openCropper(file) {
+    if (!dom.cropperBackdrop || !dom.cropperImage) {
+        imageBlob = file;
+        imagePreviewUrl = URL.createObjectURL(file);
+        setImagePreview(imagePreviewUrl);
+        return;
+    }
+
+    if (!window.Cropper) {
+        imageBlob = file;
+        imagePreviewUrl = URL.createObjectURL(file);
+        setImagePreview(imagePreviewUrl);
+        return;
+    }
+
+    destroyCropper();
+    imagePreviewUrl = URL.createObjectURL(file);
+    dom.cropperImage.src = imagePreviewUrl;
+    openBackdrop(dom.cropperBackdrop);
+
+    cropper = new Cropper(dom.cropperImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        dragMode: 'move',
+        background: false,
+        autoCropArea: 1,
+        ready() {
+            if (dom.cropperZoom) dom.cropperZoom.value = 1;
+        },
+        zoom(event) {
+            if (!dom.cropperZoom) return;
+            if (syncZoom) return;
+            syncZoom = true;
+            dom.cropperZoom.value = event.detail.ratio.toFixed(2);
+            syncZoom = false;
+        }
+    });
+}
+
+async function applyCropper() {
+    if (!cropper) {
+        closeCropper();
+        return;
+    }
+
+    const canvas = cropper.getCroppedCanvas({
+        width: IMAGE_SIZE,
+        height: IMAGE_SIZE,
+        imageSmoothingQuality: 'high'
+    });
+
+    if (!canvas) {
+        closeCropper();
+        return;
+    }
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.92));
+    if (!blob) {
+        closeCropper();
+        return;
+    }
+
+    imageBlob = blob;
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    imagePreviewUrl = URL.createObjectURL(blob);
+    setImagePreview(imagePreviewUrl);
+    closeCropper();
+}
+
+async function uploadImage(dbId, nameHint) {
+    if (!imageBlob || !supabase) return null;
+    const safeName = String(nameHint || 'item')
+        .toLowerCase()
+        .replace(/[^a-z0-9_.-]/g, '_');
+    const filePath = `items/${dbId}/${Date.now()}_${safeName}.png`;
+
+    const { error: uploadError } = await supabase.storage
+        .from(ITEMS_BUCKET)
+        .upload(filePath, imageBlob, {
+            cacheControl: '3600',
+            upsert: true,
+            contentType: 'image/png'
+        });
+
+    if (uploadError) {
+        console.error(uploadError);
+        setError('Upload image impossible. Verifie le bucket items.');
+        return null;
+    }
+
+    const { data } = supabase.storage.from(ITEMS_BUCKET).getPublicUrl(filePath);
+    return data?.publicUrl || null;
+}
+
+async function saveItem(event) {
+    event.preventDefault();
+    if (!supabase) return;
+    setError('');
+
+    const name = dom.nameInput.value.trim();
+    if (!name) {
+        setError('Nom obligatoire.');
+        dom.nameInput.focus();
+        return;
+    }
+
+    const payload = {
+        name,
+        description: dom.descriptionInput.value.trim(),
+        effect: dom.effectInput.value.trim(),
+        category: dom.categoryInput.value.trim().toLowerCase(),
+        price_po: parsePrice(dom.sellInput.value),
+        price_pa: parsePrice(dom.buyInput.value)
+    };
+
+    dom.saveBtn.disabled = true;
+
+    try {
+        let row = null;
+        if (editingItem && editingItem._dbId) {
+            const { data, error } = await supabase
+                .from('items')
+                .update(payload)
+                .eq('id', editingItem._dbId)
+                .select()
+                .single();
+            if (error) throw error;
+            row = data;
+        } else {
+            const { data, error } = await supabase
+                .from('items')
+                .insert([payload])
+                .select()
+                .single();
+            if (error) throw error;
+            row = data;
+        }
+
+        let imageUrl = null;
+        if (imageBlob && row?.id) {
+            imageUrl = await uploadImage(row.id, name);
+            if (imageUrl) {
+                const images = { primary: imageUrl };
+                const { data, error } = await supabase
+                    .from('items')
+                    .update({ images })
+                    .eq('id', row.id)
+                    .select()
+                    .single();
+                if (!error && data) row = data;
+            }
+        }
+
+        const mapped = mapDbItem(row);
+        if (imageUrl) {
+            mapped.image = imageUrl;
+            mapped.images = { primary: imageUrl };
+        }
+
+        if (editingItem && editingItem._dbId) {
+            window.astoriaCodex?.updateItemById(editingItem._dbId, mapped);
+        } else {
+            window.astoriaCodex?.addItems([mapped]);
+        }
+        closeAdminModal();
+    } catch (error) {
+        console.error(error);
+        setError('Impossible de sauvegarder.');
+    } finally {
+        dom.saveBtn.disabled = false;
+    }
+}
+
+async function loadDbItems() {
+    if (!supabase || !window.astoriaCodex) return;
+    const { data, error } = await supabase
+        .from('items')
+        .select('id, name, description, effect, category, price_po, price_pa, images, enabled')
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error('Items load error:', error);
+        return;
+    }
+
+    const mapped = (data || []).map(mapDbItem);
+    window.astoriaCodex.addItems(mapped);
+}
+
+function updateEditButton(detail) {
+    if (!dom.editBtn || !dom.modalActions) return;
+    const item = detail?.item || null;
+    if (adminMode && item && item._dbId) {
+        dom.modalActions.hidden = false;
+        dom.editBtn.hidden = false;
+        dom.editBtn.onclick = () => {
+            if (typeof window.closeItemModal === 'function') {
+                window.closeItemModal();
+            }
+            openAdminModal(item);
+        };
+    } else {
+        dom.modalActions.hidden = true;
+        dom.editBtn.hidden = true;
+    }
+}
+
+async function init() {
+    try {
+        await refreshSessionUser?.();
+    } catch {}
+
+    const user = getCurrentUser();
+    if (!user) return;
+
+    adminMode = isAdmin();
+    if (!adminMode) return;
+
+    supabase = await getSupabaseClient();
+    dom.addBtn.hidden = false;
+
+    dom.addBtn.addEventListener('click', () => openAdminModal(null));
+    dom.closeBtn?.addEventListener('click', closeAdminModal);
+    dom.cancelBtn?.addEventListener('click', closeAdminModal);
+    dom.form?.addEventListener('submit', saveItem);
+
+    dom.imageBtn?.addEventListener('click', () => dom.imageInput?.click());
+    dom.imageInput?.addEventListener('change', (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            setError('Fichier image invalide.');
+            return;
+        }
+        openCropper(file);
+    });
+
+    dom.cropperClose?.addEventListener('click', closeCropper);
+    dom.cropperCancel?.addEventListener('click', closeCropper);
+    dom.cropperConfirm?.addEventListener('click', applyCropper);
+    dom.cropperZoom?.addEventListener('input', () => {
+        if (!cropper) return;
+        if (syncZoom) return;
+        const value = parseFloat(dom.cropperZoom.value);
+        if (Number.isFinite(value)) {
+            syncZoom = true;
+            cropper.zoomTo(value);
+            syncZoom = false;
+        }
+    });
+
+    window.addEventListener('astoria:codex-modal-open', (event) => updateEditButton(event.detail));
+    window.addEventListener('astoria:codex-modal-close', () => updateEditButton(null));
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (dom.backdrop?.classList.contains('open')) {
+            closeAdminModal();
+        }
+        if (dom.cropperBackdrop?.classList.contains('open')) {
+            closeCropper();
+        }
+    });
+
+    await loadDbItems();
+}
+
+init();

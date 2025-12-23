@@ -6,6 +6,8 @@
     <meta http-equiv="Cache-Control" content="max-age=604800, public">
     <title>Liste d'objets</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/codex.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
     <!-- Preload handled dynamically once data.js is available -->
 </head>
 <body>
@@ -18,6 +20,7 @@
 
             <h1 class="title" id="pageTitle">Liste d'objets</h1>
             <span class="stats-badge" id="statsBadge">0 objet</span>
+            <button type="button" class="admin-add-btn" id="adminAddItemBtn" hidden>+ Ajouter un objet</button>
 
             <!-- Dropdown catégories -->
             <select id="categoryFilter" class="category-dropdown" onchange="filterByCategory()">
@@ -80,6 +83,9 @@
         <div class="modal-inner" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalName"></h2>
+                <div class="modal-admin-actions" id="modalAdminActions" hidden>
+                    <button type="button" class="admin-edit-btn" id="adminEditBtn">Modifier</button>
+                </div>
                 <button class="modal-close" aria-label="Fermer la fenêtre" onclick="closeItemModal()">×</button>
             </div>
             <div class="modal-body">
@@ -100,10 +106,82 @@
         </div>
     </div>
 
+    <div class="codex-admin-backdrop" id="adminItemBackdrop" aria-hidden="true">
+        <div class="codex-admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminItemTitle">
+            <div class="codex-admin-header">
+                <h2 class="codex-admin-title" id="adminItemTitle">Ajouter un objet</h2>
+                <button type="button" class="codex-admin-close" id="adminItemClose" aria-label="Fermer">x</button>
+            </div>
+            <div class="codex-admin-error" id="adminItemError" role="alert"></div>
+            <form id="adminItemForm">
+                <div class="codex-admin-grid">
+                    <label class="codex-admin-label" for="adminItemName">Nom</label>
+                    <input class="codex-admin-input" id="adminItemName" name="name" required>
+
+                    <label class="codex-admin-label" for="adminItemCategory">Categorie</label>
+                    <input class="codex-admin-input" id="adminItemCategory" name="category" placeholder="ex: consommable">
+
+                    <label class="codex-admin-label" for="adminItemBuy">Prix achat</label>
+                    <input class="codex-admin-input" id="adminItemBuy" name="buy" placeholder="ex: 5 po">
+
+                    <label class="codex-admin-label" for="adminItemSell">Prix vente</label>
+                    <input class="codex-admin-input" id="adminItemSell" name="sell" placeholder="ex: 2 po">
+                </div>
+
+                <label class="codex-admin-label" for="adminItemDescription">Description</label>
+                <textarea class="codex-admin-textarea" id="adminItemDescription" name="description" rows="4"></textarea>
+
+                <label class="codex-admin-label" for="adminItemEffect">Effet</label>
+                <textarea class="codex-admin-textarea" id="adminItemEffect" name="effect" rows="3"></textarea>
+
+                <div class="codex-admin-image">
+                    <div class="codex-admin-image-preview" id="adminItemImagePreview">
+                        <span class="codex-admin-image-placeholder">Image</span>
+                        <img id="adminItemImage" alt="Apercu image" hidden>
+                    </div>
+                    <div class="codex-admin-image-actions">
+                        <button type="button" class="codex-admin-button secondary" id="adminItemImageBtn">Importer l'image</button>
+                        <span class="codex-admin-image-hint">Recadre en carre pour garder la taille.</span>
+                    </div>
+                    <input type="file" id="adminItemImageInput" accept="image/*" hidden>
+                </div>
+
+                <div class="codex-admin-actions">
+                    <button type="button" class="codex-admin-button secondary" id="adminItemCancel">Annuler</button>
+                    <button type="submit" class="codex-admin-button" id="adminItemSave">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="codex-cropper-backdrop" id="itemCropperBackdrop" aria-hidden="true">
+        <div class="codex-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="itemCropperTitle">
+            <div class="codex-cropper-header">
+                <h2 class="codex-cropper-title" id="itemCropperTitle">Recadrer l'image</h2>
+                <button type="button" class="codex-cropper-close" id="itemCropperClose" aria-label="Fermer">x</button>
+            </div>
+            <div class="codex-cropper-body">
+                <div class="codex-cropper-stage">
+                    <img id="itemCropperImage" alt="Apercu recadrage">
+                </div>
+                <div class="codex-cropper-controls">
+                    <label for="itemCropperZoom">Zoom</label>
+                    <input type="range" id="itemCropperZoom" min="0.2" max="3" step="0.01" value="1">
+                    <span class="codex-cropper-hint">Molette pour zoomer.</span>
+                </div>
+            </div>
+            <div class="codex-cropper-actions">
+                <button type="button" class="codex-admin-button secondary" id="itemCropperCancel">Annuler</button>
+                <button type="button" class="codex-admin-button" id="itemCropperConfirm">Appliquer</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Données des objets -->
     <script src="js/image-helpers.js"></script>
     <script src="js/data.js"></script>
     <script type="module" src="js/ui/app-shell.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
 
     <script>
         // On récupère les données depuis data.js (inventoryData)
@@ -582,6 +660,10 @@
 
             const focusTarget = modal.querySelector(".modal-close") || modal;
             focusTarget.focus({ preventScroll: true });
+
+            if (window.dispatchEvent) {
+                window.dispatchEvent(new CustomEvent('astoria:codex-modal-open', { detail: { index, item } }));
+            }
         }
 
         // Delegate clicks to keep row DOM (and images) stable across filters/sorts
@@ -612,6 +694,9 @@
             modal.classList.remove("open");
             clearRowHighlights('row-selected');
             if (lastFocusedElement?.focus) lastFocusedElement.focus({ preventScroll: true });
+            if (window.dispatchEvent) {
+                window.dispatchEvent(new CustomEvent('astoria:codex-modal-close'));
+            }
         }
 
         // Track currently selected row for keyboard navigation
@@ -1050,7 +1135,39 @@
             });
         }
 
+        window.astoriaCodex = {
+            addItems(items) {
+                if (!Array.isArray(items) || items.length === 0) return;
+                items.forEach((item) => {
+                    if (!item || typeof item !== 'object') return;
+                    const dbId = item._dbId;
+                    if (dbId && allItems.some((existing) => existing._dbId === dbId)) return;
+                    allItems.push(item);
+                    getOrCreateItemMeta(item, allItems.length - 1);
+                });
+                applyFilters();
+                populateCategoryCounts();
+            },
+            updateItemById(dbId, updates) {
+                if (!dbId) return null;
+                const target = allItems.find((item) => item && item._dbId === dbId);
+                if (!target) return null;
+                Object.assign(target, updates || {});
+                applyFilters();
+                populateCategoryCounts();
+                return target;
+            },
+            getItemByIndex(index) {
+                return currentData[index];
+            },
+            refresh() {
+                applyFilters();
+                populateCategoryCounts();
+            }
+        };
+
         initFromUrl();
     </script>
+    <script type="module" src="js/codex-admin.js"></script>
 </body>
 </html>
