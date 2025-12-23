@@ -12,7 +12,7 @@
     <main class="inventory-wrapper" aria-labelledby="inventoryTitle">
                 <!-- Header with title and back button -->
         <div class="inventory-header">
-            <a href="index.html" class="back-link" title="Retour à la liste">&#x2190;</a>
+            <a href="codex.html" class="back-link" title="Retour à la liste">&#x2190;</a>
             <h1 class="inventory-title" id="inventoryTitle">Inventaire</h1>
             <div class="inventory-actions">
                 <span id="itemCount" class="inventory-info">0 objets</span>
@@ -1775,7 +1775,7 @@
 
         /**
          * Expose API for external use
-         * - Can be called from index.html or other pages
+         * - Can be called from codex.html or other pages
          */
         window.InventoryModule = {
             // Current state
@@ -1785,7 +1785,7 @@
             renderInventory,
             filterByCategory,
 
-            // Add item from external page (e.g., index.html)
+            // Add item from external page (e.g., codex.html)
             addItemFromExternal: (itemName, quantity = 1) => {
                 const allItems = getAllItems();
                 const sourceItem = allItems.find(i => i.name === itemName);
