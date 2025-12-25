@@ -225,23 +225,7 @@
                     <h1 class="profile-title" id="profileTitle">Mon look</h1>
                     <p class="profile-subtitle">Espace personnel - version de base.</p>
                 </div>
-                <div class="profile-summary-card" aria-label="Résumé du joueur">
-                    <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
-                        <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
-                        <span class="profile-avatar-placeholder" id="characterInitial">Avatar</span>
-                    </button>
-                    <div class="profile-summary-infos">
-                        <span class="profile-username" id="characterName">Nom du personnage</span>
-                        <span class="profile-role" id="characterRole">Rôle / Classe</span>
-                        <div class="profile-summary-stats">
-                            <span class="profile-stat">Style : <strong id="statStyle">0</strong></span>
-                            <span class="profile-stat">Dico : <strong id="statDico">0</strong></span>
-                            <span class="profile-stat">Popularité : <strong id="statPopularity">0</strong></span>
-                        </div>
-                    </div>
-                </div>
             </div>
-            <input class="profile-avatar-input" id="avatarUploadInput" type="file" accept="image/*">
         </header>
 
         <section class="profile-layout">
@@ -250,7 +234,25 @@
                 <section class="profile-panel">
                     <h2 class="profile-panel-title">Mon look</h2>
                     <div class="profile-look-card">
-                        <span class="profile-look-placeholder">Prévisualisation à venir</span>
+                                                <div class="profile-summary-card profile-summary-card--compact" aria-label="Résumé du joueur">
+                            <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
+                                <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
+                                <span class="profile-avatar-placeholder" id="characterInitial">Avatar</span>
+                            </button>
+                            <div class="profile-summary-infos">
+                                <a class="profile-username" id="characterName" href="profil.html">Nom du personnage</a>
+                                <span class="profile-role" id="characterRole">Rôle / Classe</span>
+                                <div class="profile-summary-stats">
+                                    <span class="profile-stat">Style : <strong id="statStyle">0</strong></span>
+                                    <span class="profile-stat">Dico : <strong id="statDico">0</strong></span>
+                                    <span class="profile-stat">Popularité : <strong id="statPopularity">0</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <input class="profile-avatar-input" id="avatarUploadInput" type="file" accept="image/*">
+                        <div class="profile-look-preview">
+                            <span class="profile-look-placeholder">Prévisualisation à venir</span>
+                        </div>
                     </div>
 
                     <div class="profile-tags" id="profileTags" aria-label="Tags de profil">

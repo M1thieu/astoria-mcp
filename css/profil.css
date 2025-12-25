@@ -9,8 +9,8 @@
 
 .profile-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     gap: var(--space-6);
     margin-bottom: var(--space-8);
     padding-bottom: var(--space-4);
@@ -20,8 +20,8 @@
 .profile-header-main {
     flex: 1;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     gap: var(--space-6);
 }
 
@@ -53,6 +53,32 @@
     border-radius: var(--radius-lg);
     background: var(--color-primary-lighter);
     border: 1px solid var(--color-primary-light);
+}
+
+.profile-summary-card--compact {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(216, 27, 96, 0.2);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+}
+
+.profile-summary-card--compact .profile-summary-infos {
+    align-items: center;
+}
+
+.profile-summary-card--compact .profile-summary-stats {
+    justify-content: center;
+    font-size: var(--text-xs);
+}
+
+.profile-summary-card--compact .profile-avatar-large {
+    width: 96px;
+    height: 96px;
 }
 
 .profile-avatar-large {
@@ -143,6 +169,11 @@
     font-weight: var(--font-semibold);
     font-size: var(--text-lg);
     color: var(--color-primary);
+    text-decoration: none;
+}
+
+.profile-username:hover {
+    text-decoration: underline;
 }
 
 .profile-role {
@@ -188,12 +219,28 @@
 
 .profile-look-card {
     border-radius: var(--radius-md);
+    border: 1px solid var(--color-primary-light);
+    background: rgba(255, 255, 255, 0.75);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    text-align: left;
+    color: var(--color-gray-700);
+}
+
+.profile-look-preview {
+    border-radius: var(--radius-md);
     border: 1px dashed var(--color-primary-light);
     background: var(--color-primary-lighter);
-    padding: var(--space-6);
+    padding: var(--space-5);
     text-align: center;
     font-size: var(--text-sm-plus);
     color: var(--color-gray-700);
+}
+
+.profile-look-placeholder {
+    display: block;
 }
 
 .profile-tags {
@@ -1002,6 +1049,16 @@
 
     .profile-panel {
         flex: 1 1 220px;
+    }
+
+    .profile-summary-card--compact {
+        flex-direction: row;
+        text-align: left;
+        align-items: center;
+    }
+
+    .profile-summary-card--compact .profile-summary-infos {
+        align-items: flex-start;
     }
 }
 
