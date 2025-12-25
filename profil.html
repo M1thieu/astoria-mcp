@@ -311,22 +311,28 @@
                                     <button type="button" class="profile-presentation-tab is-active" id="presentationViewWrite" data-view="write" role="tab" aria-controls="presentationEditorWrite" aria-selected="true">Write</button>
                                     <button type="button" class="profile-presentation-tab" id="presentationViewPreview" data-view="preview" role="tab" aria-controls="presentationPreview" aria-selected="false">Preview</button>
                                 </div>
-                                <div class="profile-presentation-toolbar" id="presentationToolbar" role="toolbar" aria-label="Outils de mise en forme">
-                                    <button type="button" class="profile-presentation-tool" data-md="heading" title="Heading">H</button>
-                                    <button type="button" class="profile-presentation-tool" data-md="bold" title="Gras"><strong>B</strong></button>
-                                    <button type="button" class="profile-presentation-tool" data-md="italic" title="Italique"><em>I</em></button>
-                                    <span class="profile-presentation-divider" aria-hidden="true"></span>
-                                    <button type="button" class="profile-presentation-tool" data-md="quote" title="Citation">&gt;</button>
-                                    <button type="button" class="profile-presentation-tool" data-md="code" title="Code">&lt;/&gt;</button>
-                                    <button type="button" class="profile-presentation-tool" data-md="link" title="Lien">&#128279;</button>
-                                    <span class="profile-presentation-divider" aria-hidden="true"></span>
-                                    <button type="button" class="profile-presentation-tool" data-md="ul" title="Liste">-</button>
-                                    <button type="button" class="profile-presentation-tool" data-md="ol" title="Liste numerotee">1.</button>
+                                <div class="profile-presentation-tools">
+                                    <div class="profile-presentation-toolbar" id="presentationToolbar" role="toolbar" aria-label="Outils de mise en forme">
+                                        <button type="button" class="profile-presentation-tool" data-md="heading" title="Heading">H</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="bold" title="Gras"><strong>B</strong></button>
+                                        <button type="button" class="profile-presentation-tool" data-md="italic" title="Italique"><em>I</em></button>
+                                        <span class="profile-presentation-divider" aria-hidden="true"></span>
+                                        <button type="button" class="profile-presentation-tool" data-md="quote" title="Citation">&gt;</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="code" title="Code">&lt;/&gt;</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="link" title="Lien">&#128279;</button>
+                                        <span class="profile-presentation-divider" aria-hidden="true"></span>
+                                        <button type="button" class="profile-presentation-tool" data-md="ul" title="Liste">-</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="ol" title="Liste numerotee">1.</button>
+                                    </div>
+                                    <div class="profile-presentation-mode" role="group" aria-label="Mode de rendu">
+                                        <button type="button" class="profile-presentation-mode-btn is-active" id="presentationModeMarkdown" data-mode="markdown">Markdown</button>
+                                        <button type="button" class="profile-presentation-mode-btn" id="presentationModeHtml" data-mode="html">HTML</button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="profile-presentation-body" id="presentationBody">
                                 <div class="profile-presentation-field" id="presentationEditorWrite" role="tabpanel" aria-labelledby="presentationViewWrite">
-                                    <label class="profile-modal-label" for="presentationInput">Texte (Markdown simple)</label>
+                                    <label class="profile-modal-label" for="presentationInput" id="presentationInputLabel">Texte (Markdown simple)</label>
                                     <textarea class="profile-modal-input profile-presentation-input" id="presentationInput" rows="6" placeholder="Ecris ici..."></textarea>
                                 </div>
                                 <div class="profile-presentation-preview" id="presentationPreview" role="tabpanel" aria-labelledby="presentationViewPreview" hidden></div>
@@ -435,6 +441,7 @@
         let pendingAvatarFile = null;
         let isCropperZoomSync = false;
         let currentPresentationView = 'write';
+        let currentPresentationMode = 'markdown';
         let presentationSelection = { start: 0, end: 0 };
 
         const AVATAR_BUCKET = 'avatars';
@@ -455,8 +462,11 @@
         const presentationViewWrite = document.getElementById('presentationViewWrite');
         const presentationViewPreview = document.getElementById('presentationViewPreview');
         const presentationToolbar = document.getElementById('presentationToolbar');
+        const presentationModeMarkdown = document.getElementById('presentationModeMarkdown');
+        const presentationModeHtml = document.getElementById('presentationModeHtml');
         const presentationEditorWrite = document.getElementById('presentationEditorWrite');
         const presentationInput = document.getElementById('presentationInput');
+        const presentationInputLabel = document.getElementById('presentationInputLabel');
         const presentationPreview = document.getElementById('presentationPreview');
         const presentationHint = document.getElementById('presentationHint');
         const presentationSave = document.getElementById('presentationSave');
@@ -660,6 +670,52 @@
             return String(profileData.presentation_md || '').trim();
         }
 
+        function getPresentationMode() {
+            const profileData = currentCharacter?.profile_data || {};
+            return profileData.presentation_mode === 'html' ? 'html' : 'markdown';
+        }
+
+        function sanitizePresentationHtml(raw) {
+            if (!raw) return '';
+            const template = document.createElement('template');
+            template.innerHTML = String(raw);
+            const forbiddenTags = new Set(['script', 'iframe', 'object', 'embed', 'link', 'style', 'meta']);
+            const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+            const nodes = [];
+
+            while (walker.nextNode()) {
+                nodes.push(walker.currentNode);
+            }
+
+            nodes.forEach((node) => {
+                const tag = node.tagName.toLowerCase();
+                if (forbiddenTags.has(tag)) {
+                    node.remove();
+                    return;
+                }
+
+                [...node.attributes].forEach((attr) => {
+                    const name = attr.name.toLowerCase();
+                    const value = String(attr.value || '');
+                    if (name.startsWith('on')) {
+                        node.removeAttribute(attr.name);
+                    }
+                    if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) {
+                        node.removeAttribute(attr.name);
+                    }
+                });
+            });
+
+            return template.innerHTML;
+        }
+
+        function renderPresentationOutput(raw) {
+            if (currentPresentationMode === 'html') {
+                return sanitizePresentationHtml(raw);
+            }
+            return renderPresentationMarkdown(raw);
+        }
+
         function renderPresentationPreview(value) {
             if (!presentationPreview) return;
             const raw = typeof value === 'string' ? value : (presentationInput?.value || '');
@@ -667,7 +723,39 @@
                 presentationPreview.innerHTML = '<p class="profile-placeholder-text">Apercu vide.</p>';
                 return;
             }
-            presentationPreview.innerHTML = renderPresentationMarkdown(raw);
+            presentationPreview.innerHTML = renderPresentationOutput(raw);
+        }
+
+        function setPresentationMode(mode) {
+            currentPresentationMode = mode === 'html' ? 'html' : 'markdown';
+            const isHtml = currentPresentationMode === 'html';
+
+            if (presentationModeMarkdown) {
+                presentationModeMarkdown.classList.toggle('is-active', !isHtml);
+                presentationModeMarkdown.setAttribute('aria-pressed', String(!isHtml));
+            }
+            if (presentationModeHtml) {
+                presentationModeHtml.classList.toggle('is-active', isHtml);
+                presentationModeHtml.setAttribute('aria-pressed', String(isHtml));
+            }
+
+            if (presentationToolbar) {
+                presentationToolbar.hidden = isHtml;
+            }
+            if (presentationHint) {
+                presentationHint.textContent = isHtml
+                    ? 'HTML avance (scripts desactives).'
+                    : '*italique* / **gras** / [lien](https://exemple.com)';
+            }
+            if (presentationInputLabel) {
+                presentationInputLabel.textContent = isHtml ? 'HTML avance' : 'Texte (Markdown simple)';
+            }
+            if (presentationInput) {
+                presentationInput.placeholder = isHtml ? '<div>Ton univers ici...</div>' : 'Ecris ici...';
+            }
+            if (currentPresentationView === 'preview') {
+                renderPresentationPreview();
+            }
         }
 
         function setPresentationView(view) {
@@ -691,6 +779,7 @@
 
         function renderPresentation() {
             if (!presentationPlaceholder || !presentationContent) return;
+            currentPresentationMode = getPresentationMode();
             if (!currentCharacter) {
                 presentationPlaceholder.hidden = false;
                 presentationContent.hidden = true;
@@ -708,7 +797,7 @@
 
             presentationPlaceholder.hidden = true;
             presentationContent.hidden = false;
-            presentationContent.innerHTML = renderPresentationMarkdown(raw);
+            presentationContent.innerHTML = renderPresentationOutput(raw);
         }
 
         function updatePresentationControls() {
@@ -726,7 +815,8 @@
             if (presentationContent) presentationContent.hidden = true;
             presentationEditor.hidden = false;
             presentationInput.value = getPresentationValue();
-            setPresentationView(currentPresentationView);
+            setPresentationMode(getPresentationMode());
+            setPresentationView('write');
             autoGrowPresentation();
             presentationInput.focus();
             updatePresentationSelection();
@@ -738,13 +828,23 @@
             renderPresentation();
         }
 
+        function cancelPresentationEdit() {
+            if (presentationInput) {
+                presentationInput.value = getPresentationValue();
+            }
+            setPresentationMode(getPresentationMode());
+            setPresentationView('write');
+            closePresentationEditor();
+        }
+
         async function savePresentation() {
             if (!currentCharacter || !canEditProfile()) return;
             const profileData = currentCharacter.profile_data || {};
             const nextMarkdown = (presentationInput?.value || '').trim();
             const nextProfileData = {
                 ...profileData,
-                presentation_md: nextMarkdown
+                presentation_md: nextMarkdown,
+                presentation_mode: currentPresentationMode
             };
 
             try {
@@ -857,6 +957,7 @@
         function applyPresentationTool(action) {
             if (!presentationInput) return;
             if (currentPresentationView === 'preview') setPresentationView('write');
+            if (currentPresentationMode === 'html') return;
             if (document.activeElement !== presentationInput) {
                 restorePresentationSelection();
             }
@@ -1394,7 +1495,7 @@
         }
 
         if (presentationCancel) {
-            presentationCancel.addEventListener('click', closePresentationEditor);
+            presentationCancel.addEventListener('click', cancelPresentationEdit);
         }
 
         if (presentationSave) {
@@ -1407,6 +1508,14 @@
 
         if (presentationViewPreview) {
             presentationViewPreview.addEventListener('click', () => setPresentationView('preview'));
+        }
+
+        if (presentationModeMarkdown) {
+            presentationModeMarkdown.addEventListener('click', () => setPresentationMode('markdown'));
+        }
+
+        if (presentationModeHtml) {
+            presentationModeHtml.addEventListener('click', () => setPresentationMode('html'));
         }
 
         if (presentationToolbar) {
