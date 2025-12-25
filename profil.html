@@ -234,7 +234,11 @@
                 <section class="profile-panel">
                     <h2 class="profile-panel-title">Mon look</h2>
                     <div class="profile-look-card">
-                                                <div class="profile-summary-card profile-summary-card--compact" aria-label="Résumé du joueur">
+                        <div class="profile-summary-card profile-summary-card--compact" aria-label="Résumé du joueur">
+                            <div class="profile-summary-header">
+                                <span class="profile-summary-title">Résumé</span>
+                                <a class="profile-summary-link" href="profil.html">Voir profil</a>
+                            </div>
                             <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
                                 <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
                                 <span class="profile-avatar-placeholder" id="characterInitial">Avatar</span>
@@ -250,9 +254,6 @@
                             </div>
                         </div>
                         <input class="profile-avatar-input" id="avatarUploadInput" type="file" accept="image/*">
-                        <div class="profile-look-preview">
-                            <span class="profile-look-placeholder">Prévisualisation à venir</span>
-                        </div>
                     </div>
 
                     <div class="profile-tags" id="profileTags" aria-label="Tags de profil">
@@ -448,6 +449,7 @@
 
         const AVATAR_BUCKET = 'avatars';
         const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+        const CHARACTER_SUMMARY_KEY = 'astoria_character_summary';
 
         const createBackdrop = document.getElementById('createCharacterBackdrop');
         const createForm = document.getElementById('createCharacterForm');
@@ -528,6 +530,35 @@
             }
             if (avatarPlaceholder) {
                 avatarPlaceholder.hidden = !!url;
+            }
+        }
+
+        function buildCharacterSummary(character) {
+            if (!character) return null;
+            const profileData = character.profile_data || {};
+            const race = character.race || '';
+            const charClass = character.class || '';
+            const roleText = [race, charClass].filter(Boolean).join(' • ');
+
+            return {
+                id: character.id || null,
+                name: character.name || '',
+                role: roleText,
+                avatar_url: profileData.avatar_url || '',
+                user_id: character.user_id || null,
+                updated_at: Date.now()
+            };
+        }
+
+        function persistCharacterSummary(character) {
+            try {
+                if (!character) {
+                    localStorage.removeItem(CHARACTER_SUMMARY_KEY);
+                    return;
+                }
+                localStorage.setItem(CHARACTER_SUMMARY_KEY, JSON.stringify(character));
+            } catch (error) {
+                console.warn('Impossible de sauvegarder le resume du personnage.', error);
             }
         }
 
@@ -1005,6 +1036,49 @@
             autoGrowPresentation();
         }
 
+        function handlePresentationKeydown(event) {
+            if (!presentationInput || currentPresentationMode === 'html') return;
+            const isModifier = event.ctrlKey || event.metaKey;
+            if (!isModifier || event.altKey) return;
+
+            const key = event.key.toLowerCase();
+
+            if (key === 'b') {
+                event.preventDefault();
+                applyPresentationTool('bold');
+                return;
+            }
+            if (key === 'i') {
+                event.preventDefault();
+                applyPresentationTool('italic');
+                return;
+            }
+            if (key === 'k') {
+                event.preventDefault();
+                applyPresentationTool('link');
+                return;
+            }
+            if (key === '`') {
+                event.preventDefault();
+                applyPresentationTool('code');
+                return;
+            }
+            if (event.shiftKey && key === '7') {
+                event.preventDefault();
+                applyPresentationTool('ol');
+                return;
+            }
+            if (event.shiftKey && key === '8') {
+                event.preventDefault();
+                applyPresentationTool('ul');
+                return;
+            }
+            if (event.shiftKey && key === 'h') {
+                event.preventDefault();
+                applyPresentationTool('heading');
+            }
+        }
+
         function destroyAvatarCropper() {
             if (avatarCropper) {
                 avatarCropper.destroy();
@@ -1373,18 +1447,27 @@
 
         function showNoCharacterSelected() {
             document.getElementById('characterInitial').textContent = '?';
-            document.getElementById('characterName').textContent = 'Aucun personnage sélectionné';
+            const nameEl = document.getElementById('characterName');
+            if (nameEl) {
+                nameEl.textContent = 'Aucun personnage sélectionné';
+                nameEl.setAttribute('href', 'profil.html');
+            }
             document.getElementById('characterRole').textContent = 'Sélectionnez un personnage ci-dessus';
             updateAvatarUI('');
             renderPresentation();
             updatePresentationControls();
+            persistCharacterSummary(null);
         }
 
         function displayCharacter(character) {
             // Update header with character info
             const initial = character.name ? character.name.charAt(0).toUpperCase() : '?';
             document.getElementById('characterInitial').textContent = initial;
-            document.getElementById('characterName').textContent = character.name || 'Sans nom';
+            const nameEl = document.getElementById('characterName');
+            if (nameEl) {
+                nameEl.textContent = character.name || 'Sans nom';
+                nameEl.setAttribute('href', `profil.html?character=${encodeURIComponent(character.id)}`);
+            }
 
             // Display race and class
             const race = character.race || 'Race inconnue';
@@ -1400,6 +1483,7 @@
             updateAvatarUI(profileData.avatar_url || '');
             renderPresentation();
             updatePresentationControls();
+            persistCharacterSummary(buildCharacterSummary(character));
 
             // TODO: Populate rest of profile sections based on issue #9 requirements
             // - House, Rank, Alice types, etc.
@@ -1461,6 +1545,7 @@
 
                 currentCharacter = res.character;
                 updateAvatarUI(publicUrl);
+                persistCharacterSummary(buildCharacterSummary(currentCharacter));
             } catch (error) {
                 console.error(error);
                 alert('Erreur lors de l\'upload.');
@@ -1541,6 +1626,7 @@
                     renderPresentationPreview(presentationInput.value);
                 }
             });
+            presentationInput.addEventListener('keydown', handlePresentationKeydown);
             presentationInput.addEventListener('keyup', updatePresentationSelection);
             presentationInput.addEventListener('mouseup', updatePresentationSelection);
             presentationInput.addEventListener('select', updatePresentationSelection);
