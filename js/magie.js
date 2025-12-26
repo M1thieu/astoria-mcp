@@ -8,6 +8,16 @@
     const capacityList = document.getElementById("magicCapacityList");
     const capacityFilter = document.getElementById("magicCapacityFilter");
     const addCapacityBtn = document.getElementById("magicAddCapacityBtn");
+    const capacityForm = document.getElementById("magicCapacityForm");
+    const capNameInput = document.getElementById("magicNewCapName");
+    const capTypeInput = document.getElementById("magicNewCapType");
+    const capRankInput = document.getElementById("magicNewCapRank");
+    const capRpInput = document.getElementById("magicNewCapRp");
+    const capEffectInput = document.getElementById("magicNewCapEffect");
+    const capCostInput = document.getElementById("magicNewCapCost");
+    const capLimitsInput = document.getElementById("magicNewCapLimits");
+    const capSaveBtn = document.getElementById("magicCapacitySave");
+    const capCancelBtn = document.getElementById("magicCapacityCancel");
     const adminSection = document.getElementById("magic-admin");
     const pageTabs = document.getElementById("magicPageTabs");
     const addPageBtn = document.getElementById("magicAddPageBtn");
@@ -183,6 +193,7 @@
         activePageIndex = index;
         applyFormFields(pages[activePageIndex].fields || {});
         setActiveSection(activeSection);
+        setCapacityFormOpen(false);
         renderCapacities(capacityFilter ? capacityFilter.value : "");
         renderPageTabs();
         saveToStorage();
@@ -280,6 +291,40 @@
             });
     }
 
+    function setCapacityFormOpen(open) {
+        if (!capacityForm) return;
+        capacityForm.hidden = !open;
+        if (open && capNameInput) capNameInput.focus();
+    }
+
+    function resetCapacityForm() {
+        if (capNameInput) capNameInput.value = "";
+        if (capTypeInput) capTypeInput.value = "offensif";
+        if (capRankInput) capRankInput.value = "mineur";
+        if (capRpInput) capRpInput.value = "";
+        if (capEffectInput) capEffectInput.value = "";
+        if (capCostInput) capCostInput.value = "";
+        if (capLimitsInput) capLimitsInput.value = "";
+    }
+
+    function buildCapacityFromForm() {
+        const name = capNameInput?.value.trim();
+        if (!name) return null;
+        return {
+            id: `cap-${Date.now()}`,
+            name,
+            type: capTypeInput?.value || "offensif",
+            rank: capRankInput?.value || "mineur",
+            stats: [],
+            rp: capRpInput?.value.trim() || "",
+            effect: capEffectInput?.value.trim() || "",
+            cost: capCostInput?.value.trim() || "",
+            limits: capLimitsInput?.value.trim() || "",
+            adminNote: "",
+            locked: false
+        };
+    }
+
     if (!isAdmin && adminSection) {
         const adminNav = document.querySelector(".magic-nav-btn--admin");
         if (adminNav) {
@@ -316,7 +361,34 @@
 
     if (addCapacityBtn) {
         addCapacityBtn.addEventListener("click", () => {
-            alert("Ajout de capacités à venir (placeholder). Le backend définira la sauvegarde JSON.");
+            if (!capacityForm) return;
+            const willOpen = capacityForm.hidden;
+            setCapacityFormOpen(willOpen);
+            if (willOpen) {
+                resetCapacityForm();
+            }
+        });
+    }
+
+    if (capCancelBtn) {
+        capCancelBtn.addEventListener("click", () => {
+            setCapacityFormOpen(false);
+        });
+    }
+
+    if (capSaveBtn) {
+        capSaveBtn.addEventListener("click", () => {
+            const newCap = buildCapacityFromForm();
+            if (!newCap) {
+                alert("Ajoutez un nom pour la capacite.");
+                return;
+            }
+            if (!pages[activePageIndex]) return;
+            pages[activePageIndex].capacities = pages[activePageIndex].capacities || [];
+            pages[activePageIndex].capacities.push(newCap);
+            renderCapacities(capacityFilter ? capacityFilter.value : "");
+            setCapacityFormOpen(false);
+            saveToStorage();
         });
     }
 

@@ -37,6 +37,10 @@ function ensureTopbarStyles() {
 .app-topbar-select:focus{outline:none;box-shadow:0 0 0 3px rgba(216,27,96,.22)}
 .app-topbar-badge{padding:var(--space-2,4px) var(--space-4,8px);border-radius:999px;background:var(--color-primary,#d81b60);color:#fff;font-weight:600;font-size:var(--text-sm,.8rem);letter-spacing:var(--letter-spacing-wide,.08em);white-space:nowrap}
 .app-topbar-label{color:var(--color-gray-800,#444);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.app-topbar-souls{display:flex;gap:var(--space-2,4px);align-items:center;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid rgba(216,27,96,.2)}
+.app-topbar-soul{display:flex;flex-direction:column;align-items:center;line-height:1}
+.app-topbar-soul-label{font-size:.6rem;color:#666;text-transform:uppercase;letter-spacing:.06em}
+.app-topbar-soul-value{font-weight:700;color:var(--color-primary,#d81b60);font-size:.78rem}
 .app-topbar-logout{padding:var(--space-2,4px) var(--space-4,8px);border-radius:var(--radius-md,6px);border:2px solid rgba(216,27,96,.55);background:rgba(255,255,255,.9);color:var(--color-primary,#d81b60);font-family:var(--font-family,system-ui);font-size:var(--text-sm-plus,.82rem);font-weight:600;cursor:pointer;transition:transform .12s ease,background .12s ease;white-space:nowrap}
 .app-topbar-logout:hover{background:rgba(255,255,255,1);transform:translateY(-1px)}
 .app-topbar-logout:active{transform:translateY(0)}
@@ -104,6 +108,16 @@ async function run() {
 
   const badge = el("span", "app-topbar-badge", adminMode ? "ADMIN" : "JOUEUR");
   const label = el("span", "app-topbar-label");
+  const souls = el("div", "app-topbar-souls");
+  const soulConso = el("div", "app-topbar-soul");
+  const soulConsoLabel = el("span", "app-topbar-soul-label", "Ames conso");
+  const soulConsoValue = el("span", "app-topbar-soul-value", "0");
+  soulConso.append(soulConsoLabel, soulConsoValue);
+  const soulProg = el("div", "app-topbar-soul");
+  const soulProgLabel = el("span", "app-topbar-soul-label", "Ames prog");
+  const soulProgValue = el("span", "app-topbar-soul-value", "0");
+  soulProg.append(soulProgLabel, soulProgValue);
+  souls.append(soulConso, soulProg);
 
   const logoutBtn = el("button", "app-topbar-logout", "Déconnexion");
   logoutBtn.type = "button";
@@ -147,6 +161,31 @@ async function run() {
     });
   }
 
+  function readSoulCounts(active) {
+    if (!active || !active.id) return { conso: 0, prog: 0 };
+    const key = `fiche-${active.id}-eater`;
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return { conso: 0, prog: 0 };
+      const data = JSON.parse(raw);
+      const conso = Number.parseInt(data?.eaterAmesConso ?? 0, 10);
+      const prog = Number.parseInt(data?.eaterAmesProgression ?? 0, 10);
+      return {
+        conso: Number.isNaN(conso) ? 0 : conso,
+        prog: Number.isNaN(prog) ? 0 : prog
+      };
+    } catch {
+      return { conso: 0, prog: 0 };
+    }
+  }
+
+  function renderSoulCounts(active) {
+    const counts = readSoulCounts(active);
+    soulConsoValue.textContent = String(counts.conso);
+    soulProgValue.textContent = String(counts.prog);
+    souls.title = "Compteur d'ames (stub, base sur la fiche)";
+  }
+
   function syncFromActive() {
     const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
     if (active && active.id) {
@@ -156,6 +195,7 @@ async function run() {
       selector.value = "";
       label.textContent = user.username;
     }
+    renderSoulCounts(active);
   }
 
   syncFromActive();
@@ -188,11 +228,16 @@ async function run() {
   });
 
   if (adminSelect) {
-    mount.append(selector, adminSelect, badge, label, logoutBtn);
+    mount.append(selector, adminSelect, badge, label, souls, logoutBtn);
   } else {
-    mount.append(selector, badge, label, logoutBtn);
+    mount.append(selector, badge, label, souls, logoutBtn);
   }
   document.body.prepend(mount);
+
+  setInterval(() => {
+    const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
+    renderSoulCounts(active);
+  }, 1200);
 }
 
 run();

@@ -168,6 +168,55 @@
                                 </div>
                             </div>
 
+                            <div class="magic-capacity-form" id="magicCapacityForm" hidden>
+                                <div class="magic-form-row">
+                                    <label class="magic-label" for="magicNewCapName">Nom de la capacite</label>
+                                    <input id="magicNewCapName" class="magic-input" type="text" placeholder="Ex : Lame eclipse" />
+                                </div>
+                                <div class="magic-form-row magic-form-row--split">
+                                    <div class="magic-form-field">
+                                        <label class="magic-label" for="magicNewCapType">Type</label>
+                                        <select id="magicNewCapType" class="magic-input">
+                                            <option value="offensif">Offensif</option>
+                                            <option value="defensif">Defensif</option>
+                                            <option value="soutien">Soutien</option>
+                                            <option value="utilitaire">Utilitaire</option>
+                                        </select>
+                                    </div>
+                                    <div class="magic-form-field">
+                                        <label class="magic-label" for="magicNewCapRank">Rang</label>
+                                        <select id="magicNewCapRank" class="magic-input">
+                                            <option value="mineur">Mineur</option>
+                                            <option value="majeur">Majeur</option>
+                                            <option value="signature">Signature</option>
+                                            <option value="ultime">Ultime</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="magic-form-row">
+                                    <label class="magic-label" for="magicNewCapRp">Description RP</label>
+                                    <textarea id="magicNewCapRp" class="magic-input magic-input--textarea" rows="2" placeholder="Declenchement, ambiance, etc."></textarea>
+                                </div>
+                                <div class="magic-form-row">
+                                    <label class="magic-label" for="magicNewCapEffect">Effet mecanique</label>
+                                    <textarea id="magicNewCapEffect" class="magic-input magic-input--textarea" rows="2" placeholder="Degats, effets, duree..."></textarea>
+                                </div>
+                                <div class="magic-form-row magic-form-row--split">
+                                    <div class="magic-form-field">
+                                        <label class="magic-label" for="magicNewCapCost">Cout</label>
+                                        <input id="magicNewCapCost" class="magic-input" type="text" placeholder="Mana, fatigue..." />
+                                    </div>
+                                    <div class="magic-form-field">
+                                        <label class="magic-label" for="magicNewCapLimits">Limites</label>
+                                        <input id="magicNewCapLimits" class="magic-input" type="text" placeholder="Conditions, contraintes..." />
+                                    </div>
+                                </div>
+                                <div class="magic-capacity-form-actions">
+                                    <button type="button" class="magic-btn magic-btn-outline" id="magicCapacityCancel">Annuler</button>
+                                    <button type="button" class="magic-btn magic-btn-primary" id="magicCapacitySave">Ajouter</button>
+                                </div>
+                            </div>
+
                             <ul class="magic-capacity-list" id="magicCapacityList" aria-label="Liste des capacités">
                                 <!-- Capacités exemple : purement placeholders -->
                             </ul>
@@ -176,6 +225,7 @@
                         <!-- 4. Progression & limitations -->
                         <section id="magic-progression" class="magic-section" aria-label="Progression & limitations">
                             <h2 class="magic-section-title">Progression &amp; limitations</h2>
+                            <p class="magic-section-help magic-progress-hint">Deverrouillage auto par tags (Weapon / Meister / Alice / Sorcier) et ames: stub en cours.</p>
                             <div class="magic-cards-grid magic-cards-grid--two">
                                 <article class="magic-card">
                                     <h3 class="magic-card-title">Cadre global</h3>

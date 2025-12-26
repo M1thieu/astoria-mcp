@@ -46,6 +46,16 @@ export const adminPanel = {
     actions.append(selectLabel, select, hint);
     wrapper.appendChild(actions);
 
+    const stub = el("div", "panel-admin-stub");
+    const stubTitle = el("h4", "panel-admin-stub-title", "Admin panel (stub)");
+    const stubBody = el(
+      "p",
+      "panel-muted",
+      "Roles, permissions, moderation et audit seront ajoutes ici."
+    );
+    stub.append(stubTitle, stubBody);
+    wrapper.appendChild(stub);
+
     select.addEventListener("change", async () => {
       const value = select.value;
       if (!value) return;

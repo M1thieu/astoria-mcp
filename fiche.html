@@ -90,6 +90,16 @@
                             <label class="field-label" for="identitePaysOrigine">Pays d'origine</label>
                             <input id="identitePaysOrigine" class="field-input" type="text" placeholder="Royaume / pays / région d'origine.">
                         </div>
+                        <div class="field-group">
+                            <div class="relations-header">
+                                <label class="field-label">Liens &amp; relations</label>
+                                <button type="button" class="relation-add-btn" id="addBackgroundRelation">+ Ajouter un lien</button>
+                            </div>
+                            <div class="relations-list" id="backgroundRelations"></div>
+                            <p class="relations-hint">
+                                Ajoute un ID de personnage pour créer un lien direct vers son profil (optionnel).
+                            </p>
+                        </div>
                     </section>
 
                     <!-- Appartenance -->
@@ -328,6 +338,7 @@
                         </div>
 
                         <div id="sorcellerie-fields" class="conditional-block" hidden>
+                            <p class="fiche-hint">Deblocage par parchemins d'eveil et tags Sorcier: stub en cours.</p>
                             <div class="field-group">
                                 <label class="field-label" for="sorcelleriePrincipale">Magie principale</label>
                                 <input
@@ -396,6 +407,7 @@
                             <!-- Soul Counter Panel -->
                             <div class="eater-counter">
                                 <h3 class="eater-counter-title">Compteur d'âmes</h3>
+                                <p class="fiche-hint">Lien automatique avec l'inventaire (ames) : stub.</p>
                                 <div class="field-group field-group--inline">
                                     <div class="field-group">
                                         <label class="field-label" for="eaterAmesConso">Âmes de Consommation</label>
@@ -672,6 +684,26 @@
             const summaryAvatarImg = document.getElementById('characterSummaryAvatar');
             const summaryAvatarInitial = document.getElementById('characterSummaryInitial');
             let currentCharacterKey = 'default';
+            const relationsContainer = document.getElementById('backgroundRelations');
+            const addRelationBtn = document.getElementById('addBackgroundRelation');
+            const RELATION_TYPES = [
+                { value: 'family', label: 'Famille' },
+                { value: 'friend', label: 'Ami' },
+                { value: 'enemy', label: 'Ennemi' },
+                { value: 'rival', label: 'Rival' },
+                { value: 'romance', label: 'Romantique' },
+                { value: 'mentor', label: 'Mentor' },
+                { value: 'ally', label: 'Allie' }
+            ];
+            let authApi = null;
+
+            (async () => {
+                try {
+                    authApi = await import('./js/auth.js');
+                } catch (error) {
+                    authApi = null;
+                }
+            })();
 
             function getActiveCharacterFromStorage() {
                 const raw = localStorage.getItem(CHARACTER_STORAGE_KEY);
@@ -757,6 +789,161 @@
                 const legacy = getLegacySummary();
                 if (legacy) {
                     applySummaryData(legacy);
+                }
+            }
+
+            function updateRelationLink(row) {
+                const input = row.querySelector('.relation-character');
+                const link = row.querySelector('.relation-link-btn');
+                if (!input || !link) return;
+                const value = input.value.trim();
+                if (!value) {
+                    link.hidden = true;
+                    link.removeAttribute('href');
+                    return;
+                }
+                link.hidden = false;
+                link.href = `profil.html?character=${encodeURIComponent(value)}`;
+            }
+
+            function createRelationRow(data) {
+                const row = document.createElement('div');
+                row.className = 'relation-row';
+
+                const nameInput = document.createElement('input');
+                nameInput.className = 'field-input relation-name';
+                nameInput.type = 'text';
+                nameInput.placeholder = 'Nom du lien';
+
+                const typeSelect = document.createElement('select');
+                typeSelect.className = 'field-input relation-type';
+                RELATION_TYPES.forEach((optionData) => {
+                    const option = document.createElement('option');
+                    option.value = optionData.value;
+                    option.textContent = optionData.label;
+                    typeSelect.appendChild(option);
+                });
+
+                const charInput = document.createElement('input');
+                charInput.className = 'field-input relation-character';
+                charInput.type = 'text';
+                charInput.placeholder = 'ID personnage (optionnel)';
+
+                const link = document.createElement('a');
+                link.className = 'relation-link-btn';
+                link.textContent = 'Voir profil';
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.hidden = true;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'relation-remove-btn';
+                removeBtn.textContent = 'Retirer';
+
+                row.append(nameInput, typeSelect, charInput, link, removeBtn);
+
+                if (data) {
+                    if (data.name) nameInput.value = data.name;
+                    if (data.type) typeSelect.value = data.type;
+                    if (data.characterId) charInput.value = data.characterId;
+                }
+
+                updateRelationLink(row);
+
+                const markDirty = () => markTabDirty('background');
+                nameInput.addEventListener('input', markDirty);
+                typeSelect.addEventListener('change', markDirty);
+                charInput.addEventListener('input', () => {
+                    updateRelationLink(row);
+                    markDirty();
+                });
+
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    markDirty();
+                });
+
+                return row;
+            }
+
+            function collectRelations() {
+                if (!relationsContainer) return [];
+                const rows = Array.from(relationsContainer.querySelectorAll('.relation-row'));
+                return rows
+                    .map((row) => {
+                        const name = row.querySelector('.relation-name')?.value.trim() || '';
+                        const type = row.querySelector('.relation-type')?.value || '';
+                        const characterId = row.querySelector('.relation-character')?.value.trim() || '';
+                        if (!name && !type && !characterId) return null;
+                        return { name, type, characterId };
+                    })
+                    .filter(Boolean);
+            }
+
+            function restoreRelations(relations) {
+                if (!relationsContainer) return;
+                relationsContainer.innerHTML = '';
+                (relations || []).forEach((relation) => {
+                    relationsContainer.appendChild(createRelationRow(relation));
+                });
+            }
+
+            function getInputValue(id) {
+                const input = document.getElementById(id);
+                return input ? input.value.trim() : '';
+            }
+
+            function getSelectLabel(id) {
+                const select = document.getElementById(id);
+                if (!select) return '';
+                if (!select.value) return '';
+                const option = select.options[select.selectedIndex];
+                return option ? option.textContent.trim() : '';
+            }
+
+            function syncProfileFromFiche() {
+                const active = getActiveCharacterFromStorage();
+                const name = getInputValue('identiteNomPrenom');
+                const race = getInputValue('identiteRace');
+                const roleLabel = getSelectLabel('appRole');
+                const profileData = active?.profile_data || {};
+                const avatarUrl = profileData.avatar_url || '';
+                const roleText = [race, roleLabel].filter(Boolean).join(' - ');
+                const summary = {
+                    id: active?.id || null,
+                    name: name || active?.name || 'Personnage',
+                    role: roleText || 'Classe / Role / Surnom',
+                    avatar_url: avatarUrl
+                };
+
+                if (summary.id) {
+                    try {
+                        localStorage.setItem(LEGACY_SUMMARY_KEY, JSON.stringify(summary));
+                    } catch {}
+                }
+
+                if (active && active.id) {
+                    const next = { ...active };
+                    if (name) next.name = name;
+                    if (race) next.race = race;
+                    if (roleLabel) next.class = roleLabel;
+                    next.profile_data = { ...profileData, fiche_summary: summary };
+                    try {
+                        localStorage.setItem(CHARACTER_STORAGE_KEY, JSON.stringify(next));
+                    } catch {}
+                }
+
+                updateSummary(resolveCharacterContext());
+
+                if (authApi?.updateCharacter && active?.id) {
+                    const updates = {
+                        profile_data: { ...profileData, fiche_summary: summary }
+                    };
+                    if (name) updates.name = name;
+                    if (race) updates.race = race;
+                    if (roleLabel) updates.class = roleLabel;
+                    authApi.updateCharacter(active.id, updates).catch(() => {});
                 }
             }
 
@@ -864,6 +1051,14 @@
                 markTabDirty('sorcellerie');
             });
 
+            if (addRelationBtn) {
+                addRelationBtn.addEventListener('click', () => {
+                    if (!relationsContainer) return;
+                    relationsContainer.appendChild(createRelationRow());
+                    markTabDirty('background');
+                });
+            }
+
             // Mark tab as dirty when any input changes
             function markTabDirty(tabName) {
                 dirtyTabs.add(tabName);
@@ -904,6 +1099,9 @@
                         if (group) group.remove();
                     });
                     magieSupCount = 0;
+                }
+                if (tabName === 'background' && relationsContainer) {
+                    relationsContainer.innerHTML = '';
                 }
             }
 
@@ -947,9 +1145,16 @@
                     const magieSupInputs = panel.querySelectorAll('.magie-supplementaire');
                     data.magieSupplementaire = Array.from(magieSupInputs).map(input => input.value);
                 }
+                if (tabName === 'background') {
+                    data.backgroundRelations = collectRelations();
+                }
 
                 localStorage.setItem(getTabStorageKey(tabName), JSON.stringify(data));
                 console.log('Saved tab:', tabName, data);
+
+                if (tabName === 'identite' || tabName === 'appartenance') {
+                    syncProfileFromFiche();
+                }
 
                 // Visual feedback
                 btn.textContent = 'Sauvegardé ✓';
@@ -1022,6 +1227,9 @@
                 // Trigger visibility updates
                 if (tabName === 'alice') {
                     updateAliceVisibility();
+                }
+                if (tabName === 'background') {
+                    restoreRelations(data.backgroundRelations || []);
                 }
                 updateConditionalVisibility();
             }

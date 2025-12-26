@@ -337,6 +337,8 @@
         const previewImage = document.getElementById('previewImage');
         const previewName = document.getElementById('previewName');
         const previewDescription = document.getElementById('previewDescription');
+        const inventoryWrapper = document.querySelector('.inventory-wrapper');
+        let inventoryAccessAllowed = true;
 
         // =================================================================
         // INITIALIZATION
@@ -352,6 +354,10 @@
             console.log('Initializing inventory...');
 
             await initInventoryStorage();
+            if (!inventoryAccessAllowed) {
+                renderInventoryAccessDenied();
+                return;
+            }
             await loadInventory();
 
             // Render
@@ -466,6 +472,19 @@
             };
         }
 
+        function renderInventoryAccessDenied() {
+            if (!inventoryWrapper) return;
+            inventoryWrapper.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">LOCK</div>
+                    <div class="empty-state-title">Acces restreint</div>
+                    <div class="empty-state-message">
+                        Seul le proprietaire du personnage ou un administrateur peut consulter cet inventaire.
+                    </div>
+                </div>
+            `;
+        }
+
         async function initInventoryStorage() {
             inventoryStorageMode = 'local';
             authApi = null;
@@ -474,8 +493,12 @@
                 authApi = await import('./js/auth.js');
                 const user = authApi.getCurrentUser?.();
                 const character = authApi.getActiveCharacter?.();
+                const isAdmin = authApi.isAdmin?.() || false;
                 if (user && character && character.id) {
                     inventoryStorageMode = 'character';
+                    if (character.user_id && !isAdmin && character.user_id !== user.id) {
+                        inventoryAccessAllowed = false;
+                    }
                 }
             } catch (error) {
                 // No server / module blocked / auth module unavailable => stay in local mode
