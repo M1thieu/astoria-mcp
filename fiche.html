@@ -19,7 +19,7 @@
                 <div class="character-summary" aria-label="Résumé du personnage">
                     <div class="character-avatar">
                         <img class="character-avatar-img" id="characterSummaryAvatar" alt="Avatar" hidden>
-                        <div class="character-avatar-circle" id="characterSummaryInitial">?</div>
+                        <div class="character-avatar-circle" id="characterSummaryInitial"></div>
                     </div>
                     <div class="character-summary-text">
                         <a class="character-name" id="characterSummaryName" href="profil.html">Nom du personnage</a>
@@ -664,6 +664,114 @@
             const tabPanels = Array.from(document.querySelectorAll('.tab-panel'));
             const saveButtons = Array.from(document.querySelectorAll('.save-tab-button'));
             const dirtyTabs = new Set();
+            const CHARACTER_STORAGE_KEY = 'astoria_active_character';
+            const LEGACY_SUMMARY_KEY = 'astoria_character_summary';
+            const STORAGE_PREFIX = 'fiche';
+            const summaryNameEl = document.getElementById('characterSummaryName');
+            const summaryTaglineEl = document.getElementById('characterSummaryTagline');
+            const summaryAvatarImg = document.getElementById('characterSummaryAvatar');
+            const summaryAvatarInitial = document.getElementById('characterSummaryInitial');
+            let currentCharacterKey = 'default';
+
+            function getActiveCharacterFromStorage() {
+                const raw = localStorage.getItem(CHARACTER_STORAGE_KEY);
+                if (!raw) return null;
+                try {
+                    return JSON.parse(raw);
+                } catch (error) {
+                    console.warn('Active character cache invalid.', error);
+                    return null;
+                }
+            }
+
+            function getLegacySummary() {
+                const raw = localStorage.getItem(LEGACY_SUMMARY_KEY);
+                if (!raw) return null;
+                try {
+                    return JSON.parse(raw);
+                } catch (error) {
+                    console.warn('Legacy summary invalid.', error);
+                    return null;
+                }
+            }
+
+            function resolveCharacterContext() {
+                const character = getActiveCharacterFromStorage();
+                if (character && character.id) {
+                    return { key: character.id, character };
+                }
+                const legacy = getLegacySummary();
+                if (legacy && legacy.id) {
+                    return { key: legacy.id, character: null };
+                }
+                const params = new URLSearchParams(window.location.search);
+                const fallback = params.get('character');
+                return { key: fallback || 'default', character: null };
+            }
+
+            function buildRoleText(character) {
+                if (!character) return 'Classe / Role / Surnom';
+                const parts = [];
+                if (character.race) parts.push(character.race);
+                if (character.class) parts.push(character.class);
+                return parts.length ? parts.join(' - ') : 'Classe / Role / Surnom';
+            }
+
+            function applySummaryData(summary) {
+                if (!summaryNameEl || !summaryTaglineEl || !summaryAvatarInitial) return;
+                const name = summary?.name || 'Personnage';
+                const role = summary?.role || 'Classe / Role / Surnom';
+                const avatarUrl = summary?.avatar_url || '';
+                summaryNameEl.textContent = name;
+                summaryNameEl.setAttribute(
+                    'href',
+                    summary?.id ? 'profil.html?character=' + encodeURIComponent(summary.id) : 'profil.html'
+                );
+                summaryTaglineEl.textContent = role;
+                if (summaryAvatarImg) {
+                    if (avatarUrl) {
+                        summaryAvatarImg.src = avatarUrl;
+                        summaryAvatarImg.hidden = false;
+                        summaryAvatarInitial.hidden = true;
+                    } else {
+                        summaryAvatarImg.hidden = true;
+                        summaryAvatarImg.removeAttribute('src');
+                        summaryAvatarInitial.hidden = false;
+                        summaryAvatarInitial.textContent = name ? name.charAt(0).toUpperCase() : '';
+                    }
+                }
+            }
+
+            function updateSummary(context) {
+                if (context.character) {
+                    const profileData = context.character.profile_data || {};
+                    applySummaryData({
+                        id: context.character.id,
+                        name: context.character.name || 'Personnage',
+                        role: buildRoleText(context.character),
+                        avatar_url: profileData.avatar_url || ''
+                    });
+                    return;
+                }
+
+                const legacy = getLegacySummary();
+                if (legacy) {
+                    applySummaryData(legacy);
+                }
+            }
+
+            function getTabStorageKey(tabName) {
+                return `${STORAGE_PREFIX}-${currentCharacterKey}-${tabName}`;
+            }
+
+            function getLegacyTabStorageKey(tabName) {
+                return `${STORAGE_PREFIX}-${tabName}`;
+            }
+
+            function clearAllDirty() {
+                dirtyTabs.clear();
+                saveButtons.forEach((btn) => btn.classList.remove('save-button--highlight'));
+            }
 
             // Tab switching
             tabButtons.forEach((button) => {
@@ -710,13 +818,19 @@
                 const panel = document.getElementById(panelId);
                 if (!checkbox || !panel) return;
 
-                const updateVisibility = () => {
-                    panel.hidden = !checkbox.checked;
-                };
-
-                checkbox.addEventListener('change', updateVisibility);
-                updateVisibility();
+                checkbox.addEventListener('change', updateConditionalVisibility);
             });
+
+            function updateConditionalVisibility() {
+                conditionalConfigs.forEach(({ checkboxId, panelId }) => {
+                    const checkbox = document.getElementById(checkboxId);
+                    const panel = document.getElementById(panelId);
+                    if (!checkbox || !panel) return;
+                    panel.hidden = !checkbox.checked;
+                });
+            }
+
+            updateConditionalVisibility();
 
             // Dynamic Magie Supplémentaire
             const addMagieBtn = document.getElementById('addMagieSupplementaire');
@@ -767,6 +881,32 @@
                 }
             }
 
+            function resetTab(tabName) {
+                const panel = document.getElementById('tab-' + tabName);
+                if (!panel) return;
+
+                const inputs = panel.querySelectorAll('input, select, textarea');
+                inputs.forEach((input) => {
+                    if (input.classList.contains('magie-supplementaire')) return;
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    } else if (input.tagName === 'SELECT') {
+                        input.selectedIndex = 0;
+                    } else {
+                        input.value = '';
+                    }
+                });
+
+                if (tabName === 'sorcellerie' && magieContainer) {
+                    const extraInputs = magieContainer.querySelectorAll('.magie-supplementaire');
+                    extraInputs.forEach((input) => {
+                        const group = input.closest('.field-group');
+                        if (group) group.remove();
+                    });
+                    magieSupCount = 0;
+                }
+            }
+
             // Add change listeners to all inputs
             tabPanels.forEach((panel) => {
                 const tabName = panel.id.replace('tab-', '');
@@ -808,7 +948,7 @@
                     data.magieSupplementaire = Array.from(magieSupInputs).map(input => input.value);
                 }
 
-                localStorage.setItem('fiche-' + tabName, JSON.stringify(data));
+                localStorage.setItem(getTabStorageKey(tabName), JSON.stringify(data));
                 console.log('Saved tab:', tabName, data);
 
                 // Visual feedback
@@ -822,7 +962,17 @@
                 const panel = document.getElementById('tab-' + tabName);
                 if (!panel) return;
 
-                const savedData = localStorage.getItem('fiche-' + tabName);
+                const storageKey = getTabStorageKey(tabName);
+                let savedData = localStorage.getItem(storageKey);
+                if (!savedData) {
+                    const legacyKey = getLegacyTabStorageKey(tabName);
+                    const legacyData = localStorage.getItem(legacyKey);
+                    if (legacyData) {
+                        savedData = legacyData;
+                        localStorage.setItem(storageKey, legacyData);
+                    }
+                }
+                resetTab(tabName);
                 if (!savedData) return;
 
                 const data = JSON.parse(savedData);
@@ -873,57 +1023,34 @@
                 if (tabName === 'alice') {
                     updateAliceVisibility();
                 }
+                updateConditionalVisibility();
             }
 
             // Load all tabs on page load
             const allTabs = ['identite', 'appartenance', 'combat', 'alice', 'sorcellerie', 'eater', 'religion', 'mental', 'physique', 'background'];
-            allTabs.forEach(loadTab);
 
-            // Update conditional visibility after loading
-            updateAliceVisibility();
-        })();
-    </script>
-
-    <script>
-        (function () {
-            var STORAGE_KEY = 'astoria_character_summary';
-            var raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return;
-
-            var summary = null;
-            try {
-                summary = JSON.parse(raw);
-            } catch (error) {
-                console.warn('Resume personnage invalide.', error);
-                return;
+            function loadAllTabs() {
+                allTabs.forEach(loadTab);
+                updateAliceVisibility();
+                updateConditionalVisibility();
             }
-            if (!summary) return;
 
-            var nameEl = document.getElementById('characterSummaryName');
-            var taglineEl = document.getElementById('characterSummaryTagline');
-            var avatarImg = document.getElementById('characterSummaryAvatar');
-            var avatarInitial = document.getElementById('characterSummaryInitial');
+            const initialContext = resolveCharacterContext();
+            currentCharacterKey = initialContext.key;
+            updateSummary(initialContext);
+            loadAllTabs();
 
-            var name = summary.name || '';
-            var role = summary.role || 'Classe / Role / Surnom';
-            var avatarUrl = summary.avatar_url || '';
-
-            if (nameEl) {
-                nameEl.textContent = name || 'Personnage';
-                nameEl.setAttribute('href', summary.id ? 'profil.html?character=' + encodeURIComponent(summary.id) : 'profil.html');
-            }
-            if (taglineEl) taglineEl.textContent = role;
-            if (avatarImg && avatarInitial) {
-                if (avatarUrl) {
-                    avatarImg.src = avatarUrl;
-                    avatarImg.hidden = false;
-                    avatarInitial.hidden = true;
-                } else {
-                    avatarImg.hidden = true;
-                    avatarInitial.hidden = false;
-                    avatarInitial.textContent = name ? name.charAt(0).toUpperCase() : '?';
+            setInterval(() => {
+                const nextContext = resolveCharacterContext();
+                if (nextContext.key !== currentCharacterKey) {
+                    currentCharacterKey = nextContext.key;
+                    updateSummary(nextContext);
+                    clearAllDirty();
+                    loadAllTabs();
+                    return;
                 }
-            }
+                updateSummary(nextContext);
+            }, 800);
         })();
     </script>
 </body>
