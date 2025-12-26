@@ -16,6 +16,12 @@
     border: 1px solid var(--color-primary-light);
 }
 
+.character-avatar {
+    position: relative;
+    width: 56px;
+    height: 56px;
+}
+
 .character-avatar-circle {
     width: 56px;
     height: 56px;
@@ -29,6 +35,17 @@
     color: var(--color-primary);
 }
 
+.character-avatar-img {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-primary-light);
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    background: var(--color-white);
+}
+
 .character-summary-text {
     display: flex;
     flex-direction: column;
@@ -38,6 +55,11 @@
 .character-name {
     font-weight: var(--font-semibold);
     color: var(--color-primary);
+    text-decoration: none;
+}
+
+.character-name:hover {
+    text-decoration: underline;
 }
 
 .character-tagline {

@@ -237,7 +237,6 @@
                         <div class="profile-summary-card profile-summary-card--compact" aria-label="Résumé du joueur">
                             <div class="profile-summary-header">
                                 <span class="profile-summary-title">Résumé</span>
-                                <a class="profile-summary-link" href="profil.html">Voir profil</a>
                             </div>
                             <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
                                 <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
@@ -449,6 +448,18 @@
 
         const AVATAR_BUCKET = 'avatars';
         const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+
+        if (avatarImg) {
+            avatarImg.addEventListener('error', () => {
+                avatarImg.hidden = true;
+                avatarImg.removeAttribute('src');
+                if (avatarPlaceholder) avatarPlaceholder.hidden = false;
+            });
+            avatarImg.addEventListener('load', () => {
+                if (!avatarImg.src) return;
+                if (avatarPlaceholder) avatarPlaceholder.hidden = true;
+            });
+        }
         const CHARACTER_SUMMARY_KEY = 'astoria_character_summary';
 
         const createBackdrop = document.getElementById('createCharacterBackdrop');
@@ -525,7 +536,7 @@
                     avatarImg.hidden = false;
                 } else {
                     avatarImg.hidden = true;
-                    avatarImg.src = '';
+                    avatarImg.removeAttribute('src');
                 }
             }
             if (avatarPlaceholder) {
@@ -538,7 +549,7 @@
             const profileData = character.profile_data || {};
             const race = character.race || '';
             const charClass = character.class || '';
-            const roleText = [race, charClass].filter(Boolean).join(' • ');
+            const roleText = [race, charClass].filter(Boolean).join(' - ');
 
             return {
                 id: character.id || null,
@@ -778,7 +789,7 @@
             if (presentationHint) {
                 presentationHint.textContent = isHtml
                     ? 'HTML avance (scripts desactives).'
-                    : '*italique* / **gras** / [lien](https://exemple.com)';
+                    : '*italique* / **gras** / [lien](https://exemple.com) - Ctrl/Cmd+B, Ctrl/Cmd+I, Ctrl/Cmd+K';
             }
             if (presentationInputLabel) {
                 presentationInputLabel.textContent = isHtml ? 'HTML avance' : 'Texte (Markdown simple)';
@@ -803,8 +814,14 @@
                 presentationViewPreview.classList.toggle('is-active', isPreview);
                 presentationViewPreview.setAttribute('aria-selected', String(isPreview));
             }
-            if (presentationEditorWrite) presentationEditorWrite.hidden = isPreview;
-            if (presentationPreview) presentationPreview.hidden = !isPreview;
+            if (presentationEditorWrite) {
+                presentationEditorWrite.hidden = isPreview;
+                presentationEditorWrite.style.display = isPreview ? 'none' : '';
+            }
+            if (presentationPreview) {
+                presentationPreview.hidden = !isPreview;
+                presentationPreview.style.display = isPreview ? 'block' : 'none';
+            }
             if (presentationHint) presentationHint.hidden = isPreview;
             if (presentationEditor) presentationEditor.dataset.view = currentPresentationView;
             if (isPreview) renderPresentationPreview();
@@ -1041,40 +1058,49 @@
             const isModifier = event.ctrlKey || event.metaKey;
             if (!isModifier || event.altKey) return;
 
-            const key = event.key.toLowerCase();
+            const key = (event.key || '').toLowerCase();
+            const code = event.code || '';
+            const isKey = (k, c) => key === k || code === c;
 
-            if (key === 'b') {
+            if (isKey('b', 'KeyB')) {
                 event.preventDefault();
+                event.stopPropagation();
                 applyPresentationTool('bold');
                 return;
             }
-            if (key === 'i') {
+            if (isKey('i', 'KeyI')) {
                 event.preventDefault();
+                event.stopPropagation();
                 applyPresentationTool('italic');
                 return;
             }
-            if (key === 'k') {
+            if (isKey('k', 'KeyK')) {
                 event.preventDefault();
+                event.stopPropagation();
                 applyPresentationTool('link');
                 return;
             }
-            if (key === '`') {
+            if (isKey('`', 'Backquote')) {
                 event.preventDefault();
+                event.stopPropagation();
                 applyPresentationTool('code');
                 return;
             }
-            if (event.shiftKey && key === '7') {
+            if (event.shiftKey && (key === '7' || code === 'Digit7')) {
                 event.preventDefault();
+                event.stopPropagation();
                 applyPresentationTool('ol');
                 return;
             }
-            if (event.shiftKey && key === '8') {
+            if (event.shiftKey && (key === '8' || code === 'Digit8')) {
                 event.preventDefault();
+                event.stopPropagation();
                 applyPresentationTool('ul');
                 return;
             }
-            if (event.shiftKey && key === 'h') {
+            if (event.shiftKey && isKey('h', 'KeyH')) {
                 event.preventDefault();
+                event.stopPropagation();
                 applyPresentationTool('heading');
             }
         }
@@ -1472,7 +1498,7 @@
             // Display race and class
             const race = character.race || 'Race inconnue';
             const charClass = character.class || 'Classe inconnue';
-            document.getElementById('characterRole').textContent = `${race} • ${charClass}`;
+            document.getElementById('characterRole').textContent = `${race} - ${charClass}`;
 
             // Display stats (from profile_data if available)
             const profileData = character.profile_data || {};

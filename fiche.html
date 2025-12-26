@@ -18,12 +18,12 @@
                 </div>
                 <div class="character-summary" aria-label="Résumé du personnage">
                     <div class="character-avatar">
-                        <!-- Avatar placeholder, remplacé plus tard par une vraie image -->
-                        <div class="character-avatar-circle">☆</div>
+                        <img class="character-avatar-img" id="characterSummaryAvatar" alt="Avatar" hidden>
+                        <div class="character-avatar-circle" id="characterSummaryInitial">?</div>
                     </div>
                     <div class="character-summary-text">
-                        <span class="character-name">Nom du personnage</span>
-                        <span class="character-tagline">Classe / Rôle / Surnom</span>
+                        <a class="character-name" id="characterSummaryName" href="profil.html">Nom du personnage</a>
+                        <span class="character-tagline" id="characterSummaryTagline">Classe / Rôle / Surnom</span>
                     </div>
                 </div>
             </div>
@@ -881,6 +881,49 @@
 
             // Update conditional visibility after loading
             updateAliceVisibility();
+        })();
+    </script>
+
+    <script>
+        (function () {
+            var STORAGE_KEY = 'astoria_character_summary';
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+
+            var summary = null;
+            try {
+                summary = JSON.parse(raw);
+            } catch (error) {
+                console.warn('Resume personnage invalide.', error);
+                return;
+            }
+            if (!summary) return;
+
+            var nameEl = document.getElementById('characterSummaryName');
+            var taglineEl = document.getElementById('characterSummaryTagline');
+            var avatarImg = document.getElementById('characterSummaryAvatar');
+            var avatarInitial = document.getElementById('characterSummaryInitial');
+
+            var name = summary.name || '';
+            var role = summary.role || 'Classe / Role / Surnom';
+            var avatarUrl = summary.avatar_url || '';
+
+            if (nameEl) {
+                nameEl.textContent = name || 'Personnage';
+                nameEl.setAttribute('href', summary.id ? 'profil.html?character=' + encodeURIComponent(summary.id) : 'profil.html');
+            }
+            if (taglineEl) taglineEl.textContent = role;
+            if (avatarImg && avatarInitial) {
+                if (avatarUrl) {
+                    avatarImg.src = avatarUrl;
+                    avatarImg.hidden = false;
+                    avatarInitial.hidden = true;
+                } else {
+                    avatarImg.hidden = true;
+                    avatarInitial.hidden = false;
+                    avatarInitial.textContent = name ? name.charAt(0).toUpperCase() : '?';
+                }
+            }
         })();
     </script>
 </body>
