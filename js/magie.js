@@ -1,7 +1,5 @@
 ﻿(function () {
     const STORAGE_KEY_BASE = "magicSheetPages";
-    const CHARACTER_STORAGE_KEY = "astoria_active_character";
-    const LEGACY_SUMMARY_KEY = "astoria_character_summary";
     const body = document.body;
     const isAdmin = body.dataset.admin === "true" || !body.hasAttribute("data-admin");
 
@@ -10,10 +8,6 @@
     const saveBtn = document.getElementById("magicSaveBtn");
     const saveStatus = document.getElementById("magicSaveStatus");
     const pagesOverview = document.getElementById("magicPagesOverview");
-    const summaryNameEl = document.getElementById("magicCharacterName");
-    const summaryTaglineEl = document.getElementById("magicCharacterTagline");
-    const summaryAvatarImg = document.getElementById("magicCharacterAvatar");
-    const summaryAvatarInitial = document.getElementById("magicCharacterInitial");
     const capacityList = document.getElementById("magicCapacityList");
     const capacityFilter = document.getElementById("magicCapacityFilter");
     const addCapacityBtn = document.getElementById("magicAddCapacityBtn");
@@ -42,6 +36,7 @@
     let storageKey = STORAGE_KEY_BASE;
     let authApi = null;
     let hasPendingChanges = false;
+    let summaryModule = null;
 
     const defaultCapacities = [
         {
@@ -84,92 +79,16 @@
         return key === "default" ? STORAGE_KEY_BASE : `${STORAGE_KEY_BASE}-${key}`;
     }
 
-    function getActiveCharacterFromStorage() {
-        const raw = localStorage.getItem(CHARACTER_STORAGE_KEY);
-        if (!raw) return null;
+    async function initSummary() {
         try {
-            return JSON.parse(raw);
-        } catch {
-            return null;
+            summaryModule = await import("./js/ui/character-summary.js");
+        } catch (error) {
+            summaryModule = null;
         }
-    }
-
-    function getLegacySummary() {
-        const raw = localStorage.getItem(LEGACY_SUMMARY_KEY);
-        if (!raw) return null;
-        try {
-            return JSON.parse(raw);
-        } catch {
-            return null;
-        }
-    }
-
-    function resolveCharacterContext() {
-        const character = getActiveCharacterFromStorage();
-        if (character && character.id) {
-            return { key: character.id, character };
-        }
-        const legacy = getLegacySummary();
-        if (legacy && legacy.id) {
-            return { key: legacy.id, character: null };
-        }
-        return { key: "default", character: null };
-    }
-
-    function buildRoleText(character) {
-        if (!character) return "Classe / Role / Surnom";
-        const parts = [];
-        if (character.race) parts.push(character.race);
-        if (character.class) parts.push(character.class);
-        return parts.length ? parts.join(" - ") : "Classe / Role / Surnom";
-    }
-
-    function applySummaryData(summary) {
-        if (!summaryNameEl || !summaryTaglineEl || !summaryAvatarInitial) return;
-        const name = summary?.name || "Personnage";
-        const role = summary?.role || "Classe / Role / Surnom";
-        const avatarUrl = summary?.avatar_url || "";
-        summaryNameEl.textContent = name;
-        summaryTaglineEl.textContent = role;
-        if (summaryAvatarImg) {
-            if (avatarUrl) {
-                summaryAvatarImg.src = avatarUrl;
-                summaryAvatarImg.hidden = false;
-                summaryAvatarInitial.hidden = true;
-            } else {
-                summaryAvatarImg.hidden = true;
-                summaryAvatarImg.removeAttribute("src");
-                summaryAvatarInitial.hidden = false;
-                summaryAvatarInitial.textContent = name ? name.charAt(0).toUpperCase() : "?";
-            }
-        }
-    }
-
-    function updateSummary(context) {
-        if (context.character) {
-            const profileData = context.character.profile_data || {};
-            const storedSummary = profileData.fiche_summary;
-            const summary = storedSummary || {
-                id: context.character.id,
-                name: context.character.name || "Personnage",
-                role: buildRoleText(context.character),
-                avatar_url: profileData.avatar_url || ""
-            };
-            applySummaryData(summary);
-            return;
-        }
-        const legacy = getLegacySummary();
-        if (legacy) {
-            applySummaryData(legacy);
-        }
-    }
-
-    function setCharacterContext() {
-        const context = resolveCharacterContext();
-        currentCharacterKey = context.key || "default";
-        currentCharacter = context.character || null;
+        const summaryState = summaryModule?.initCharacterSummary({ includeQueryParam: false }) || null;
+        currentCharacterKey = summaryState?.context?.key || "default";
+        currentCharacter = summaryState?.context?.character || null;
         storageKey = buildStorageKey(currentCharacterKey);
-        updateSummary(context);
     }
 
     function updateSaveStatus() {
@@ -610,33 +529,33 @@
         addPageBtn.addEventListener("click", handleAddPage);
     }
 
-    setCharacterContext();
-    updateSaveStatus();
-
     (async () => {
+        await initSummary();
+        updateSaveStatus();
+
         try {
             authApi = await import("./js/auth.js");
         } catch (error) {
             authApi = null;
         }
-    })();
 
-    const restored = loadFromStorage();
-    if (!restored) {
-        pages = [createDefaultPage()];
-        activePageIndex = 0;
-    }
+        const restored = loadFromStorage();
+        if (!restored) {
+            pages = [createDefaultPage()];
+            activePageIndex = 0;
+        }
 
-    if (sanitizeCapacityText()) {
+        if (sanitizeCapacityText()) {
+            saveToStorage();
+        }
+
+        normalizeActiveSection();
+        applyFormFields(pages[activePageIndex].fields || {});
+        setActiveSection(activeSection);
+        renderCapacities(capacityFilter ? capacityFilter.value : "");
+        renderPageTabs();
+        renderPagesOverview();
         saveToStorage();
-    }
-
-    normalizeActiveSection();
-    applyFormFields(pages[activePageIndex].fields || {});
-    setActiveSection(activeSection);
-    renderCapacities(capacityFilter ? capacityFilter.value : "");
-    renderPageTabs();
-    renderPagesOverview();
-    saveToStorage();
-    markSaved();
+        markSaved();
+    })();
 })();

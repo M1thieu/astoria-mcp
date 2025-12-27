@@ -44,59 +44,6 @@
     color: var(--color-gray-700);
 }
 
-.magic-character-summary {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    background: var(--color-primary-lighter);
-    border: 1px solid var(--color-primary-light);
-}
-
-.magic-character-avatar {
-    width: 56px;
-    height: 56px;
-    position: relative;
-}
-
-.magic-character-avatar-img {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-full);
-    border: 2px solid var(--color-primary-light);
-    object-fit: cover;
-    display: block;
-}
-
-.magic-avatar-circle {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-full);
-    background: var(--color-white);
-    border: 2px solid var(--color-primary-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--text-xl);
-    color: var(--color-primary);
-}
-
-.magic-character-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.magic-character-name {
-    font-weight: var(--font-semibold);
-    color: var(--color-primary);
-}
-
-.magic-character-tagline {
-    font-size: var(--text-sm);
-    color: var(--color-gray-700);
-}
 
 .magic-layout {
     display: flex;

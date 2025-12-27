@@ -671,7 +671,7 @@
 
     <script type="module" src="js/ui/app-shell.js"></script>
     <script>
-        (function () {
+        (async function () {
             const tabButtons = Array.from(document.querySelectorAll('.tab-button'));
             const tabPanels = Array.from(document.querySelectorAll('.tab-panel'));
             const saveButtons = Array.from(document.querySelectorAll('.save-tab-button'));
@@ -679,11 +679,9 @@
             const CHARACTER_STORAGE_KEY = 'astoria_active_character';
             const LEGACY_SUMMARY_KEY = 'astoria_character_summary';
             const STORAGE_PREFIX = 'fiche';
-            const summaryNameEl = document.getElementById('characterSummaryName');
-            const summaryTaglineEl = document.getElementById('characterSummaryTagline');
-            const summaryAvatarImg = document.getElementById('characterSummaryAvatar');
-            const summaryAvatarInitial = document.getElementById('characterSummaryInitial');
             let currentCharacterKey = 'default';
+            let summaryModule = null;
+            let summaryElements = null;
             const relationsContainer = document.getElementById('backgroundRelations');
             const addRelationBtn = document.getElementById('addBackgroundRelation');
             const RELATION_TYPES = [
@@ -696,101 +694,20 @@
                 { value: 'ally', label: 'Allie' }
             ];
             let authApi = null;
-
-            (async () => {
-                try {
-                    authApi = await import('./js/auth.js');
-                } catch (error) {
-                    authApi = null;
-                }
-            })();
-
-            function getActiveCharacterFromStorage() {
-                const raw = localStorage.getItem(CHARACTER_STORAGE_KEY);
-                if (!raw) return null;
-                try {
-                    return JSON.parse(raw);
-                } catch (error) {
-                    console.warn('Active character cache invalid.', error);
-                    return null;
-                }
+            try {
+                authApi = await import('./js/auth.js');
+            } catch (error) {
+                authApi = null;
             }
 
-            function getLegacySummary() {
-                const raw = localStorage.getItem(LEGACY_SUMMARY_KEY);
-                if (!raw) return null;
-                try {
-                    return JSON.parse(raw);
-                } catch (error) {
-                    console.warn('Legacy summary invalid.', error);
-                    return null;
-                }
+            try {
+                summaryModule = await import('./js/ui/character-summary.js');
+            } catch (error) {
+                summaryModule = null;
             }
-
-            function resolveCharacterContext() {
-                const character = getActiveCharacterFromStorage();
-                if (character && character.id) {
-                    return { key: character.id, character };
-                }
-                const legacy = getLegacySummary();
-                if (legacy && legacy.id) {
-                    return { key: legacy.id, character: null };
-                }
-                const params = new URLSearchParams(window.location.search);
-                const fallback = params.get('character');
-                return { key: fallback || 'default', character: null };
-            }
-
-            function buildRoleText(character) {
-                if (!character) return 'Classe / Role / Surnom';
-                const parts = [];
-                if (character.race) parts.push(character.race);
-                if (character.class) parts.push(character.class);
-                return parts.length ? parts.join(' - ') : 'Classe / Role / Surnom';
-            }
-
-            function applySummaryData(summary) {
-                if (!summaryNameEl || !summaryTaglineEl || !summaryAvatarInitial) return;
-                const name = summary?.name || 'Personnage';
-                const role = summary?.role || 'Classe / Role / Surnom';
-                const avatarUrl = summary?.avatar_url || '';
-                summaryNameEl.textContent = name;
-                summaryNameEl.setAttribute(
-                    'href',
-                    summary?.id ? 'profil.html?character=' + encodeURIComponent(summary.id) : 'profil.html'
-                );
-                summaryTaglineEl.textContent = role;
-                if (summaryAvatarImg) {
-                    if (avatarUrl) {
-                        summaryAvatarImg.src = avatarUrl;
-                        summaryAvatarImg.hidden = false;
-                        summaryAvatarInitial.hidden = true;
-                    } else {
-                        summaryAvatarImg.hidden = true;
-                        summaryAvatarImg.removeAttribute('src');
-                        summaryAvatarInitial.hidden = false;
-                        summaryAvatarInitial.textContent = name ? name.charAt(0).toUpperCase() : '';
-                    }
-                }
-            }
-
-            function updateSummary(context) {
-                if (context.character) {
-                    const profileData = context.character.profile_data || {};
-                    applySummaryData({
-                        id: context.character.id,
-                        name: context.character.name || 'Personnage',
-                        role: buildRoleText(context.character),
-                        avatar_url: profileData.avatar_url || ''
-                    });
-                    return;
-                }
-
-                const legacy = getLegacySummary();
-                if (legacy) {
-                    applySummaryData(legacy);
-                }
-            }
+            const summaryState = summaryModule?.initCharacterSummary({ includeQueryParam: true }) || null;
+            summaryElements = summaryState?.elements || null;
+            currentCharacterKey = summaryState?.context?.key || currentCharacterKey;
 
             function updateRelationLink(row) {
                 const input = row.querySelector('.relation-character');
@@ -903,7 +820,9 @@
             }
 
             function syncProfileFromFiche() {
-                const active = getActiveCharacterFromStorage();
+                const active = summaryModule?.getActiveCharacterFromStorage
+                    ? summaryModule.getActiveCharacterFromStorage()
+                    : null;
                 const name = getInputValue('identiteNomPrenom');
                 const race = getInputValue('identiteRace');
                 const roleLabel = getSelectLabel('appRole');
@@ -934,7 +853,9 @@
                     } catch {}
                 }
 
-                updateSummary(resolveCharacterContext());
+                if (summaryModule?.applySummaryToElements) {
+                    summaryModule.applySummaryToElements(summaryElements, summary);
+                }
 
                 if (authApi?.updateCharacter && active?.id) {
                     const updates = {
@@ -1243,21 +1164,24 @@
                 updateConditionalVisibility();
             }
 
-            const initialContext = resolveCharacterContext();
-            currentCharacterKey = initialContext.key;
-            updateSummary(initialContext);
+            const initialContext = summaryModule?.resolveCharacterContext
+                ? summaryModule.resolveCharacterContext({ includeQueryParam: true })
+                : { key: currentCharacterKey, character: null };
+            currentCharacterKey = initialContext.key || currentCharacterKey;
+            if (summaryModule?.applySummaryToElements && summaryModule?.buildSummary) {
+                summaryModule.applySummaryToElements(summaryElements, summaryModule.buildSummary(initialContext));
+            }
             loadAllTabs();
 
             setInterval(() => {
-                const nextContext = resolveCharacterContext();
+                if (!summaryModule?.resolveCharacterContext || !summaryModule?.buildSummary) return;
+                const nextContext = summaryModule.resolveCharacterContext({ includeQueryParam: true });
+                summaryModule.applySummaryToElements(summaryElements, summaryModule.buildSummary(nextContext));
                 if (nextContext.key !== currentCharacterKey) {
                     currentCharacterKey = nextContext.key;
-                    updateSummary(nextContext);
                     clearAllDirty();
                     loadAllTabs();
-                    return;
                 }
-                updateSummary(nextContext);
             }, 800);
         })();
     </script>
