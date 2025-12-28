@@ -1,7 +1,9 @@
-export function createPanelHost({ root = document.body } = {}) {
+export function createPanelHost({ root = document.body, variant = "drawer" } = {}) {
   if (!root) throw new Error("createPanelHost: root is required");
 
   const previousFocusStack = [];
+  const normalizeVariant = (value) => (value === "modal" ? "modal" : "drawer");
+  let currentVariant = normalizeVariant(variant);
 
   const backdrop = document.createElement("div");
   backdrop.className = "panel-backdrop";
@@ -9,6 +11,7 @@ export function createPanelHost({ root = document.body } = {}) {
 
   const drawer = document.createElement("aside");
   drawer.className = "panel-drawer";
+  drawer.classList.add(`panel-variant-${currentVariant}`);
   drawer.setAttribute("role", "dialog");
   drawer.setAttribute("aria-modal", "true");
   drawer.setAttribute("aria-hidden", "true");
@@ -76,7 +79,19 @@ export function createPanelHost({ root = document.body } = {}) {
     if (node) content.appendChild(node);
   }
 
-  function open({ panelId, titleText, fullPageHref, fullPageLabel, node } = {}) {
+  function setVariant(nextVariant) {
+    const normalized = normalizeVariant(nextVariant);
+    if (normalized === currentVariant) return;
+    drawer.classList.remove(`panel-variant-${currentVariant}`);
+    currentVariant = normalized;
+    drawer.classList.add(`panel-variant-${currentVariant}`);
+  }
+
+  function open({ panelId, titleText, fullPageHref, fullPageLabel, node, variant: openVariant } = {}) {
+    if (openVariant) {
+      setVariant(openVariant);
+    }
+
     if (isOpen) {
       setTitle(titleText);
       setOpenFullPage({ href: fullPageHref, label: fullPageLabel });
@@ -129,10 +144,11 @@ export function createPanelHost({ root = document.body } = {}) {
     close,
     isOpen: () => isOpen,
     getCurrentPanelId: () => currentPanelId,
+    getVariant: () => currentVariant,
+    setVariant,
     setTitle,
     setContent,
     setOpenFullPage,
     elements: { backdrop, drawer, header, content, title, actions, closeBtn, openFullLink },
   };
 }
-

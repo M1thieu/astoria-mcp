@@ -41,6 +41,18 @@
   - Admin: username `admin`, password `admin123`
   - Player: username `player1`, password `player123`
 
+### Step 3b: Create Storage Bucket (Avatars)
+
+The avatar upload feature needs a public bucket named `avatars`.
+
+Option A (recommended): run the storage section inside `supabase-schema.sql`.
+
+Option B (manual):
+1. Go to **Storage** in Supabase
+2. Create a bucket named `avatars`
+3. Set it to **Public**
+4. Run the storage policies from `supabase-schema.sql` (section "Storage (Avatars)")
+
 ### Step 4: Configure Your App (3 mins)
 
 1. Open `js/auth.js` in your code editor

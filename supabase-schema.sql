@@ -426,6 +426,29 @@ FROM users
 ON CONFLICT (user_id) DO NOTHING;
 
 -- ============================================================================
+-- STORAGE (Avatars)
+-- ============================================================================
+
+-- NOTE: This project uses custom auth + anon key, so policies are permissive.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read avatars"
+    ON storage.objects FOR SELECT
+    USING (bucket_id = 'avatars');
+
+CREATE POLICY "Anyone can upload avatars"
+    ON storage.objects FOR INSERT
+    WITH CHECK (bucket_id = 'avatars');
+
+CREATE POLICY "Anyone can update avatars"
+    ON storage.objects FOR UPDATE
+    USING (bucket_id = 'avatars');
+
+-- ============================================================================
 -- NOTES
 -- ============================================================================
 -- 1. Default admin credentials: username: admin, password: admin123

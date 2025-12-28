@@ -6,89 +6,8 @@
     <title>Profil - Astoria</title>
     <link rel="stylesheet" href="css/style.css">
         <link rel="stylesheet" href="css/profil.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
 <style>
-        .auth-controls {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .character-selector {
-            padding: 0.5rem 1rem;
-            background: white;
-            border: 2px solid var(--color-primary);
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--color-primary);
-            min-width: 200px;
-        }
-
-        .character-selector:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px var(--color-primary-lighter);
-        }
-
-        .auth-button {
-            padding: 0.5rem 1rem;
-            background: var(--color-primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .auth-button:hover {
-            background: var(--color-primary-dark);
-        }
-
-        .auth-button.secondary {
-            background: white;
-            color: var(--color-primary);
-            border: 2px solid var(--color-primary);
-        }
-
-        .auth-button.secondary:hover {
-            background: var(--color-primary-lighter);
-        }
-
-        .user-badge {
-            background: var(--color-primary);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .auth-user-link {
-            appearance: none;
-            background: transparent;
-            border: none;
-            padding: 0.25rem 0.25rem;
-            margin: 0;
-            color: var(--color-gray-700);
-            font-weight: 700;
-            cursor: pointer;
-            border-radius: 6px;
-        }
-
-        .auth-user-link:hover {
-            background: rgba(255, 255, 255, 0.7);
-        }
-
-        .auth-user-link:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px var(--color-primary-lighter);
-        }
-
         .profile-not-logged-in {
             text-align: center;
             padding: 4rem 2rem;
@@ -212,9 +131,7 @@
 </head>
 <body>
     <!-- Auth Controls (always visible) -->
-    <div class="auth-controls" id="authControls">
-        <!-- Will be populated by JS -->
-    </div>
+    <div class="auth-controls app-dock" id="authControls"></div>
 
     <main class="profile-page" aria-labelledby="profileTitle" id="profileContent">
         <header class="profile-header">
@@ -223,20 +140,6 @@
                 <div class="profile-title-block">
                     <h1 class="profile-title" id="profileTitle">Mon look</h1>
                     <p class="profile-subtitle">Espace personnel - version de base.</p>
-                </div>
-                <div class="profile-summary-card" aria-label="Résumé du joueur">
-                    <div class="profile-avatar-large">
-                        <span class="profile-avatar-placeholder" id="characterInitial">Avatar</span>
-                    </div>
-                    <div class="profile-summary-infos">
-                        <span class="profile-username" id="characterName">Nom du personnage</span>
-                        <span class="profile-role" id="characterRole">Rôle / Classe</span>
-                        <div class="profile-summary-stats">
-                            <span class="profile-stat">Style : <strong id="statStyle">0</strong></span>
-                            <span class="profile-stat">Dico : <strong id="statDico">0</strong></span>
-                            <span class="profile-stat">Popularité : <strong id="statPopularity">0</strong></span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </header>
@@ -247,7 +150,25 @@
                 <section class="profile-panel">
                     <h2 class="profile-panel-title">Mon look</h2>
                     <div class="profile-look-card">
-                        <span class="profile-look-placeholder">Prévisualisation à venir</span>
+                        <div class="profile-summary-card profile-summary-card--compact" aria-label="Résumé du joueur">
+                            <div class="profile-summary-header">
+                                <span class="profile-summary-title">Résumé</span>
+                            </div>
+                            <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
+                                <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
+                                <span class="profile-avatar-placeholder" id="characterInitial">Avatar</span>
+                            </button>
+                            <div class="profile-summary-infos">
+                                <a class="profile-username" id="characterName" href="profil.html">Nom du personnage</a>
+                                <span class="profile-role" id="characterRole">Rôle / Classe</span>
+                                <div class="profile-summary-stats">
+                                    <span class="profile-stat">Style : <strong id="statStyle">0</strong></span>
+                                    <span class="profile-stat">Dico : <strong id="statDico">0</strong></span>
+                                    <span class="profile-stat">Popularité : <strong id="statPopularity">0</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <input class="profile-avatar-input" id="avatarUploadInput" type="file" accept="image/*">
                     </div>
 
                     <div class="profile-tags" id="profileTags" aria-label="Tags de profil">
@@ -273,22 +194,74 @@
                             <button type="button" class="profile-shortcut-btn" data-panel="inventaire">Inventaire</button>
                             <a class="profile-shortcut-open" href="inventaire.html" title="Ouvrir la page complète">↗</a>
                         </li>
+
+                        <li class="profile-shortcut-item" id="adminShortcut" hidden>
+                            <button type="button" class="profile-shortcut-btn" data-panel="admin">Admin</button>
+                        </li>
+
                         <li><a href="hdv.html">Hôtel de vente</a></li>
-                        <li><a href="index.html">Objets</a></li>
+                        <li><a href="codex.html">Codex</a></li>
                     </ul>
                 </section>
             </aside>
 
             <!-- Colonne droite : contenu principal -->
             <section class="profile-main" aria-label="Contenu du profil">
-                <section class="profile-section">
+                <section class="profile-section profile-section--presentation">
                     <header class="profile-section-header">
-                        <h2 class="profile-section-title">Présentation</h2>
+                        <div class="profile-section-title-wrap">
+                            <h2 class="profile-section-title">Presentation</h2>
+                            <p class="profile-section-subtitle">Carte perso a personnaliser pour chaque joueur.</p>
+                        </div>
+                        <div class="profile-section-actions">
+                            <button type="button" class="profile-edit-btn" id="presentationEditBtn" hidden>Modifier</button>
+                        </div>
                     </header>
-                    <p class="profile-placeholder-text">
-                        Zone de présentation du joueur et de son personnage. On pourra y coller du contenu HTML libre, des blocs de texte,
-                        ou des extraits de la fiche personnage. Pour l’instant, ceci n’est qu’un gabarit de base.
-                    </p>
+                    <div class="profile-presentation-shell">
+                        <p class="profile-placeholder-text" id="presentationPlaceholder">
+                            Zone de presentation du joueur et de son personnage. On pourra y coller du contenu HTML libre, des blocs de texte,
+                            ou des extraits de la fiche personnage. Pour l'instant, ceci n'est qu'un gabarit de base.
+                        </p>
+                        <div class="profile-presentation-content" id="presentationContent" hidden></div>
+                        <div class="profile-presentation-editor" id="presentationEditor" hidden>
+                            <div class="profile-presentation-editor-header">
+                                <div class="profile-presentation-tabs" role="tablist" aria-label="Mode d'edition">
+                                    <button type="button" class="profile-presentation-tab is-active" id="presentationViewWrite" data-view="write" role="tab" aria-controls="presentationEditorWrite" aria-selected="true">Write</button>
+                                    <button type="button" class="profile-presentation-tab" id="presentationViewPreview" data-view="preview" role="tab" aria-controls="presentationPreview" aria-selected="false">Preview</button>
+                                </div>
+                                <div class="profile-presentation-tools">
+                                    <div class="profile-presentation-toolbar" id="presentationToolbar" role="toolbar" aria-label="Outils de mise en forme">
+                                        <button type="button" class="profile-presentation-tool" data-md="heading" title="Heading">H</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="bold" title="Gras"><strong>B</strong></button>
+                                        <button type="button" class="profile-presentation-tool" data-md="italic" title="Italique"><em>I</em></button>
+                                        <span class="profile-presentation-divider" aria-hidden="true"></span>
+                                        <button type="button" class="profile-presentation-tool" data-md="quote" title="Citation">&gt;</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="code" title="Code">&lt;/&gt;</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="link" title="Lien">&#128279;</button>
+                                        <span class="profile-presentation-divider" aria-hidden="true"></span>
+                                        <button type="button" class="profile-presentation-tool" data-md="ul" title="Liste">-</button>
+                                        <button type="button" class="profile-presentation-tool" data-md="ol" title="Liste numerotee">1.</button>
+                                    </div>
+                                    <div class="profile-presentation-mode" role="group" aria-label="Mode de rendu">
+                                        <button type="button" class="profile-presentation-mode-btn is-active" id="presentationModeMarkdown" data-mode="markdown">Markdown</button>
+                                        <button type="button" class="profile-presentation-mode-btn" id="presentationModeHtml" data-mode="html">HTML</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="profile-presentation-body" id="presentationBody">
+                                <div class="profile-presentation-field" id="presentationEditorWrite" role="tabpanel" aria-labelledby="presentationViewWrite">
+                                    <label class="profile-modal-label" for="presentationInput" id="presentationInputLabel">Texte (Markdown simple)</label>
+                                    <textarea class="profile-modal-input profile-presentation-input" id="presentationInput" rows="6" placeholder="Ecris ici..."></textarea>
+                                </div>
+                                <div class="profile-presentation-preview" id="presentationPreview" role="tabpanel" aria-labelledby="presentationViewPreview" hidden></div>
+                            </div>
+                            <div class="profile-presentation-hint" id="presentationHint">*italique* / **gras** / [lien](https://exemple.com)</div>
+                            <div class="profile-modal-actions">
+                                <button type="button" class="profile-modal-button secondary" id="presentationCancel">Annuler</button>
+                                <button type="button" class="profile-modal-button" id="presentationSave">Enregistrer</button>
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </section>
         </section>
@@ -321,13 +294,40 @@
         </div>
     </div>
 
+    <div class="profile-cropper-backdrop" id="avatarCropperBackdrop" aria-hidden="true">
+        <div class="profile-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="avatarCropperTitle">
+            <div class="profile-cropper-header">
+                <h2 class="profile-cropper-title" id="avatarCropperTitle">Ajuster l'avatar</h2>
+                <button type="button" class="profile-cropper-close" id="avatarCropperClose" aria-label="Fermer">×</button>
+            </div>
+            <div class="profile-cropper-body">
+                <div class="profile-cropper-stage">
+                    <img id="avatarCropperImage" alt="Apercu avatar">
+                </div>
+                <div class="profile-cropper-controls">
+                    <label for="avatarZoomRange">Zoom</label>
+                    <input type="range" id="avatarZoomRange" min="0.2" max="3" step="0.01" value="1">
+                    <span class="profile-cropper-hint">Molette pour zoomer.</span>
+                </div>
+            </div>
+            <div class="profile-cropper-actions">
+                <button type="button" class="profile-modal-button secondary" id="avatarCropperCancel">Annuler</button>
+                <button type="button" class="profile-modal-button" id="avatarCropperConfirm">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
     <script type="module">
         import {
             getCurrentUser,
             getUserCharacters,
+            getAllCharacters,
             getActiveCharacter,
             setActiveCharacter,
             createCharacter,
+            getSupabaseClient,
+            updateCharacter,
             logout,
             isAdmin
         } from './js/auth.js';
@@ -338,12 +338,53 @@
         const authControls = document.getElementById('authControls');
         const profileContent = document.getElementById('profileContent');
         const shortcutsPanel = document.getElementById('profileShortcutsPanel');
+        const adminShortcut = document.getElementById('adminShortcut');
+        const avatarTrigger = document.getElementById('avatarUploadTrigger');
+        const avatarInput = document.getElementById('avatarUploadInput');
+        const avatarImg = document.getElementById('characterAvatarImg');
+        const avatarPlaceholder = document.getElementById('characterInitial');
+        const cropperBackdrop = document.getElementById('avatarCropperBackdrop');
+        const cropperImage = document.getElementById('avatarCropperImage');
+        const cropperZoom = document.getElementById('avatarZoomRange');
+        const cropperClose = document.getElementById('avatarCropperClose');
+        const cropperCancel = document.getElementById('avatarCropperCancel');
+        const cropperConfirm = document.getElementById('avatarCropperConfirm');
 
         let currentUser = null;
         let currentCharacter = null;
         let userCharacters = [];
         let userLinkButton = null;
+        let dockPrimaryRow = null;
+        let dockAdminRow = null;
+        let dockMetaRow = null;
+        let adminSelectorEl = null;
+        let dockSouls = null;
+        let soulConsoValue = null;
+        let soulProgValue = null;
         let panelHost = null;
+        let avatarCropper = null;
+        let avatarPreviewUrl = '';
+        let pendingAvatarFile = null;
+        let isCropperZoomSync = false;
+        let currentPresentationView = 'write';
+        let currentPresentationMode = 'markdown';
+        let presentationSelection = { start: 0, end: 0 };
+
+        const AVATAR_BUCKET = 'avatars';
+        const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+
+        if (avatarImg) {
+            avatarImg.addEventListener('error', () => {
+                avatarImg.hidden = true;
+                avatarImg.removeAttribute('src');
+                if (avatarPlaceholder) avatarPlaceholder.hidden = false;
+            });
+            avatarImg.addEventListener('load', () => {
+                if (!avatarImg.src) return;
+                if (avatarPlaceholder) avatarPlaceholder.hidden = true;
+            });
+        }
+        const CHARACTER_SUMMARY_KEY = 'astoria_character_summary';
 
         const createBackdrop = document.getElementById('createCharacterBackdrop');
         const createForm = document.getElementById('createCharacterForm');
@@ -353,6 +394,22 @@
         const createClass = document.getElementById('characterClassInput');
         const createCancel = document.getElementById('createCharacterCancel');
         const createSubmit = document.getElementById('createCharacterSubmit');
+        const presentationEditBtn = document.getElementById('presentationEditBtn');
+        const presentationPlaceholder = document.getElementById('presentationPlaceholder');
+        const presentationContent = document.getElementById('presentationContent');
+        const presentationEditor = document.getElementById('presentationEditor');
+        const presentationViewWrite = document.getElementById('presentationViewWrite');
+        const presentationViewPreview = document.getElementById('presentationViewPreview');
+        const presentationToolbar = document.getElementById('presentationToolbar');
+        const presentationModeMarkdown = document.getElementById('presentationModeMarkdown');
+        const presentationModeHtml = document.getElementById('presentationModeHtml');
+        const presentationEditorWrite = document.getElementById('presentationEditorWrite');
+        const presentationInput = document.getElementById('presentationInput');
+        const presentationInputLabel = document.getElementById('presentationInputLabel');
+        const presentationPreview = document.getElementById('presentationPreview');
+        const presentationHint = document.getElementById('presentationHint');
+        const presentationSave = document.getElementById('presentationSave');
+        const presentationCancel = document.getElementById('presentationCancel');
 
         function showCreateCharacterModal() {
             if (!currentUser) return;
@@ -386,11 +443,670 @@
             };
         }
 
+        function canEditProfile() {
+            if (!currentUser || !currentCharacter) return false;
+            const ownerId = currentCharacter.user_id || null;
+            if (ownerId && ownerId === currentUser.id) return true;
+            if (Array.isArray(userCharacters)) {
+                return userCharacters.some((char) => char.id === currentCharacter.id);
+            }
+            return false;
+        }
+
+        function updateAvatarUI(url) {
+            if (avatarImg) {
+                if (url) {
+                    avatarImg.src = url;
+                    avatarImg.hidden = false;
+                } else {
+                    avatarImg.hidden = true;
+                    avatarImg.removeAttribute('src');
+                }
+            }
+            if (avatarPlaceholder) {
+                avatarPlaceholder.hidden = !!url;
+            }
+        }
+
+        function buildCharacterSummary(character) {
+            if (!character) return null;
+            const profileData = character.profile_data || {};
+            const race = character.race || '';
+            const charClass = character.class || '';
+            const roleText = [race, charClass].filter(Boolean).join(' - ');
+
+            return {
+                id: character.id || null,
+                name: character.name || '',
+                role: roleText,
+                avatar_url: profileData.avatar_url || '',
+                user_id: character.user_id || null,
+                updated_at: Date.now()
+            };
+        }
+
+        function persistCharacterSummary(character) {
+            try {
+                if (!character) {
+                    localStorage.removeItem(CHARACTER_SUMMARY_KEY);
+                    return;
+                }
+                localStorage.setItem(CHARACTER_SUMMARY_KEY, JSON.stringify(character));
+            } catch (error) {
+                console.warn('Impossible de sauvegarder le resume du personnage.', error);
+            }
+        }
+
+        function updateAvatarControls() {
+            if (!avatarTrigger || !avatarInput) return;
+            const editable = canEditProfile();
+            avatarTrigger.classList.toggle('is-editable', editable);
+            avatarTrigger.disabled = !editable;
+            avatarInput.disabled = !editable;
+        }
+
+        function updateAdminShortcut() {
+            if (!adminShortcut) return;
+            adminShortcut.hidden = !isAdmin();
+        }
+
+        function escapePresentationHtml(raw) {
+            return String(raw || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function formatPresentationInline(raw) {
+            const codeSnippets = [];
+            let html = raw.replace(/`([^`]+)`/g, (match, code) => {
+                const token = `__CODE_${codeSnippets.length}__`;
+                codeSnippets.push(code);
+                return token;
+            });
+
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+            codeSnippets.forEach((code, index) => {
+                html = html.replace(`__CODE_${index}__`, `<code>${code}</code>`);
+            });
+
+            return html;
+        }
+
+        function renderPresentationMarkdown(raw) {
+            const escaped = escapePresentationHtml(raw);
+            const lines = escaped.split(/\n/);
+            let html = '';
+            let inUl = false;
+            let inOl = false;
+            let inCode = false;
+            let codeBuffer = [];
+
+            const closeLists = () => {
+                if (inUl) {
+                    html += '</ul>';
+                    inUl = false;
+                }
+                if (inOl) {
+                    html += '</ol>';
+                    inOl = false;
+                }
+            };
+
+            lines.forEach((line) => {
+                const trimmed = line.trim();
+
+                if (trimmed.startsWith('```')) {
+                    if (!inCode) {
+                        closeLists();
+                        inCode = true;
+                        codeBuffer = [];
+                    } else {
+                        html += `<pre><code>${codeBuffer.join('\n')}</code></pre>`;
+                        inCode = false;
+                        codeBuffer = [];
+                    }
+                    return;
+                }
+
+                if (inCode) {
+                    codeBuffer.push(line);
+                    return;
+                }
+
+                if (!trimmed) {
+                    closeLists();
+                    html += '<br>';
+                    return;
+                }
+
+                const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+                if (headingMatch) {
+                    closeLists();
+                    const level = headingMatch[1].length;
+                    html += `<h${level}>${formatPresentationInline(headingMatch[2])}</h${level}>`;
+                    return;
+                }
+
+                const quoteMatch = line.match(/^>\s?(.*)$/);
+                if (quoteMatch) {
+                    closeLists();
+                    html += `<blockquote>${formatPresentationInline(quoteMatch[1])}</blockquote>`;
+                    return;
+                }
+
+                const olMatch = line.match(/^\d+\.\s+(.+)$/);
+                if (olMatch) {
+                    if (!inOl) {
+                        closeLists();
+                        html += '<ol>';
+                        inOl = true;
+                    }
+                    html += `<li>${formatPresentationInline(olMatch[1])}</li>`;
+                    return;
+                }
+
+                const ulMatch = line.match(/^[-*]\s+(.+)$/);
+                if (ulMatch) {
+                    if (!inUl) {
+                        closeLists();
+                        html += '<ul>';
+                        inUl = true;
+                    }
+                    html += `<li>${formatPresentationInline(ulMatch[1])}</li>`;
+                    return;
+                }
+
+                closeLists();
+                html += `<p>${formatPresentationInline(line)}</p>`;
+            });
+
+            closeLists();
+
+            if (inCode) {
+                html += `<pre><code>${codeBuffer.join('\n')}</code></pre>`;
+            }
+
+            return html;
+        }
+
+        function getPresentationValue() {
+            const profileData = currentCharacter?.profile_data || {};
+            return String(profileData.presentation_md || '').trim();
+        }
+
+        function getPresentationMode() {
+            const profileData = currentCharacter?.profile_data || {};
+            return profileData.presentation_mode === 'html' ? 'html' : 'markdown';
+        }
+
+        function sanitizePresentationHtml(raw) {
+            if (!raw) return '';
+            const template = document.createElement('template');
+            template.innerHTML = String(raw);
+            const forbiddenTags = new Set(['script', 'iframe', 'object', 'embed', 'link', 'style', 'meta']);
+            const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+            const nodes = [];
+
+            while (walker.nextNode()) {
+                nodes.push(walker.currentNode);
+            }
+
+            nodes.forEach((node) => {
+                const tag = node.tagName.toLowerCase();
+                if (forbiddenTags.has(tag)) {
+                    node.remove();
+                    return;
+                }
+
+                [...node.attributes].forEach((attr) => {
+                    const name = attr.name.toLowerCase();
+                    const value = String(attr.value || '');
+                    if (name.startsWith('on')) {
+                        node.removeAttribute(attr.name);
+                    }
+                    if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) {
+                        node.removeAttribute(attr.name);
+                    }
+                });
+            });
+
+            return template.innerHTML;
+        }
+
+        function renderPresentationOutput(raw) {
+            if (currentPresentationMode === 'html') {
+                return sanitizePresentationHtml(raw);
+            }
+            return renderPresentationMarkdown(raw);
+        }
+
+        function renderPresentationPreview(value) {
+            if (!presentationPreview) return;
+            const raw = typeof value === 'string' ? value : (presentationInput?.value || '');
+            if (!raw.trim()) {
+                presentationPreview.innerHTML = '<p class="profile-placeholder-text">Apercu vide.</p>';
+                return;
+            }
+            presentationPreview.innerHTML = renderPresentationOutput(raw);
+        }
+
+        function setPresentationMode(mode) {
+            currentPresentationMode = mode === 'html' ? 'html' : 'markdown';
+            const isHtml = currentPresentationMode === 'html';
+
+            if (presentationModeMarkdown) {
+                presentationModeMarkdown.classList.toggle('is-active', !isHtml);
+                presentationModeMarkdown.setAttribute('aria-pressed', String(!isHtml));
+            }
+            if (presentationModeHtml) {
+                presentationModeHtml.classList.toggle('is-active', isHtml);
+                presentationModeHtml.setAttribute('aria-pressed', String(isHtml));
+            }
+
+            if (presentationToolbar) {
+                presentationToolbar.hidden = isHtml;
+            }
+            if (presentationHint) {
+                presentationHint.textContent = isHtml
+                    ? 'HTML avance (scripts desactives).'
+                    : '*italique* / **gras** / [lien](https://exemple.com) - Ctrl/Cmd+B, Ctrl/Cmd+I, Ctrl/Cmd+K';
+            }
+            if (presentationInputLabel) {
+                presentationInputLabel.textContent = isHtml ? 'HTML avance' : 'Texte (Markdown simple)';
+            }
+            if (presentationInput) {
+                presentationInput.placeholder = isHtml ? '<div>Ton univers ici...</div>' : 'Ecris ici...';
+            }
+            if (currentPresentationView === 'preview') {
+                renderPresentationPreview();
+            }
+        }
+
+        function setPresentationView(view) {
+            currentPresentationView = view === 'preview' ? 'preview' : 'write';
+            const isPreview = currentPresentationView === 'preview';
+
+            if (presentationViewWrite) {
+                presentationViewWrite.classList.toggle('is-active', !isPreview);
+                presentationViewWrite.setAttribute('aria-selected', String(!isPreview));
+            }
+            if (presentationViewPreview) {
+                presentationViewPreview.classList.toggle('is-active', isPreview);
+                presentationViewPreview.setAttribute('aria-selected', String(isPreview));
+            }
+            if (presentationEditorWrite) {
+                presentationEditorWrite.hidden = isPreview;
+                presentationEditorWrite.style.display = isPreview ? 'none' : '';
+            }
+            if (presentationPreview) {
+                presentationPreview.hidden = !isPreview;
+                presentationPreview.style.display = isPreview ? 'block' : 'none';
+            }
+            if (presentationHint) presentationHint.hidden = isPreview;
+            if (presentationEditor) presentationEditor.dataset.view = currentPresentationView;
+            if (isPreview) renderPresentationPreview();
+        }
+
+        function renderPresentation() {
+            if (!presentationPlaceholder || !presentationContent) return;
+            currentPresentationMode = getPresentationMode();
+            if (!currentCharacter) {
+                presentationPlaceholder.hidden = false;
+                presentationContent.hidden = true;
+                presentationContent.innerHTML = '';
+                return;
+            }
+
+            const raw = getPresentationValue();
+            if (!raw) {
+                presentationPlaceholder.hidden = false;
+                presentationContent.hidden = true;
+                presentationContent.innerHTML = '';
+                return;
+            }
+
+            presentationPlaceholder.hidden = true;
+            presentationContent.hidden = false;
+            presentationContent.innerHTML = renderPresentationOutput(raw);
+        }
+
+        function updatePresentationControls() {
+            if (presentationEditBtn) {
+                presentationEditBtn.hidden = !canEditProfile();
+            }
+            if (!canEditProfile()) {
+                presentationEditor?.setAttribute('hidden', 'true');
+            }
+        }
+
+        function openPresentationEditor() {
+            if (!presentationEditor || !presentationInput) return;
+            if (presentationPlaceholder) presentationPlaceholder.hidden = true;
+            if (presentationContent) presentationContent.hidden = true;
+            presentationEditor.hidden = false;
+            presentationInput.value = getPresentationValue();
+            setPresentationMode(getPresentationMode());
+            setPresentationView('write');
+            autoGrowPresentation();
+            presentationInput.focus();
+            updatePresentationSelection();
+        }
+
+        function closePresentationEditor() {
+            if (!presentationEditor) return;
+            presentationEditor.hidden = true;
+            renderPresentation();
+        }
+
+        function cancelPresentationEdit() {
+            if (presentationInput) {
+                presentationInput.value = getPresentationValue();
+            }
+            setPresentationMode(getPresentationMode());
+            setPresentationView('write');
+            closePresentationEditor();
+        }
+
+        async function savePresentation() {
+            if (!currentCharacter || !canEditProfile()) return;
+            const profileData = currentCharacter.profile_data || {};
+            const nextMarkdown = (presentationInput?.value || '').trim();
+            const nextProfileData = {
+                ...profileData,
+                presentation_md: nextMarkdown,
+                presentation_mode: currentPresentationMode
+            };
+
+            try {
+                const res = await updateCharacter(currentCharacter.id, { profile_data: nextProfileData });
+                if (!res || !res.success) {
+                    alert('Impossible de sauvegarder la presentation.');
+                    return;
+                }
+                currentCharacter = res.character;
+                renderPresentation();
+                closePresentationEditor();
+            } catch (error) {
+                console.error(error);
+                alert('Impossible de sauvegarder la presentation.');
+            }
+        }
+
+        function autoGrowPresentation() {
+            if (!presentationInput || presentationInput.closest('[hidden]')) return;
+            presentationInput.style.height = 'auto';
+            presentationInput.style.height = `${presentationInput.scrollHeight}px`;
+        }
+
+        function applyPresentationReplacement(replacement, selectionStart, selectionEnd) {
+            if (!presentationInput) return;
+            const value = presentationInput.value;
+            const start = presentationInput.selectionStart ?? 0;
+            const end = presentationInput.selectionEnd ?? 0;
+            presentationInput.value = value.slice(0, start) + replacement + value.slice(end);
+            const nextStart = typeof selectionStart === 'number' ? selectionStart : start + replacement.length;
+            const nextEnd = typeof selectionEnd === 'number' ? selectionEnd : nextStart;
+            presentationInput.setSelectionRange(nextStart, nextEnd);
+            presentationInput.focus();
+            updatePresentationSelection();
+        }
+
+        function updatePresentationSelection() {
+            if (!presentationInput) return;
+            presentationSelection = {
+                start: presentationInput.selectionStart ?? 0,
+                end: presentationInput.selectionEnd ?? 0
+            };
+        }
+
+        function restorePresentationSelection() {
+            if (!presentationInput) return;
+            const { start, end } = presentationSelection;
+            presentationInput.setSelectionRange(start, end);
+        }
+
+        function wrapPresentationSelection(prefix, suffix, placeholder) {
+            if (!presentationInput) return;
+            const value = presentationInput.value;
+            const start = presentationInput.selectionStart ?? 0;
+            const end = presentationInput.selectionEnd ?? 0;
+            const selected = value.slice(start, end);
+            const content = selected || placeholder;
+            const replacement = `${prefix}${content}${suffix}`;
+            const nextStart = start + prefix.length;
+            const nextEnd = nextStart + content.length;
+            applyPresentationReplacement(replacement, nextStart, nextEnd);
+        }
+
+        function applyPresentationLinePrefix(prefix, ordered = false) {
+            if (!presentationInput) return;
+            const value = presentationInput.value;
+            const start = presentationInput.selectionStart ?? 0;
+            const end = presentationInput.selectionEnd ?? 0;
+            const blockStart = value.lastIndexOf('\n', start - 1) + 1;
+            let blockEnd = value.indexOf('\n', end);
+            if (blockEnd === -1) blockEnd = value.length;
+            const block = value.slice(blockStart, blockEnd);
+            const lines = block.split('\n');
+            const prefixed = lines.map((line, index) => {
+                if (ordered) return `${index + 1}. ${line}`;
+                return `${prefix}${line}`;
+            }).join('\n');
+            presentationInput.value = value.slice(0, blockStart) + prefixed + value.slice(blockEnd);
+            presentationInput.setSelectionRange(blockStart, blockStart + prefixed.length);
+            presentationInput.focus();
+        }
+
+        function applyPresentationHeading() {
+            if (!presentationInput) return;
+            const value = presentationInput.value;
+            const start = presentationInput.selectionStart ?? 0;
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+            let lineEnd = value.indexOf('\n', start);
+            if (lineEnd === -1) lineEnd = value.length;
+            const line = value.slice(lineStart, lineEnd);
+            const nextLine = line.startsWith('#') ? line : `## ${line}`;
+            presentationInput.value = value.slice(0, lineStart) + nextLine + value.slice(lineEnd);
+            presentationInput.setSelectionRange(lineStart, lineStart + nextLine.length);
+            presentationInput.focus();
+        }
+
+        function applyPresentationLink() {
+            if (!presentationInput) return;
+            const value = presentationInput.value;
+            const start = presentationInput.selectionStart ?? 0;
+            const end = presentationInput.selectionEnd ?? 0;
+            const selected = value.slice(start, end) || 'texte';
+            const url = 'url';
+            const replacement = `[${selected}](${url})`;
+            const urlStart = start + selected.length + 3;
+            const urlEnd = urlStart + url.length;
+            applyPresentationReplacement(replacement, urlStart, urlEnd);
+        }
+
+        function applyPresentationTool(action) {
+            if (!presentationInput) return;
+            if (currentPresentationView === 'preview') setPresentationView('write');
+            if (currentPresentationMode === 'html') return;
+            if (document.activeElement !== presentationInput) {
+                restorePresentationSelection();
+            }
+
+            switch (action) {
+                case 'heading':
+                    applyPresentationHeading();
+                    break;
+                case 'bold':
+                    wrapPresentationSelection('**', '**', 'texte');
+                    break;
+                case 'italic':
+                    wrapPresentationSelection('*', '*', 'texte');
+                    break;
+                case 'quote':
+                    applyPresentationLinePrefix('> ');
+                    break;
+                case 'code': {
+                    const selected = presentationInput.value.slice(
+                        presentationInput.selectionStart ?? 0,
+                        presentationInput.selectionEnd ?? 0
+                    );
+                    if (selected.includes('\n')) {
+                        wrapPresentationSelection('```\n', '\n```', 'code');
+                    } else {
+                        wrapPresentationSelection('`', '`', 'code');
+                    }
+                    break;
+                }
+                case 'link':
+                    applyPresentationLink();
+                    break;
+                case 'ul':
+                    applyPresentationLinePrefix('- ');
+                    break;
+                case 'ol':
+                    applyPresentationLinePrefix('', true);
+                    break;
+                default:
+                    break;
+            }
+
+            autoGrowPresentation();
+        }
+
+        function handlePresentationKeydown(event) {
+            if (!presentationInput || currentPresentationMode === 'html') return;
+            const isModifier = event.ctrlKey || event.metaKey;
+            if (!isModifier || event.altKey) return;
+
+            const key = (event.key || '').toLowerCase();
+            const code = event.code || '';
+            const isKey = (k, c) => key === k || code === c;
+
+            if (isKey('b', 'KeyB')) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyPresentationTool('bold');
+                return;
+            }
+            if (isKey('i', 'KeyI')) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyPresentationTool('italic');
+                return;
+            }
+            if (isKey('k', 'KeyK')) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyPresentationTool('link');
+                return;
+            }
+            if (isKey('`', 'Backquote')) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyPresentationTool('code');
+                return;
+            }
+            if (event.shiftKey && (key === '7' || code === 'Digit7')) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyPresentationTool('ol');
+                return;
+            }
+            if (event.shiftKey && (key === '8' || code === 'Digit8')) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyPresentationTool('ul');
+                return;
+            }
+            if (event.shiftKey && isKey('h', 'KeyH')) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyPresentationTool('heading');
+            }
+        }
+
+        function destroyAvatarCropper() {
+            if (avatarCropper) {
+                avatarCropper.destroy();
+                avatarCropper = null;
+            }
+            if (avatarPreviewUrl) {
+                URL.revokeObjectURL(avatarPreviewUrl);
+                avatarPreviewUrl = '';
+            }
+            pendingAvatarFile = null;
+        }
+
+        function closeAvatarCropper(resetInput = true) {
+            if (!cropperBackdrop) return;
+            cropperBackdrop.classList.remove('open');
+            cropperBackdrop.setAttribute('aria-hidden', 'true');
+            destroyAvatarCropper();
+            if (resetInput && avatarInput) {
+                avatarInput.value = '';
+            }
+        }
+
+        function openAvatarCropper(file) {
+            if (!cropperBackdrop || !cropperImage || !window.Cropper) {
+                alert('Recadrage indisponible, upload direct.');
+                uploadAvatar(file);
+                return;
+            }
+
+            destroyAvatarCropper();
+            pendingAvatarFile = file;
+            avatarPreviewUrl = URL.createObjectURL(file);
+            cropperImage.src = avatarPreviewUrl;
+            cropperBackdrop.classList.add('open');
+            cropperBackdrop.setAttribute('aria-hidden', 'false');
+
+            avatarCropper = new Cropper(cropperImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                background: false,
+                autoCropArea: 1,
+                responsive: true,
+                checkOrientation: false,
+                ready() {
+                    if (cropperZoom && avatarCropper) {
+                        const ratio = avatarCropper.getImageData().ratio || 1;
+                        cropperZoom.value = String(ratio);
+                    }
+                },
+                zoom(event) {
+                    if (!cropperZoom || isCropperZoomSync) return;
+                    const ratio = event.detail?.ratio ?? 1;
+                    const min = Number(cropperZoom.min || 0);
+                    const max = Number(cropperZoom.max || 3);
+                    const clamped = Math.min(max, Math.max(min, ratio));
+                    cropperZoom.value = String(clamped);
+                }
+            });
+
+            if (cropperZoom) {
+                cropperZoom.oninput = () => {
+                    if (avatarCropper) {
+                        isCropperZoomSync = true;
+                        avatarCropper.zoomTo(Number(cropperZoom.value));
+                        requestAnimationFrame(() => {
+                            isCropperZoomSync = false;
+                        });
+                    }
+                };
+            }
+        }
+
         function updateShortcutsVisibility() {
             if (!shortcutsPanel) return;
             const ownerId = currentCharacter && currentCharacter.user_id ? currentCharacter.user_id : null;
             const isOwner = !!currentUser && (!ownerId || ownerId === currentUser.id);
-            shortcutsPanel.hidden = !isOwner;
+            shortcutsPanel.hidden = !(isOwner || isAdmin());
         }
 
         function renderPanel(panelId) {
@@ -428,6 +1144,10 @@
                 if (event.key !== 'astoria_active_character') return;
                 rerenderOpenPanelIfAny();
             });
+
+            window.addEventListener('astoria:character-changed', () => {
+                void loadActiveCharacter();
+            });
         }
 
         // Initialize page
@@ -443,13 +1163,16 @@
             setupShortcutPanels();
 
             // Logged in - render auth controls
-            renderAuthControls();
+            await renderAuthControls();
 
             // Load user's characters
             await loadCharacters();
 
             // Load active character or prompt to select/create one
             await loadActiveCharacter();
+            setInterval(() => {
+                renderSoulCounts(getActiveCharacter());
+            }, 1200);
         }
 
         function showNotLoggedIn() {
@@ -466,11 +1189,16 @@
             `;
         }
 
-        function renderAuthControls() {
-            const roleBadge = isAdmin() ? 'Admin' : 'Joueur';
+        async function renderAuthControls() {
+            const roleBadge = isAdmin() ? 'ADMIN' : 'JOUEUR';
 
-            // New (DOM-based) header controls: easier to keep stable + clickable username
             authControls.replaceChildren();
+
+            dockPrimaryRow = document.createElement('div');
+            dockPrimaryRow.className = 'app-dock-row app-dock-row--primary';
+
+            dockMetaRow = document.createElement('div');
+            dockMetaRow.className = 'app-dock-row app-dock-row--meta';
 
             const badge = document.createElement('span');
             badge.className = 'user-badge';
@@ -491,16 +1219,135 @@
                 }
             });
 
+            dockSouls = document.createElement('div');
+            dockSouls.className = 'app-dock-souls';
+            const soulConso = document.createElement('div');
+            soulConso.className = 'app-dock-soul';
+            const soulConsoLabel = document.createElement('span');
+            soulConsoLabel.className = 'app-dock-soul-label';
+            soulConsoLabel.textContent = 'Ames conso';
+            soulConsoValue = document.createElement('span');
+            soulConsoValue.className = 'app-dock-soul-value';
+            soulConsoValue.textContent = '0';
+            soulConso.append(soulConsoLabel, soulConsoValue);
+
+            const soulProg = document.createElement('div');
+            soulProg.className = 'app-dock-soul';
+            const soulProgLabel = document.createElement('span');
+            soulProgLabel.className = 'app-dock-soul-label';
+            soulProgLabel.textContent = 'Ames prog';
+            soulProgValue = document.createElement('span');
+            soulProgValue.className = 'app-dock-soul-value';
+            soulProgValue.textContent = '0';
+            soulProg.append(soulProgLabel, soulProgValue);
+            dockSouls.append(soulConso, soulProg);
+
             const logoutButton = document.createElement('button');
             logoutButton.className = 'auth-button secondary';
             logoutButton.id = 'logoutBtn';
-            logoutButton.textContent = 'Déconnexion';
+            logoutButton.textContent = 'Deconnexion';
             logoutButton.addEventListener('click', () => {
                 logout();
                 window.location.reload();
             });
 
-            authControls.append(badge, userLinkButton, logoutButton);
+            dockPrimaryRow.append(badge);
+            dockMetaRow.append(userLinkButton, dockSouls, logoutButton);
+
+            authControls.append(dockPrimaryRow);
+
+            dockAdminRow = null;
+            adminSelectorEl = null;
+            if (isAdmin()) {
+                dockAdminRow = document.createElement('div');
+                dockAdminRow.className = 'app-dock-row app-dock-row--admin';
+                adminSelectorEl = await buildAdminSelector();
+                if (adminSelectorEl) {
+                    dockAdminRow.append(adminSelectorEl);
+                }
+                authControls.append(dockAdminRow);
+            }
+
+            authControls.append(dockMetaRow);
+            updateAdminShortcut();
+        }
+
+        async function buildAdminSelector() {
+            if (!isAdmin()) return null;
+
+            const adminSelect = document.createElement('select');
+            adminSelect.className = 'character-selector character-selector--admin';
+            adminSelect.setAttribute('aria-label', 'MJ : selectionner un personnage');
+
+            const adminPlaceholder = document.createElement('option');
+            adminPlaceholder.value = '';
+            adminPlaceholder.textContent = 'MJ: choisir un personnage...';
+            adminSelect.appendChild(adminPlaceholder);
+
+            try {
+                const allCharacters = await getAllCharacters();
+                allCharacters.forEach((character) => {
+                    const option = document.createElement('option');
+                    option.value = character.id;
+                    const shortId = character.user_id ? String(character.user_id).slice(0, 8) : '????';
+                    option.textContent = `${character.name || 'Sans nom'} - ${shortId}`;
+                    adminSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading admin characters:', error);
+            }
+
+            adminSelect.addEventListener('change', async () => {
+                const nextId = adminSelect.value;
+                if (!nextId) return;
+
+                if (typeof window.astoriaBeforeCharacterChange === 'function') {
+                    try {
+                        await window.astoriaBeforeCharacterChange();
+                    } catch {}
+                }
+
+                const res = await setActiveCharacter(nextId);
+                if (!res || !res.success) return;
+                window.location.reload();
+            });
+
+            return adminSelect;
+        }
+
+        function syncAdminSelector() {
+            if (!adminSelectorEl) return;
+            if (currentCharacter && currentCharacter.id) {
+                adminSelectorEl.value = currentCharacter.id;
+            } else {
+                adminSelectorEl.value = '';
+            }
+        }
+
+        function readSoulCounts(active) {
+            if (!active || !active.id) return { conso: 0, prog: 0 };
+            const key = `fiche-${active.id}-eater`;
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return { conso: 0, prog: 0 };
+                const data = JSON.parse(raw);
+                const conso = Number.parseInt(data?.eaterAmesConso ?? 0, 10);
+                const prog = Number.parseInt(data?.eaterAmesProgression ?? 0, 10);
+                return {
+                    conso: Number.isNaN(conso) ? 0 : conso,
+                    prog: Number.isNaN(prog) ? 0 : prog
+                };
+            } catch {
+                return { conso: 0, prog: 0 };
+            }
+        }
+
+        function renderSoulCounts(active) {
+            if (!soulConsoValue || !soulProgValue || !dockSouls) return;
+            const counts = readSoulCounts(active);
+            soulConsoValue.textContent = String(counts.conso);
+            soulProgValue.textContent = String(counts.prog);
+            dockSouls.title = "Compteur d'ames (stub, base sur la fiche)";
         }
 
         function updateAuthUserLabel() {
@@ -516,6 +1363,28 @@
                 console.error('Error loading characters:', error);
                 userCharacters = [];
             }
+        }
+
+        async function handleCharacterSelection(characterId) {
+            if (!characterId) return;
+
+            const res = await setActiveCharacter(characterId);
+            if (!res || !res.success) return;
+
+            currentCharacter = getActiveCharacter();
+            if (currentCharacter) {
+                displayCharacter(currentCharacter);
+                initProfileTagSelector({ characterId: currentCharacter.id });
+            } else {
+                showNoCharacterSelected();
+                initProfileTagSelector({ characterId: null });
+            }
+            updateAuthUserLabel();
+            syncAdminSelector();
+            renderSoulCounts(currentCharacter);
+            rerenderOpenPanelIfAny();
+            updateShortcutsVisibility();
+            updateAvatarControls();
         }
 
         async function loadActiveCharacter() {
@@ -535,7 +1404,10 @@
                 initProfileTagSelector({ characterId: currentCharacter.id });
                 updateAuthUserLabel();
             }
+            syncAdminSelector();
+            renderSoulCounts(currentCharacter);
             updateShortcutsVisibility();
+            updateAvatarControls();
         }
 
         function renderCharacterSelector() {
@@ -547,7 +1419,9 @@
                 selectorEl = document.createElement('select');
                 selectorEl.className = 'character-selector';
                 selectorEl.id = 'characterSelector';
-                authControls.insertBefore(selectorEl, authControls.firstChild);
+                selectorEl.setAttribute('aria-label', 'Selectionner un personnage');
+                const mount = dockPrimaryRow || authControls;
+                mount.insertBefore(selectorEl, mount.firstChild);
 
                 selectorEl.addEventListener('change', async (e) => {
                     const value = e.target.value;
@@ -558,22 +1432,7 @@
                         return;
                     }
 
-                    if (!value) return;
-
-                    const res = await setActiveCharacter(value);
-                    if (!res || !res.success) return;
-
-                    currentCharacter = getActiveCharacter();
-                    if (currentCharacter) {
-                        displayCharacter(currentCharacter);
-                        initProfileTagSelector({ characterId: currentCharacter.id });
-                    } else {
-                        showNoCharacterSelected();
-                        initProfileTagSelector({ characterId: null });
-                    }
-                    updateAuthUserLabel();
-                    rerenderOpenPanelIfAny();
-                    updateShortcutsVisibility();
+                    await handleCharacterSelection(value);
                 });
             } else {
                 selectorEl.replaceChildren();
@@ -581,9 +1440,22 @@
 
             const placeholderOption = document.createElement('option');
             placeholderOption.value = '';
-            placeholderOption.textContent = 'Sélectionner un personnage...';
+            placeholderOption.textContent = 'Selectionner un personnage...';
             placeholderOption.selected = !currentCharacter;
             selectorEl.appendChild(placeholderOption);
+
+            const hasCurrent =
+                !!currentCharacter &&
+                userCharacters.some((char) => char.id === currentCharacter.id);
+
+            if (currentCharacter && !hasCurrent) {
+                const adminOption = document.createElement('option');
+                adminOption.value = currentCharacter.id;
+                adminOption.textContent = `Admin: ${currentCharacter.name}`;
+                adminOption.selected = true;
+                selectorEl.appendChild(adminOption);
+            }
+
 
             userCharacters.forEach((char) => {
                 const option = document.createElement('option');
@@ -596,7 +1468,7 @@
             if (userCharacters.length < 5) {
                 const createOption = document.createElement('option');
                 createOption.value = '__create__';
-                createOption.textContent = '+ Créer un personnage';
+                createOption.textContent = '+ Creer un personnage';
                 selectorEl.appendChild(createOption);
             }
 
@@ -657,20 +1529,32 @@
 
         function showNoCharacterSelected() {
             document.getElementById('characterInitial').textContent = '?';
-            document.getElementById('characterName').textContent = 'Aucun personnage sélectionné';
+            const nameEl = document.getElementById('characterName');
+            if (nameEl) {
+                nameEl.textContent = 'Aucun personnage sélectionné';
+                nameEl.setAttribute('href', 'profil.html');
+            }
             document.getElementById('characterRole').textContent = 'Sélectionnez un personnage ci-dessus';
+            updateAvatarUI('');
+            renderPresentation();
+            updatePresentationControls();
+            persistCharacterSummary(null);
         }
 
         function displayCharacter(character) {
             // Update header with character info
             const initial = character.name ? character.name.charAt(0).toUpperCase() : '?';
             document.getElementById('characterInitial').textContent = initial;
-            document.getElementById('characterName').textContent = character.name || 'Sans nom';
+            const nameEl = document.getElementById('characterName');
+            if (nameEl) {
+                nameEl.textContent = character.name || 'Sans nom';
+                nameEl.setAttribute('href', `profil.html?character=${encodeURIComponent(character.id)}`);
+            }
 
             // Display race and class
             const race = character.race || 'Race inconnue';
             const charClass = character.class || 'Classe inconnue';
-            document.getElementById('characterRole').textContent = `${race} • ${charClass}`;
+            document.getElementById('characterRole').textContent = `${race} - ${charClass}`;
 
             // Display stats (from profile_data if available)
             const profileData = character.profile_data || {};
@@ -678,8 +1562,79 @@
             document.getElementById('statDico').textContent = profileData.dico || 0;
             document.getElementById('statPopularity').textContent = profileData.popularity || 0;
 
+            updateAvatarUI(profileData.avatar_url || '');
+            renderPresentation();
+            updatePresentationControls();
+            persistCharacterSummary(buildCharacterSummary(character));
+
             // TODO: Populate rest of profile sections based on issue #9 requirements
             // - House, Rank, Alice types, etc.
+        }
+
+        async function uploadAvatar(file) {
+            if (!currentCharacter || !canEditProfile()) return;
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Image invalide.');
+                return;
+            }
+            if (file.size > MAX_AVATAR_SIZE) {
+                alert('Image trop lourde (max 2 Mo).');
+                return;
+            }
+
+            avatarTrigger.classList.add('is-uploading');
+
+            try {
+                const supabase = await getSupabaseClient();
+                const safeName = String(file.name || 'avatar')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9_.-]/g, '_');
+                const filePath = `characters/${currentCharacter.id}/${Date.now()}_${safeName}`;
+                const { error: uploadError } = await supabase.storage
+                    .from(AVATAR_BUCKET)
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: true,
+                        contentType: file.type
+                    });
+
+                if (uploadError) {
+                    console.error(uploadError);
+                    alert('Upload impossible. Vérifiez le bucket avatars.');
+                    return;
+                }
+
+                const { data: publicData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath);
+                const publicUrl = publicData?.publicUrl;
+                if (!publicUrl) {
+                    alert('URL avatar introuvable.');
+                    return;
+                }
+
+                const profileData = currentCharacter.profile_data || {};
+                const res = await updateCharacter(currentCharacter.id, {
+                    profile_data: {
+                        ...profileData,
+                        avatar_url: publicUrl,
+                        avatar_path: filePath
+                    }
+                });
+
+                if (!res || !res.success) {
+                    alert('Enregistrement avatar impossible.');
+                    return;
+                }
+
+                currentCharacter = res.character;
+                updateAvatarUI(publicUrl);
+                persistCharacterSummary(buildCharacterSummary(currentCharacter));
+            } catch (error) {
+                console.error(error);
+                alert('Erreur lors de l\'upload.');
+            } finally {
+                avatarTrigger.classList.remove('is-uploading');
+                avatarInput.value = '';
+            }
         }
 
         // Character create modal wiring
@@ -694,6 +1649,131 @@
                 hideCreateCharacterModal();
             }
         });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && cropperBackdrop && cropperBackdrop.classList.contains('open')) {
+                e.preventDefault();
+                closeAvatarCropper();
+            }
+        });
+
+        if (presentationEditBtn) {
+            presentationEditBtn.addEventListener('click', () => {
+                if (!canEditProfile()) return;
+                openPresentationEditor();
+            });
+        }
+
+        if (presentationCancel) {
+            presentationCancel.addEventListener('click', cancelPresentationEdit);
+        }
+
+        if (presentationSave) {
+            presentationSave.addEventListener('click', savePresentation);
+        }
+
+        if (presentationViewWrite) {
+            presentationViewWrite.addEventListener('click', () => setPresentationView('write'));
+        }
+
+        if (presentationViewPreview) {
+            presentationViewPreview.addEventListener('click', () => setPresentationView('preview'));
+        }
+
+        if (presentationModeMarkdown) {
+            presentationModeMarkdown.addEventListener('click', () => setPresentationMode('markdown'));
+        }
+
+        if (presentationModeHtml) {
+            presentationModeHtml.addEventListener('click', () => setPresentationMode('html'));
+        }
+
+        if (presentationToolbar) {
+            presentationToolbar.addEventListener('pointerdown', (event) => {
+                if (event.target.closest('button[data-md]')) {
+                    event.preventDefault();
+                }
+            });
+            presentationToolbar.addEventListener('click', (event) => {
+                const button = event.target.closest('button[data-md]');
+                if (!button) return;
+                applyPresentationTool(button.getAttribute('data-md'));
+            });
+        }
+
+        if (presentationInput) {
+            presentationInput.addEventListener('input', () => {
+                updatePresentationSelection();
+                autoGrowPresentation();
+                if (currentPresentationView === 'preview') {
+                    renderPresentationPreview(presentationInput.value);
+                }
+            });
+            presentationInput.addEventListener('keydown', handlePresentationKeydown);
+            presentationInput.addEventListener('keyup', updatePresentationSelection);
+            presentationInput.addEventListener('mouseup', updatePresentationSelection);
+            presentationInput.addEventListener('select', updatePresentationSelection);
+        }
+
+        if (avatarTrigger && avatarInput) {
+            avatarTrigger.addEventListener('click', () => {
+                if (!canEditProfile()) return;
+                avatarInput.click();
+            });
+            avatarTrigger.addEventListener('keydown', (event) => {
+                if (!canEditProfile()) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    avatarInput.click();
+                }
+            });
+            avatarInput.addEventListener('change', () => {
+                const file = avatarInput.files && avatarInput.files[0];
+                if (file) openAvatarCropper(file);
+            });
+        }
+
+        if (cropperClose) {
+            cropperClose.addEventListener('click', () => closeAvatarCropper());
+        }
+
+        if (cropperCancel) {
+            cropperCancel.addEventListener('click', () => closeAvatarCropper());
+        }
+
+        if (cropperBackdrop) {
+            cropperBackdrop.addEventListener('click', (event) => {
+                if (event.target === cropperBackdrop) {
+                    closeAvatarCropper();
+                }
+            });
+        }
+
+        if (cropperConfirm) {
+            cropperConfirm.addEventListener('click', async () => {
+                if (!avatarCropper || !pendingAvatarFile) return;
+
+                const canvas = avatarCropper.getCroppedCanvas({
+                    width: 512,
+                    height: 512,
+                    imageSmoothingQuality: 'high'
+                });
+
+                if (!canvas) return;
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert('Recadrage impossible.');
+                        return;
+                    }
+                    const baseName = String(pendingAvatarFile.name || 'avatar')
+                        .replace(/\.[^/.]+$/, '')
+                        .slice(0, 120);
+                    const uploadFile = new File([blob], `${baseName}.png`, { type: 'image/png' });
+                    closeAvatarCropper(false);
+                    await uploadAvatar(uploadFile);
+                }, 'image/png');
+            });
+        }
 
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
