@@ -601,7 +601,7 @@ async function refreshProfile() {
     state.character = resolveActiveCharacter();
 
     // Toujours initialiser le character-summary widget (persistance comme fiche/magie)
-    await initCharacterSummary({ enableDropdown: true });
+    await initCharacterSummary({ enableDropdown: true, showKaels: true });
 
     if (!state.user) {
         state.profile = null;

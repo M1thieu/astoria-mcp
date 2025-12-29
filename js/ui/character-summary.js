@@ -170,6 +170,42 @@ function updateSoulCounts(characterId) {
 }
 
 /**
+ * Formate un montant de kaels avec séparateurs de milliers
+ */
+function formatKaels(amount) {
+    return new Intl.NumberFormat('fr-FR').format(amount);
+}
+
+/**
+ * Affiche les kaels du personnage (appel API)
+ */
+async function updateKaels() {
+    const kaelsBadge = document.getElementById("characterKaelsBadge");
+    if (!kaelsBadge) return;
+
+    try {
+        // Import dynamique du module market
+        const market = await import("../market.js");
+        if (!market || !market.getMyProfile) {
+            console.warn("Character-summary: market.getMyProfile not available");
+            kaelsBadge.hidden = true;
+            return;
+        }
+
+        const profile = await market.getMyProfile();
+        if (profile && typeof profile.kaels === 'number') {
+            kaelsBadge.textContent = `${formatKaels(profile.kaels)} kaels`;
+            kaelsBadge.hidden = false;
+        } else {
+            kaelsBadge.hidden = true;
+        }
+    } catch (error) {
+        console.warn("Character-summary: Could not load kaels", error);
+        kaelsBadge.hidden = true;
+    }
+}
+
+/**
  * Construit le dropdown des personnages disponibles
  */
 async function buildCharacterDropdown(dropdownEl, currentCharacterId) {
@@ -288,7 +324,7 @@ function wireDropdownToggle(avatarEl, dropdownEl) {
     });
 }
 
-export async function initCharacterSummary({ includeQueryParam = false, elements, enableDropdown = true } = {}) {
+export async function initCharacterSummary({ includeQueryParam = false, elements, enableDropdown = true, showKaels = false } = {}) {
     const resolvedElements = elements || getDefaultSummaryElements();
     const context = resolveCharacterContext({ includeQueryParam });
     const summary = buildSummary(context);
@@ -297,6 +333,11 @@ export async function initCharacterSummary({ includeQueryParam = false, elements
     // Update soul counts if character available
     if (context?.character?.id) {
         updateSoulCounts(context.character.id);
+    }
+
+    // Update kaels if enabled
+    if (showKaels) {
+        await updateKaels();
     }
 
     // Setup dropdown if enabled

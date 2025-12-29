@@ -708,7 +708,7 @@
             } catch (error) {
                 summaryModule = null;
             }
-            const summaryState = await summaryModule?.initCharacterSummary({ includeQueryParam: true, enableDropdown: true }) || null;
+            const summaryState = await summaryModule?.initCharacterSummary({ includeQueryParam: true, enableDropdown: true, showKaels: true }) || null;
             summaryElements = summaryState?.elements || null;
             currentCharacterKey = summaryState?.context?.key || currentCharacterKey;
 
