@@ -74,7 +74,11 @@
                             </div>
                             <div class="field-group">
                                 <label class="field-label" for="identiteSexe">Sexe</label>
-                                <input id="identiteSexe" class="field-input" type="text" placeholder="Sexe / genre du personnage">
+                                <select id="identiteSexe" class="field-input">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="Féminin">Féminin</option>
+                                    <option value="Masculin">Masculin</option>
+                                </select>
                             </div>
                         </div>
 
@@ -85,13 +89,36 @@
                             </div>
                             <div class="field-group">
                                 <label class="field-label" for="identiteHierarchieSociale">Hiérarchie sociale</label>
-                                <input id="identiteHierarchieSociale" class="field-input" type="text" placeholder="Noble, roturier, famille influente, etc.">
+                                <select id="identiteHierarchieSociale" class="field-input">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="Lignée régente">Lignée régente</option>
+                                    <option value="Clergé">Clergé</option>
+                                    <option value="Haute-Noblesse">Haute-Noblesse</option>
+                                    <option value="Petite-Noblesse">Petite-Noblesse</option>
+                                    <option value="Force Armée">Force Armée</option>
+                                    <option value="Bourgeoisie">Bourgeoisie</option>
+                                    <option value="Paysannerie">Paysannerie</option>
+                                    <option value="Bas Peuple">Bas Peuple</option>
+                                    <option value="Esclaves & Hybrides">Esclaves & Hybrides</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="field-group">
                             <label class="field-label" for="identitePaysOrigine">Pays d'origine</label>
-                            <input id="identitePaysOrigine" class="field-input" type="text" placeholder="Royaume / pays / région d'origine.">
+                            <select id="identitePaysOrigine" class="field-input">
+                                <option value="">-- Sélectionner --</option>
+                                <option value="Evercrest">Evercrest</option>
+                                <option value="Ombresyl">Ombresyl</option>
+                                <option value="Sancturia">Sancturia</option>
+                                <option value="Luminara">Luminara</option>
+                                <option value="Celestheon">Celestheon</option>
+                                <option value="Avalon">Avalon</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="identitePaysOrigineUrl">URL du Pays d'origine</label>
+                            <input id="identitePaysOrigineUrl" class="field-input" type="url" placeholder="https://...">
                         </div>
                         <div class="field-group">
                             <div class="relations-header">
@@ -140,7 +167,8 @@
                                     <option value="">Sélectionner...</option>
                                     <option value="civil">Civil</option>
                                     <option value="sorcier">Sorcier</option>
-                                    <option value="eater">Eater</option>
+                                    <option value="weapon">Weapon</option>
+                                    <option value="meister">Meister</option>
                                     <option value="alice">Alice</option>
                                 </select>
                             </div>
@@ -208,6 +236,16 @@
                         </div>
 
                         <div class="field-group">
+                            <label class="field-label" for="combatArmeDescription">Description de l'arme</label>
+                            <textarea
+                                id="combatArmeDescription"
+                                class="field-input field-textarea"
+                                rows="4"
+                                placeholder="Décrivez l'apparence, les caractéristiques et les particularités de votre arme..."
+                            ></textarea>
+                        </div>
+
+                        <div class="field-group">
                             <label class="field-label" for="combatArmeImage">Image de l'arme (URL)</label>
                             <input
                                 id="combatArmeImage"
@@ -271,22 +309,25 @@
 
                                 <div class="field-group">
                                     <label class="field-label" for="aliceType">Type</label>
-                                    <input
-                                        id="aliceType"
-                                        class="field-input"
-                                        type="text"
-                                        placeholder="Type d'Alice : physiologique, mentale, élémentaire, etc."
-                                    >
+                                    <select id="aliceType" class="field-input">
+                                        <option value="">-- Sélectionner --</option>
+                                        <option value="Physiques">Physiques</option>
+                                        <option value="Psychiques">Psychiques</option>
+                                        <option value="Technologiques">Technologiques</option>
+                                        <option value="Spéciaux">Spéciaux</option>
+                                        <option value="Dangereux">Dangereux</option>
+                                    </select>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label" for="aliceForme">Forme</label>
-                                    <input
-                                        id="aliceForme"
-                                        class="field-input"
-                                        type="text"
-                                        placeholder="Forme(s) ou modalités d'expression de l'Alice."
-                                    >
+                                    <select id="aliceForme" class="field-input">
+                                        <option value="">-- Sélectionner --</option>
+                                        <option value="Enfance">Enfance</option>
+                                        <option value="Diffuse">Diffuse</option>
+                                        <option value="Indéterminée">Indéterminée</option>
+                                        <option value="Limitée">Limitée</option>
+                                    </select>
                                 </div>
 
                                 <div class="field-group">
@@ -359,32 +400,236 @@
                             <p class="fiche-hint">Deblocage par parchemins d'eveil et tags Sorcier: stub en cours.</p>
                             <div class="field-group">
                                 <label class="field-label" for="sorcelleriePrincipale">Magie principale</label>
-                                <input
-                                    id="sorcelleriePrincipale"
-                                    class="field-input"
-                                    type="text"
-                                    placeholder="Spécialisation principale (ex : feu, soin, gravité...)."
-                                >
+                                <select id="sorcelleriePrincipale" class="field-input">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="🔥 Feu">🔥 Feu</option>
+                                    <option value="💧 Eau">💧 Eau</option>
+                                    <option value="🌪️ Vent">🌪️ Vent</option>
+                                    <option value="🌱 Terre">🌱 Terre</option>
+                                    <option value="🌿 Nature">🌿 Nature</option>
+                                    <option value="🪨 Roche">🪨 Roche</option>
+                                    <option value="⚙️ Métaux">⚙️ Métaux</option>
+                                    <option value="❄️ Cryo (glace)">❄️ Cryo (glace)</option>
+                                    <option value="⚡ Foudre">⚡ Foudre</option>
+                                    <option value="🌕 Lumière">🌕 Lumière</option>
+                                    <option value="🌑 Ténèbres">🌑 Ténèbres</option>
+                                    <option value="🌲 Bois">🌲 Bois</option>
+                                    <option value="🟫 Boue">🟫 Boue</option>
+                                    <option value="🌋 Lave">🌋 Lave</option>
+                                    <option value="☣️ Acide">☣️ Acide</option>
+                                    <option value="💎 Cristal">💎 Cristal</option>
+                                    <option value="🌀 Gravité">🌀 Gravité</option>
+                                    <option value="🧪 Osmose">🧪 Osmose</option>
+                                    <option value="🧠 Télékinésie">🧠 Télékinésie</option>
+                                    <option value="👁️ Invisibilité">👁️ Invisibilité</option>
+                                    <option value="🕊️ Vol">🕊️ Vol</option>
+                                    <option value="❤️‍🩹 Soin">❤️‍🩹 Soin</option>
+                                    <option value="👂 Amélioration des sens">👂 Amélioration des sens</option>
+                                    <option value="💭 Rêve">💭 Rêve</option>
+                                    <option value="👁️‍🗨️ Contrôle mental">👁️‍🗨️ Contrôle mental</option>
+                                    <option value="⏳ Contrôle du Temps">⏳ Contrôle du Temps</option>
+                                    <option value="🌀 Portails">🌀 Portails</option>
+                                    <option value="🪐 Monde de poche">🪐 Monde de poche</option>
+                                    <option value="🧭 Téléportation">🧭 Téléportation</option>
+                                    <option value="💥 Mana brut">💥 Mana brut</option>
+                                    <option value="⚖️ Ordre">⚖️ Ordre</option>
+                                    <option value="🚫 Antimagie">🚫 Antimagie</option>
+                                    <option value="🔷 Amélioration runique">🔷 Amélioration runique</option>
+                                    <option value="☀️ Invocation d'énergie">☀️ Invocation d'énergie</option>
+                                    <option value="🌊 Amplification élémentaire">🌊 Amplification élémentaire</option>
+                                    <option value="🔄 Rotation">🔄 Rotation</option>
+                                    <option value="🧲 Magnétisme">🧲 Magnétisme</option>
+                                    <option value="🧵 Fil">🧵 Fil</option>
+                                    <option value="🏜️ Sable">🏜️ Sable</option>
+                                    <option value="🌑 Ombres solides">🌑 Ombres solides</option>
+                                    <option value="🪟 Verre">🪟 Verre</option>
+                                    <option value="⚫ Cendres">⚫ Cendres</option>
+                                    <option value="🧱 Argile">🧱 Argile</option>
+                                    <option value="🐺 Invocation animale">🐺 Invocation animale</option>
+                                    <option value="⚔️ Invocation d'armes">⚔️ Invocation d'armes</option>
+                                    <option value="🗿 Invocation de golems">🗿 Invocation de golems</option>
+                                    <option value="🌪️ Esprits élémentaires">🌪️ Esprits élémentaires</option>
+                                    <option value="👢 Pantins">👢 Pantins</option>
+                                    <option value="🧸 Fabrication de familiers">🧸 Fabrication de familiers</option>
+                                    <option value="🦎 Métamorphose animale">🦎 Métamorphose animale</option>
+                                    <option value="🧬 Mutations">🧬 Mutations</option>
+                                    <option value="♻️ Régénération avancée">♻️ Régénération avancée</option>
+                                    <option value="🦠 MicroBiologie">🦠 MicroBiologie</option>
+                                    <option value="🎵 Son">🎵 Son</option>
+                                    <option value="🎭 Illusion">🎭 Illusion</option>
+                                    <option value="🩸 Sang">🩸 Sang</option>
+                                    <option value="🍀 Chance / Malchance">🍀 Chance / Malchance</option>
+                                    <option value="🔗 Lien">🔗 Lien</option>
+                                    <option value="📡 Détection">📡 Détection</option>
+                                    <option value="🤫 Silence">🤫 Silence</option>
+                                    <option value="☣️ Corruption">☣️ Corruption</option>
+                                    <option value="🔯 Cercle démoniaque">🔯 Cercle démoniaque</option>
+                                    <option value="💀 Dévoreur d'âmes">💀 Dévoreur d'âmes</option>
+                                    <option value="🧲 Rouille">🧲 Rouille</option>
+                                    <option value="🔥 Berserker">🔥 Berserker</option>
+                                    <option value="☠️ Malédictions">☠️ Malédictions</option>
+                                    <option value="⚖️ Variation de masse">⚖️ Variation de masse</option>
+                                    <option value="🌦️ Météorologie">🌦️ Météorologie</option>
+                                    <option value="⚗️ Chimie magique">⚗️ Chimie magique</option>
+                                    <option value="🌌 Magie astral">🌌 Magie astral</option>
+                                    <option value="🪢 Élasticité">🪢 Élasticité</option>
+                                </select>
                             </div>
 
                             <div class="field-group">
                                 <label class="field-label" for="sorcellerieSecondaire">Magie secondaire</label>
-                                <input
-                                    id="sorcellerieSecondaire"
-                                    class="field-input"
-                                    type="text"
-                                    placeholder="Magie secondaire éventuelle (optionnelle)."
-                                >
+                                <select id="sorcellerieSecondaire" class="field-input">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="🔥 Feu">🔥 Feu</option>
+                                    <option value="💧 Eau">💧 Eau</option>
+                                    <option value="🌪️ Vent">🌪️ Vent</option>
+                                    <option value="🌱 Terre">🌱 Terre</option>
+                                    <option value="🌿 Nature">🌿 Nature</option>
+                                    <option value="🪨 Roche">🪨 Roche</option>
+                                    <option value="⚙️ Métaux">⚙️ Métaux</option>
+                                    <option value="❄️ Cryo (glace)">❄️ Cryo (glace)</option>
+                                    <option value="⚡ Foudre">⚡ Foudre</option>
+                                    <option value="🌕 Lumière">🌕 Lumière</option>
+                                    <option value="🌑 Ténèbres">🌑 Ténèbres</option>
+                                    <option value="🌲 Bois">🌲 Bois</option>
+                                    <option value="🟫 Boue">🟫 Boue</option>
+                                    <option value="🌋 Lave">🌋 Lave</option>
+                                    <option value="☣️ Acide">☣️ Acide</option>
+                                    <option value="💎 Cristal">💎 Cristal</option>
+                                    <option value="🌀 Gravité">🌀 Gravité</option>
+                                    <option value="🧪 Osmose">🧪 Osmose</option>
+                                    <option value="🧠 Télékinésie">🧠 Télékinésie</option>
+                                    <option value="👁️ Invisibilité">👁️ Invisibilité</option>
+                                    <option value="🕊️ Vol">🕊️ Vol</option>
+                                    <option value="❤️‍🩹 Soin">❤️‍🩹 Soin</option>
+                                    <option value="👂 Amélioration des sens">👂 Amélioration des sens</option>
+                                    <option value="💭 Rêve">💭 Rêve</option>
+                                    <option value="👁️‍🗨️ Contrôle mental">👁️‍🗨️ Contrôle mental</option>
+                                    <option value="⏳ Contrôle du Temps">⏳ Contrôle du Temps</option>
+                                    <option value="🌀 Portails">🌀 Portails</option>
+                                    <option value="🪐 Monde de poche">🪐 Monde de poche</option>
+                                    <option value="🧭 Téléportation">🧭 Téléportation</option>
+                                    <option value="💥 Mana brut">💥 Mana brut</option>
+                                    <option value="⚖️ Ordre">⚖️ Ordre</option>
+                                    <option value="🚫 Antimagie">🚫 Antimagie</option>
+                                    <option value="🔷 Amélioration runique">🔷 Amélioration runique</option>
+                                    <option value="☀️ Invocation d'énergie">☀️ Invocation d'énergie</option>
+                                    <option value="🌊 Amplification élémentaire">🌊 Amplification élémentaire</option>
+                                    <option value="🔄 Rotation">🔄 Rotation</option>
+                                    <option value="🧲 Magnétisme">🧲 Magnétisme</option>
+                                    <option value="🧵 Fil">🧵 Fil</option>
+                                    <option value="🏜️ Sable">🏜️ Sable</option>
+                                    <option value="🌑 Ombres solides">🌑 Ombres solides</option>
+                                    <option value="🪟 Verre">🪟 Verre</option>
+                                    <option value="⚫ Cendres">⚫ Cendres</option>
+                                    <option value="🧱 Argile">🧱 Argile</option>
+                                    <option value="🐺 Invocation animale">🐺 Invocation animale</option>
+                                    <option value="⚔️ Invocation d'armes">⚔️ Invocation d'armes</option>
+                                    <option value="🗿 Invocation de golems">🗿 Invocation de golems</option>
+                                    <option value="🌪️ Esprits élémentaires">🌪️ Esprits élémentaires</option>
+                                    <option value="👢 Pantins">👢 Pantins</option>
+                                    <option value="🧸 Fabrication de familiers">🧸 Fabrication de familiers</option>
+                                    <option value="🦎 Métamorphose animale">🦎 Métamorphose animale</option>
+                                    <option value="🧬 Mutations">🧬 Mutations</option>
+                                    <option value="♻️ Régénération avancée">♻️ Régénération avancée</option>
+                                    <option value="🦠 MicroBiologie">🦠 MicroBiologie</option>
+                                    <option value="🎵 Son">🎵 Son</option>
+                                    <option value="🎭 Illusion">🎭 Illusion</option>
+                                    <option value="🩸 Sang">🩸 Sang</option>
+                                    <option value="🍀 Chance / Malchance">🍀 Chance / Malchance</option>
+                                    <option value="🔗 Lien">🔗 Lien</option>
+                                    <option value="📡 Détection">📡 Détection</option>
+                                    <option value="🤫 Silence">🤫 Silence</option>
+                                    <option value="☣️ Corruption">☣️ Corruption</option>
+                                    <option value="🔯 Cercle démoniaque">🔯 Cercle démoniaque</option>
+                                    <option value="💀 Dévoreur d'âmes">💀 Dévoreur d'âmes</option>
+                                    <option value="🧲 Rouille">🧲 Rouille</option>
+                                    <option value="🔥 Berserker">🔥 Berserker</option>
+                                    <option value="☠️ Malédictions">☠️ Malédictions</option>
+                                    <option value="⚖️ Variation de masse">⚖️ Variation de masse</option>
+                                    <option value="🌦️ Météorologie">🌦️ Météorologie</option>
+                                    <option value="⚗️ Chimie magique">⚗️ Chimie magique</option>
+                                    <option value="🌌 Magie astral">🌌 Magie astral</option>
+                                    <option value="🪢 Élasticité">🪢 Élasticité</option>
+                                </select>
                             </div>
 
                             <div class="field-group">
                                 <label class="field-label" for="sorcellerieCachee">Magie cachée</label>
-                                <input
-                                    id="sorcellerieCachee"
-                                    class="field-input"
-                                    type="text"
-                                    placeholder="Magie cachée ou en latence (si connue de l'équipe)."
-                                >
+                                <select id="sorcellerieCachee" class="field-input">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="🔥 Feu">🔥 Feu</option>
+                                    <option value="💧 Eau">💧 Eau</option>
+                                    <option value="🌪️ Vent">🌪️ Vent</option>
+                                    <option value="🌱 Terre">🌱 Terre</option>
+                                    <option value="🌿 Nature">🌿 Nature</option>
+                                    <option value="🪨 Roche">🪨 Roche</option>
+                                    <option value="⚙️ Métaux">⚙️ Métaux</option>
+                                    <option value="❄️ Cryo (glace)">❄️ Cryo (glace)</option>
+                                    <option value="⚡ Foudre">⚡ Foudre</option>
+                                    <option value="🌕 Lumière">🌕 Lumière</option>
+                                    <option value="🌑 Ténèbres">🌑 Ténèbres</option>
+                                    <option value="🌲 Bois">🌲 Bois</option>
+                                    <option value="🟫 Boue">🟫 Boue</option>
+                                    <option value="🌋 Lave">🌋 Lave</option>
+                                    <option value="☣️ Acide">☣️ Acide</option>
+                                    <option value="💎 Cristal">💎 Cristal</option>
+                                    <option value="🌀 Gravité">🌀 Gravité</option>
+                                    <option value="🧪 Osmose">🧪 Osmose</option>
+                                    <option value="🧠 Télékinésie">🧠 Télékinésie</option>
+                                    <option value="👁️ Invisibilité">👁️ Invisibilité</option>
+                                    <option value="🕊️ Vol">🕊️ Vol</option>
+                                    <option value="❤️‍🩹 Soin">❤️‍🩹 Soin</option>
+                                    <option value="👂 Amélioration des sens">👂 Amélioration des sens</option>
+                                    <option value="💭 Rêve">💭 Rêve</option>
+                                    <option value="👁️‍🗨️ Contrôle mental">👁️‍🗨️ Contrôle mental</option>
+                                    <option value="⏳ Contrôle du Temps">⏳ Contrôle du Temps</option>
+                                    <option value="🌀 Portails">🌀 Portails</option>
+                                    <option value="🪐 Monde de poche">🪐 Monde de poche</option>
+                                    <option value="🧭 Téléportation">🧭 Téléportation</option>
+                                    <option value="💥 Mana brut">💥 Mana brut</option>
+                                    <option value="⚖️ Ordre">⚖️ Ordre</option>
+                                    <option value="🚫 Antimagie">🚫 Antimagie</option>
+                                    <option value="🔷 Amélioration runique">🔷 Amélioration runique</option>
+                                    <option value="☀️ Invocation d'énergie">☀️ Invocation d'énergie</option>
+                                    <option value="🌊 Amplification élémentaire">🌊 Amplification élémentaire</option>
+                                    <option value="🔄 Rotation">🔄 Rotation</option>
+                                    <option value="🧲 Magnétisme">🧲 Magnétisme</option>
+                                    <option value="🧵 Fil">🧵 Fil</option>
+                                    <option value="🏜️ Sable">🏜️ Sable</option>
+                                    <option value="🌑 Ombres solides">🌑 Ombres solides</option>
+                                    <option value="🪟 Verre">🪟 Verre</option>
+                                    <option value="⚫ Cendres">⚫ Cendres</option>
+                                    <option value="🧱 Argile">🧱 Argile</option>
+                                    <option value="🐺 Invocation animale">🐺 Invocation animale</option>
+                                    <option value="⚔️ Invocation d'armes">⚔️ Invocation d'armes</option>
+                                    <option value="🗿 Invocation de golems">🗿 Invocation de golems</option>
+                                    <option value="🌪️ Esprits élémentaires">🌪️ Esprits élémentaires</option>
+                                    <option value="👢 Pantins">👢 Pantins</option>
+                                    <option value="🧸 Fabrication de familiers">🧸 Fabrication de familiers</option>
+                                    <option value="🦎 Métamorphose animale">🦎 Métamorphose animale</option>
+                                    <option value="🧬 Mutations">🧬 Mutations</option>
+                                    <option value="♻️ Régénération avancée">♻️ Régénération avancée</option>
+                                    <option value="🦠 MicroBiologie">🦠 MicroBiologie</option>
+                                    <option value="🎵 Son">🎵 Son</option>
+                                    <option value="🎭 Illusion">🎭 Illusion</option>
+                                    <option value="🩸 Sang">🩸 Sang</option>
+                                    <option value="🍀 Chance / Malchance">🍀 Chance / Malchance</option>
+                                    <option value="🔗 Lien">🔗 Lien</option>
+                                    <option value="📡 Détection">📡 Détection</option>
+                                    <option value="🤫 Silence">🤫 Silence</option>
+                                    <option value="☣️ Corruption">☣️ Corruption</option>
+                                    <option value="🔯 Cercle démoniaque">🔯 Cercle démoniaque</option>
+                                    <option value="💀 Dévoreur d'âmes">💀 Dévoreur d'âmes</option>
+                                    <option value="🧲 Rouille">🧲 Rouille</option>
+                                    <option value="🔥 Berserker">🔥 Berserker</option>
+                                    <option value="☠️ Malédictions">☠️ Malédictions</option>
+                                    <option value="⚖️ Variation de masse">⚖️ Variation de masse</option>
+                                    <option value="🌦️ Météorologie">🌦️ Météorologie</option>
+                                    <option value="⚗️ Chimie magique">⚗️ Chimie magique</option>
+                                    <option value="🌌 Magie astral">🌌 Magie astral</option>
+                                    <option value="🪢 Élasticité">🪢 Élasticité</option>
+                                </select>
                             </div>
 
                             <div class="field-group">
@@ -487,26 +732,6 @@
                                     type="url"
                                     placeholder="Lien vers une illustration de l'arme (optionnel)."
                                 >
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label" for="eaterNoyau">Capacité unique [Noyau]</label>
-                                <textarea
-                                    id="eaterNoyau"
-                                    class="field-input field-textarea"
-                                    rows="4"
-                                    placeholder="Capacité centrale liée au noyau de l'âme."
-                                ></textarea>
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label" for="eaterFragments">Capacité unique [Fragments]</label>
-                                <textarea
-                                    id="eaterFragments"
-                                    class="field-input field-textarea"
-                                    rows="4"
-                                    placeholder="À remplir seulement si acquis (fragment(s) liés au noyau)."
-                                ></textarea>
                             </div>
                         </div>
                     </section>
@@ -884,6 +1109,59 @@
                     if (roleLabel) updates.class = roleLabel;
                     authApi.updateCharacter(active.id, updates).catch(() => {});
                 }
+            }
+
+            /**
+             * Synchronise les sélections de la fiche avec les tags du profil
+             * Les tags sont automatiquement activés en fonction des choix de l'utilisateur
+             */
+            function syncProfileTags() {
+                if (!currentCharacterKey) return;
+
+                // Récupérer les tags actuels du profil (c'est un tableau d'IDs)
+                const profileTagsKey = `profile-tags-${currentCharacterKey}`;
+                let selectedTagIds = JSON.parse(localStorage.getItem(profileTagsKey) || '[]');
+
+                // S'assurer que c'est un tableau
+                if (!Array.isArray(selectedTagIds)) {
+                    selectedTagIds = [];
+                }
+
+                // Map des champs de la fiche vers les IDs de tags de profil
+                const fieldToTagMapping = {
+                    // Section Identité
+                    'identiteSexe': {
+                        'Féminin': 'gender_f',
+                        'Masculin': 'gender_m'
+                    },
+
+                    // Section Appartenance
+                    'appAffection': {
+                        'meister': 'identity_meister',
+                        'weapon': 'identity_weapon',
+                        'alice': 'identity_alice',
+                        'sorcier': 'identity_witch',
+                        'civil': 'identity_none'
+                    }
+                };
+
+                // Parcourir tous les champs et activer les tags correspondants
+                Object.keys(fieldToTagMapping).forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    if (!element) return;
+
+                    const value = element.value;
+                    if (!value) return; // Pas de valeur sélectionnée
+
+                    const tagId = fieldToTagMapping[fieldId][value];
+
+                    if (tagId && !selectedTagIds.includes(tagId)) {
+                        selectedTagIds.push(tagId);
+                    }
+                });
+
+                // Sauvegarder les tags mis à jour
+                localStorage.setItem(profileTagsKey, JSON.stringify(selectedTagIds));
             }
 
             function getTabStorageKey(tabName) {
@@ -1318,6 +1596,7 @@
 
                 if (tabName === 'identite' || tabName === 'appartenance') {
                     syncProfileFromFiche();
+                    syncProfileTags(); // Sync profile tags when saving identity or appartenance sections
                 }
 
                 // Visual feedback
@@ -1497,6 +1776,24 @@
 
             // ====================================================================
             // END COMBAT TECHNIQUES EVENT LISTENERS
+            // ====================================================================
+
+            // ====================================================================
+            // PROFILE TAGS SYNCHRONIZATION EVENT LISTENERS
+            // ====================================================================
+            // Synchroniser les tags quand les dropdowns de identité ou appartenance changent
+            const tagSyncFields = ['identiteSexe', 'appAffection'];
+
+            tagSyncFields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.addEventListener('change', () => {
+                        syncProfileTags();
+                    });
+                }
+            });
+            // ====================================================================
+            // END PROFILE TAGS SYNCHRONIZATION EVENT LISTENERS
             // ====================================================================
         })();
     </script>
