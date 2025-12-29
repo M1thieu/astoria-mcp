@@ -1,4 +1,4 @@
-import { getCurrentUser } from './auth.js';
+import { getCurrentUser, getActiveCharacter } from './auth.js';
 import {
     buyListing,
     cancelListing,
@@ -8,6 +8,7 @@ import {
     getMyProfile,
     searchListings
 } from './market.js';
+import { getInventoryRows, setInventoryItem } from './api/inventory-service.js';
 
 const dom = {
     kaelsBadge: document.getElementById('hdvKaelsBadge'),
@@ -61,8 +62,10 @@ const state = {
     page: 1,
     pageSize: 20,
     user: null,
+    character: null,
     profile: null,
-    items: []
+    items: [],
+    inventory: []
 };
 
 function asInt(value) {
@@ -115,6 +118,98 @@ function resolveItemImage(item) {
     }
     return '';
 }
+
+function resolveSourceIndex(item) {
+    if (!item) return null;
+    const direct = Number(item.sourceIndex);
+    if (Number.isFinite(direct) && direct >= 0) return direct;
+    const idx = state.items.findIndex((entry) => entry && entry.name === item.name);
+    return idx >= 0 ? idx : null;
+}
+
+
+function mapInventoryRows(rows) {
+    const items = [];
+    if (!Array.isArray(rows)) return items;
+
+    for (const row of rows) {
+        const idx = Number(row?.item_index ?? row?.item_key);
+        const qty = Math.floor(Number(row?.qty) || 0);
+        if (!Number.isFinite(idx) || idx < 0 || qty <= 0) continue;
+        const item = state.items[idx] || { name: row?.item_key || String(idx) };
+        items.push({
+            ...item,
+            sourceIndex: idx,
+            itemKey: row?.item_key ? String(row.item_key) : String(idx),
+            quantity: qty
+        });
+    }
+
+    return items;
+}
+
+
+
+async function refreshInventory() {
+    if (!state.character || !state.character.id) {
+        state.inventory = [];
+        return;
+    }
+
+    try {
+        const rows = await getInventoryRows(state.character.id);
+        state.inventory = mapInventoryRows(Array.isArray(rows) ? rows : []);
+    } catch (error) {
+        console.error('Inventory load error:', error);
+        state.inventory = [];
+    }
+}
+
+
+
+function getInventoryEntry(itemId) {
+    return state.inventory.find((item) => item && (item.id || item.name) === itemId) ||
+        state.inventory.find((item) => item && item.name === itemId) ||
+        null;
+}
+
+
+async function applyInventoryDelta(itemId, delta) {
+    if (!state.character || !Number.isFinite(delta) || delta == 0) return false;
+    const entry = getInventoryEntry(itemId);
+    const baseItem = entry || getItemById(itemId) || { name: itemId };
+    const sourceIndex = resolveSourceIndex(baseItem);
+    if (!Number.isFinite(sourceIndex)) return false;
+
+    const currentQty = entry ? Math.floor(Number(entry.quantity) || 0) : 0;
+    const nextQty = currentQty + delta;
+    if (nextQty < 0) return false;
+
+    const itemKey = entry?.itemKey ? String(entry.itemKey) : String(sourceIndex);
+
+    try {
+        await setInventoryItem(state.character.id, itemKey, sourceIndex, nextQty);
+    } catch (error) {
+        console.error('Inventory update error:', error);
+        return false;
+    }
+
+    if (nextQty == 0) {
+        state.inventory = state.inventory.filter((item) => item !== entry);
+    } else if (entry) {
+        entry.quantity = nextQty;
+    } else {
+        state.inventory.push({
+            ...baseItem,
+            sourceIndex,
+            itemKey,
+            quantity: nextQty
+        });
+    }
+
+    return true;
+}
+
 
 function setActiveTab(tabId) {
     state.tab = tabId;
@@ -343,7 +438,7 @@ function renderListings(listings) {
         const item = getItemById(listing.item_id) || { name: listing.item_name || listing.item_id, category: listing.item_category };
         const img = resolveItemImage(item);
         const total = listing.total_price ?? (listing.quantity * listing.unit_price);
-        const canAfford = state.profile ? state.profile.kamas >= total : false;
+        const canAfford = state.profile ? state.profile.kaels >= total : false;
 
         const tr = document.createElement('tr');
 
@@ -385,6 +480,10 @@ function renderListings(listings) {
             btn.textContent = 'Connexion';
             btn.disabled = true;
             btn.classList.add('is-disabled');
+        } else if (!state.character) {
+            btn.textContent = 'Choisir perso';
+            btn.disabled = true;
+            btn.classList.add('is-disabled');
         } else if (!canAfford) {
             btn.textContent = 'Trop cher';
             btn.disabled = true;
@@ -401,6 +500,8 @@ function renderListings(listings) {
                 try {
                     await buyListing(listing.id);
                     await refreshProfile();
+                    await applyInventoryDelta(listing.item_id, listing.quantity);
+                    populateSellSelect();
                     await refreshSearch();
                     setStatus(dom.search.status, 'Achat effectué.', 'success');
                 } catch (err) {
@@ -426,27 +527,50 @@ function renderListings(listings) {
 
 async function refreshProfile() {
     state.user = getCurrentUser();
+    state.character = getActiveCharacter();
+
     if (!state.user) {
         state.profile = null;
+        state.character = null;
+        state.inventory = [];
         dom.kaelsBadge.hidden = true;
         dom.loginLink.hidden = false;
         dom.search.affordable.disabled = true;
         dom.search.affordable.checked = false;
         state.filters.affordableOnly = false;
+        populateSellSelect();
         return;
     }
 
-        dom.loginLink.hidden = true;
+    dom.loginLink.hidden = true;
+
+    if (!state.character) {
+        state.profile = null;
+        state.inventory = [];
+        dom.kaelsBadge.hidden = true;
+        dom.search.affordable.disabled = true;
+        dom.search.affordable.checked = false;
+        state.filters.affordableOnly = false;
+        populateSellSelect();
+        return;
+    }
+
     try {
-        state.profile = await getMyProfile();
+        const profile = await getMyProfile();
+        state.profile = profile;
+        state.character = profile.character || state.character;
+        await refreshInventory();
         dom.kaelsBadge.hidden = false;
-        dom.kaelsBadge.textContent = `${formatKaels(state.profile.kamas)} kaels`;
+        dom.kaelsBadge.textContent = `${formatKaels(state.profile.kaels)} kaels`;
         dom.search.affordable.disabled = false;
+        populateSellSelect();
     } catch (err) {
         console.error(err);
         state.profile = null;
+        await refreshInventory();
         dom.kaelsBadge.hidden = true;
         dom.search.affordable.disabled = true;
+        populateSellSelect();
     }
 }
 
@@ -460,7 +584,7 @@ async function refreshSearch() {
         rarity: state.filters.rarity,
         minLevel: state.filters.minLevel,
         maxLevel: state.filters.maxLevel,
-        maxTotalPrice: state.filters.affordableOnly && state.profile ? state.profile.kamas : null
+        maxTotalPrice: state.filters.affordableOnly && state.profile ? state.profile.kaels : null
     };
 
     try {
@@ -480,22 +604,45 @@ function populateSellSelect() {
     dom.mine.item.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.textContent = '-- Sélectionner un objet --';
+    if (!state.user) {
+        placeholder.textContent = 'Connectez-vous pour vendre';
+    } else if (!state.character) {
+        placeholder.textContent = 'Selectionnez un personnage';
+    } else if (!state.inventory.length) {
+        placeholder.textContent = 'Inventaire vide';
+    } else {
+        placeholder.textContent = '-- Selectionner un objet --';
+    }
     dom.mine.item.appendChild(placeholder);
 
-    for (const item of state.items) {
+    dom.mine.item.disabled = !state.character || state.inventory.length === 0;
+
+    for (const item of state.inventory) {
         const opt = document.createElement('option');
         opt.value = item.name;
-        opt.textContent = item.name;
+        opt.textContent = `${item.name} (x${item.quantity})`;
+        opt.dataset.qty = String(item.quantity);
+        if (Number.isFinite(Number(item.sourceIndex))) {
+            opt.dataset.idx = String(item.sourceIndex);
+        }
         dom.mine.item.appendChild(opt);
     }
 }
 
 function syncSellPriceFromSelection() {
-    const item = getItemById(dom.mine.item.value);
+    const itemId = dom.mine.item.value;
+    const entry = getInventoryEntry(itemId);
+    const item = entry || getItemById(itemId);
     const basePrice = parseBasePrice(item);
+    const qty = entry ? Math.max(0, Number(entry.quantity) || 0) : 0;
     dom.mine.unitPrice.value = String(basePrice);
-    dom.mine.baseHint.textContent = item ? `Prix par défaut (flat): ${formatKaels(basePrice)}/u` : '';
+    if (item) {
+        const stockText = entry ? `Stock: ${qty}` : '';
+        const priceText = `Prix par defaut: ${formatKaels(basePrice)}/u`;
+        dom.mine.baseHint.textContent = stockText ? `${stockText} - ${priceText}` : priceText;
+    } else {
+        dom.mine.baseHint.textContent = '';
+    }
 }
 
 function renderMyListings(listings) {
@@ -556,6 +703,8 @@ function renderMyListings(listings) {
             btn.textContent = '...';
             try {
                 await cancelListing(listing.id);
+                await applyInventoryDelta(listing.item_id, listing.quantity);
+                populateSellSelect();
                 await refreshMine();
                 setStatus(dom.mine.status, 'Offre retirée.', 'success');
             } catch (err) {
@@ -578,8 +727,15 @@ function renderMyListings(listings) {
 
 async function refreshMine() {
     if (!state.user) {
-        setStatus(dom.mine.status, 'Connectez-vous pour gérer vos offres.', 'info');
+        setStatus(dom.mine.status, 'Connectez-vous pour gerer vos offres.', 'info');
         dom.mine.create.disabled = true;
+        return;
+    }
+
+    if (!state.character) {
+        setStatus(dom.mine.status, 'Selectionnez un personnage pour vendre.', 'info');
+        dom.mine.create.disabled = true;
+        renderMyListings([]);
         return;
     }
 
@@ -613,12 +769,12 @@ function renderHistory(transactions) {
 
     for (const tx of transactions) {
         const itemName = tx.item_name || tx.item_id || 'Item inconnu';
-        const isBuy = state.user && tx.buyer_id === state.user.id;
+        const isBuy = state.character && tx.buyer_character_id === state.character.id;
         const type = isBuy ? 'Achat' : 'Vente';
 
         const tr = document.createElement('tr');
         const tdDate = document.createElement('td');
-        tdDate.textContent = formatDate(tx.created_at);
+        tdDate.textContent = formatDate(tx.sold_at || tx.created_at);
 
         const tdType = document.createElement('td');
         tdType.textContent = type;
@@ -650,6 +806,12 @@ function renderHistory(transactions) {
 async function refreshHistory() {
     if (!state.user) {
         setStatus(dom.history.status, 'Connectez-vous pour consulter votre historique.', 'info');
+        renderHistory([]);
+        return;
+    }
+
+    if (!state.character) {
+        setStatus(dom.history.status, 'Selectionnez un personnage pour consulter votre historique.', 'info');
         renderHistory([]);
         return;
     }
@@ -741,16 +903,31 @@ function wireEvents() {
             return;
         }
 
+        if (!state.character) {
+            setStatus(dom.mine.status, 'Selectionnez un personnage pour vendre.', 'error');
+            return;
+        }
+
         const itemId = dom.mine.item.value;
+        const entry = getInventoryEntry(itemId);
+        const available = entry ? Math.max(0, Number(entry.quantity) || 0) : 0;
         const quantity = asInt(dom.mine.qty.value) ?? 1;
         const unitPrice = asInt(dom.mine.unitPrice.value) ?? 0;
 
         if (!itemId) {
-            setStatus(dom.mine.status, 'Sélectionnez un objet.', 'error');
+            setStatus(dom.mine.status, 'Selectionnez un objet.', 'error');
+            return;
+        }
+        if (!entry) {
+            setStatus(dom.mine.status, 'Objet non disponible dans votre inventaire.', 'error');
             return;
         }
         if (quantity <= 0) {
-            setStatus(dom.mine.status, 'Quantité invalide.', 'error');
+            setStatus(dom.mine.status, 'Quantite invalide.', 'error');
+            return;
+        }
+        if (quantity > available) {
+            setStatus(dom.mine.status, 'Stock insuffisant.', 'error');
             return;
         }
         if (unitPrice < 0) {
@@ -759,15 +936,17 @@ function wireEvents() {
         }
 
         dom.mine.create.disabled = true;
-        setStatus(dom.mine.status, 'Création de l’offre…', 'info');
+        setStatus(dom.mine.status, 'Creation de l'offre...', 'info');
         try {
-            await createListing({ itemId, quantity, unitPrice });
-            setStatus(dom.mine.status, 'Offre créée.', 'success');
+            await createListing({ itemId, item: entry, quantity, unitPrice });
+            await applyInventoryDelta(itemId, -quantity);
+            populateSellSelect();
+            setStatus(dom.mine.status, 'Offre creee.', 'success');
             await refreshSearch();
             await refreshMine();
         } catch (err) {
             console.error(err);
-            setStatus(dom.mine.status, err?.message || 'Erreur lors de la création.', 'error');
+            setStatus(dom.mine.status, err?.message || 'Erreur lors de la creation.', 'error');
         } finally {
             dom.mine.create.disabled = false;
         }

@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS characters (
     race TEXT,
     class TEXT,
     profile_data JSONB DEFAULT '{}'::jsonb,
+    kaels BIGINT NOT NULL DEFAULT 5000,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -215,18 +216,63 @@ CREATE TRIGGER characters_limit_check
 -- MARKET / HDV (Hôtel de vente)
 -- ============================================================================
 
--- Player profiles / currency (kaels in UI; column kept as kamas)
-CREATE TABLE IF NOT EXISTS profiles (
-    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    kamas BIGINT NOT NULL DEFAULT 5000,
+-- Migration helpers (safe for existing setups)
+ALTER TABLE IF EXISTS characters
+    ADD COLUMN IF NOT EXISTS kaels BIGINT NOT NULL DEFAULT 5000;
+
+-- Currency is stored per character in characters.kaels.
+
+-- ============================================================================
+-- CHARACTER INVENTORY (per character, scalable)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS character_inventory (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    item_key TEXT NOT NULL,
+    item_index INTEGER NULL,
+    qty INTEGER NOT NULL CHECK (qty > 0),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Listings
-CREATE TABLE IF NOT EXISTS market_listings (
+CREATE UNIQUE INDEX IF NOT EXISTS idx_character_inventory_unique
+    ON character_inventory(character_id, item_key);
+
+CREATE INDEX IF NOT EXISTS idx_character_inventory_character_id
+    ON character_inventory(character_id);
+
+ALTER TABLE character_inventory ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read inventory"
+    ON character_inventory FOR SELECT
+    USING (true);
+
+CREATE POLICY "Public can insert inventory"
+    ON character_inventory FOR INSERT
+    WITH CHECK (true);
+
+CREATE POLICY "Public can update inventory"
+    ON character_inventory FOR UPDATE
+    USING (true);
+
+CREATE POLICY "Public can delete inventory"
+    ON character_inventory FOR DELETE
+    USING (true);
+
+CREATE TRIGGER character_inventory_updated_at
+    BEFORE UPDATE ON character_inventory
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at();
+
+-- Market (single table: listings + history)
+CREATE TABLE IF NOT EXISTS market (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','sold','cancelled','expired')),
     seller_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    seller_character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    buyer_id UUID NULL REFERENCES users(id) ON DELETE RESTRICT,
+    buyer_character_id UUID NULL REFERENCES characters(id) ON DELETE RESTRICT,
     item_id TEXT NOT NULL,
     item_name TEXT,
     item_category TEXT,
@@ -236,106 +282,49 @@ CREATE TABLE IF NOT EXISTS market_listings (
     unit_price BIGINT NOT NULL CHECK (unit_price >= 0),
     total_price BIGINT GENERATED ALWAYS AS ((quantity::bigint) * unit_price) STORED,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    expires_at TIMESTAMP WITH TIME ZONE NULL,
-    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','sold','cancelled','expired'))
-);
-
--- Transactions (purchase history)
-CREATE TABLE IF NOT EXISTS market_transactions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    listing_id UUID REFERENCES market_listings(id) ON DELETE SET NULL,
-    buyer_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-    seller_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-    item_id TEXT NOT NULL,
-    item_name TEXT,
-    item_category TEXT,
-    item_level INTEGER NOT NULL DEFAULT 0,
-    item_rarity TEXT NOT NULL DEFAULT 'Inconnue',
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
-    unit_price BIGINT NOT NULL CHECK (unit_price >= 0),
-    total_price BIGINT NOT NULL CHECK (total_price >= 0),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    sold_at TIMESTAMP WITH TIME ZONE NULL
 );
 
 -- Indexes
-CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_market_listings_status ON market_listings(status);
-CREATE INDEX IF NOT EXISTS idx_market_listings_seller_id ON market_listings(seller_id);
-CREATE INDEX IF NOT EXISTS idx_market_listings_item_name ON market_listings(item_name);
-CREATE INDEX IF NOT EXISTS idx_market_listings_item_category ON market_listings(item_category);
-CREATE INDEX IF NOT EXISTS idx_market_listings_total_price ON market_listings(total_price);
-CREATE INDEX IF NOT EXISTS idx_market_transactions_buyer_id ON market_transactions(buyer_id);
-CREATE INDEX IF NOT EXISTS idx_market_transactions_seller_id ON market_transactions(seller_id);
-CREATE INDEX IF NOT EXISTS idx_market_transactions_created_at ON market_transactions(created_at);
+CREATE INDEX IF NOT EXISTS idx_market_status ON market(status);
+CREATE INDEX IF NOT EXISTS idx_market_seller_id ON market(seller_id);
+CREATE INDEX IF NOT EXISTS idx_market_seller_character_id ON market(seller_character_id);
+CREATE INDEX IF NOT EXISTS idx_market_buyer_character_id ON market(buyer_character_id);
+CREATE INDEX IF NOT EXISTS idx_market_item_name ON market(item_name);
+CREATE INDEX IF NOT EXISTS idx_market_item_category ON market(item_category);
+CREATE INDEX IF NOT EXISTS idx_market_total_price ON market(total_price);
 
 -- RLS
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE market_listings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE market_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE market ENABLE ROW LEVEL SECURITY;
 
 -- NOTE: This project currently uses a custom login (users table + localStorage) and does not use Supabase Auth.
 -- These policies are intentionally permissive so the app works with the anon key.
-CREATE POLICY "Anyone can read profiles"
-    ON profiles FOR SELECT
+CREATE POLICY "Public can read market"
+    ON market FOR SELECT
     USING (true);
 
-CREATE POLICY "Anyone can update profiles"
-    ON profiles FOR UPDATE
-    USING (true);
-
-CREATE POLICY "Public can read active listings"
-    ON market_listings FOR SELECT
-    USING (status = 'active');
-
-CREATE POLICY "Anyone can insert listings"
-    ON market_listings FOR INSERT
+CREATE POLICY "Public can insert market"
+    ON market FOR INSERT
     WITH CHECK (true);
 
-CREATE POLICY "Anyone can update listings"
-    ON market_listings FOR UPDATE
+CREATE POLICY "Public can update market"
+    ON market FOR UPDATE
     USING (true);
-
-CREATE POLICY "Anyone can read transactions"
-    ON market_transactions FOR SELECT
-    USING (true);
-
--- Triggers to auto-update updated_at
-CREATE TRIGGER profiles_updated_at
-    BEFORE UPDATE ON profiles
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at();
-
--- Ensure every user has a profile row (kamas)
-CREATE OR REPLACE FUNCTION ensure_profile_row()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO profiles (user_id)
-    VALUES (NEW.id)
-    ON CONFLICT (user_id) DO NOTHING;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER users_create_profile
-    AFTER INSERT ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION ensure_profile_row();
 
 -- Atomic purchase (RPC)
-CREATE OR REPLACE FUNCTION buy_listing(p_listing_id UUID, p_buyer_id UUID)
+CREATE OR REPLACE FUNCTION buy_listing(p_listing_id UUID, p_buyer_id UUID, p_buyer_character_id UUID)
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-    v_listing market_listings%ROWTYPE;
+    v_listing market%ROWTYPE;
     v_total BIGINT;
-    v_buyer_kamas BIGINT;
-    v_tx_id UUID;
+    v_buyer_kaels BIGINT;
 BEGIN
     SELECT *
     INTO v_listing
-    FROM market_listings
+    FROM market
     WHERE id = p_listing_id
     FOR UPDATE;
 
@@ -347,83 +336,59 @@ BEGIN
         RAISE EXCEPTION 'Listing not active';
     END IF;
 
+    IF v_listing.seller_character_id IS NULL THEN
+        RAISE EXCEPTION 'Listing missing seller character';
+    END IF;
+
     IF v_listing.seller_id = p_buyer_id THEN
         RAISE EXCEPTION 'Cannot buy your own listing';
     END IF;
 
-    INSERT INTO profiles (user_id)
-    VALUES (p_buyer_id)
-    ON CONFLICT (user_id) DO NOTHING;
+    IF v_listing.seller_character_id = p_buyer_character_id THEN
+        RAISE EXCEPTION 'Cannot buy your own listing';
+    END IF;
 
-    INSERT INTO profiles (user_id)
-    VALUES (v_listing.seller_id)
-    ON CONFLICT (user_id) DO NOTHING;
+    IF NOT EXISTS (
+        SELECT 1
+        FROM characters
+        WHERE id = p_buyer_character_id
+          AND user_id = p_buyer_id
+    ) THEN
+        RAISE EXCEPTION 'Invalid buyer character';
+    END IF;
 
-    SELECT kamas
-    INTO v_buyer_kamas
-    FROM profiles
-    WHERE user_id = p_buyer_id
+    SELECT kaels
+    INTO v_buyer_kaels
+    FROM characters
+    WHERE id = p_buyer_character_id
     FOR UPDATE;
 
     v_total := (v_listing.quantity::bigint) * v_listing.unit_price;
 
-    IF v_buyer_kamas < v_total THEN
+    IF v_buyer_kaels < v_total THEN
         RAISE EXCEPTION 'Insufficient kaels';
     END IF;
 
-    UPDATE profiles
-    SET kamas = kamas - v_total
-    WHERE user_id = p_buyer_id;
+    UPDATE characters
+    SET kaels = kaels - v_total
+    WHERE id = p_buyer_character_id;
 
-    UPDATE profiles
-    SET kamas = kamas + v_total
-    WHERE user_id = v_listing.seller_id;
+    UPDATE characters
+    SET kaels = kaels + v_total
+    WHERE id = v_listing.seller_character_id;
 
-    v_tx_id := gen_random_uuid();
-
-    INSERT INTO market_transactions (
-        id,
-        listing_id,
-        buyer_id,
-        seller_id,
-        item_id,
-        item_name,
-        item_category,
-        item_level,
-        item_rarity,
-        quantity,
-        unit_price,
-        total_price
-    ) VALUES (
-        v_tx_id,
-        v_listing.id,
-        p_buyer_id,
-        v_listing.seller_id,
-        v_listing.item_id,
-        v_listing.item_name,
-        v_listing.item_category,
-        v_listing.item_level,
-        v_listing.item_rarity,
-        v_listing.quantity,
-        v_listing.unit_price,
-        v_total
-    );
-
-    UPDATE market_listings
-    SET status = 'sold'
+    UPDATE market
+    SET status = 'sold',
+        buyer_id = p_buyer_id,
+        buyer_character_id = p_buyer_character_id,
+        sold_at = NOW()
     WHERE id = v_listing.id;
 
-    RETURN v_tx_id;
+    RETURN v_listing.id;
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION buy_listing(UUID, UUID) TO anon, authenticated;
-
--- Backfill profiles for existing users (including sample users)
-INSERT INTO profiles (user_id)
-SELECT id
-FROM users
-ON CONFLICT (user_id) DO NOTHING;
+GRANT EXECUTE ON FUNCTION buy_listing(UUID, UUID, UUID) TO anon, authenticated;
 
 -- ============================================================================
 -- STORAGE (Avatars)
