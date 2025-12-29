@@ -15,16 +15,16 @@
 1. Aller dans `hdv.html` → onglet **Mes offres**.
 2. Créer une offre : choisir un objet, quantité, prix/unité (pré-rempli avec le “flat” issu de `data.js` quand disponible).
 3. Onglet **Rechercher** : retrouver l’offre, tester le tri “les moins chers” + pagination.
-4. Cliquer **Acheter** : la RPC `buy_listing` débite/crédite les kaels, marque le listing `sold`, et écrit une ligne dans `market_transactions`.
-5. Onglet **Historique** : vérifier l’entrée Achat/Vente.
+4. Cliquer **Acheter** : la RPC `buy_listing` debite/credite les kaels, marque l'offre `sold`, et met a jour `market` (buyer_id, buyer_character_id, sold_at).
+5. Onglet **Historique** : verifier l'entree Achat/Vente.
 
 ## Kaels
 
-- Les kaels sont stockés dans `profiles.kamas` (colonne DB conservée telle quelle) et affichés comme “kaels” côté UI.
+- Les kaels sont stockes dans `characters.kaels` (par personnage) et affiches comme "kaels" cote UI.
 - Pour ajuster manuellement :
 
 ```sql
-update profiles set kamas = 50000 where user_id = '<uuid_user>';
+update characters set kaels = 50000 where id = '<uuid_character>';
 ```
 
 ## Notes sécurité

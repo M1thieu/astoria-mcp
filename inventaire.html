@@ -292,6 +292,7 @@
         let nextItemId = 1; // Auto-increment ID for new items
         let inventoryStorageMode = 'local'; // 'local' | 'character'
         let authApi = null;
+        let inventoryApi = null;
         let pendingProfileSaveTimer = null;
         let scrollPanelOpen = false;
         let scrollPanelCategory = null;
@@ -448,29 +449,64 @@
             });
         }
 
-        function serializeInventoryForProfile() {
-            const allItems = getAllItems();
 
-            const items = inventoryItems
+        function hydrateInventoryFromRows(rows) {
+            const allItems = getAllItems();
+            inventoryItems = [];
+            nextItemId = 1;
+
+            if (!Array.isArray(rows)) return;
+
+            rows.forEach((row) => {
+                const idx = Number(row?.item_index ?? row?.item_key);
+                const qty = Number(row?.qty);
+                if (!Number.isFinite(idx) || idx < 0 || !Number.isFinite(qty) || qty <= 0) return;
+
+                const sourceItem = allItems[idx];
+                if (!sourceItem) return;
+
+                inventoryItems.push({
+                    id: nextItemId++,
+                    sourceIndex: idx,
+                    ...sourceItem,
+                    quantity: Math.floor(qty)
+                });
+            });
+        }
+
+        function buildInventoryRows(characterId) {
+            const allItems = getAllItems();
+            return inventoryItems
                 .map((item) => {
                     const idx = Number.isFinite(Number(item?.sourceIndex))
                         ? Number(item.sourceIndex)
                         : allItems.findIndex((it) => it && it.name === item?.name);
                     const qty = Math.floor(Number(item?.quantity) || 0);
-                    return { idx, qty };
+                    if (!Number.isFinite(idx) || idx < 0 || qty <= 0) return null;
+                    return {
+                        character_id: characterId,
+                        item_key: String(idx),
+                        item_index: idx,
+                        qty
+                    };
                 })
-                .filter((entry) => Number.isFinite(entry.idx) && entry.idx >= 0 && entry.qty > 0);
+                .filter(Boolean);
+        }
 
-            const totalQty = items.reduce((sum, entry) => sum + entry.qty, 0);
+        function serializeInventoryForProfile() {
+            const totalQty = inventoryItems.reduce((sum, item) => {
+                const qty = Math.floor(Number(item?.quantity) || 0);
+                return sum + (Number.isFinite(qty) ? qty : 0);
+            }, 0);
 
             return {
                 version: 1,
-                itemCount: items.length,
+                itemCount: inventoryItems.length,
                 totalQty,
-                items,
                 scrollTypes: normalizeScrollTypeStore(scrollTypeStore)
             };
         }
+
 
         function renderInventoryAccessDenied() {
             if (!inventoryWrapper) return;
@@ -485,12 +521,15 @@
             `;
         }
 
+
         async function initInventoryStorage() {
             inventoryStorageMode = 'local';
             authApi = null;
+            inventoryApi = null;
 
             try {
                 authApi = await import('./js/auth.js');
+                inventoryApi = await import('./js/api/inventory-service.js');
                 const user = authApi.getCurrentUser?.();
                 const character = authApi.getActiveCharacter?.();
                 const isAdmin = authApi.isAdmin?.() || false;
@@ -504,11 +543,14 @@
                 // No server / module blocked / auth module unavailable => stay in local mode
                 inventoryStorageMode = 'local';
                 authApi = null;
+                inventoryApi = null;
             }
         }
 
+
+
         async function loadInventory() {
-            if (inventoryStorageMode !== 'character' || !authApi) {
+            if (inventoryStorageMode !== 'character' || !authApi || !inventoryApi) {
                 loadFromLocalStorage();
                 return;
             }
@@ -516,20 +558,23 @@
             const character = authApi.getActiveCharacter?.();
             const payload = character?.profile_data?.inventory;
 
-            if (payload && Array.isArray(payload.items)) {
-                hydrateInventoryFromCompact(payload.items);
-                if (payload.scrollTypes && typeof payload.scrollTypes === 'object') {
-                    scrollTypeStore = payload.scrollTypes;
-                } else {
-                    scrollTypeStore = {};
-                }
-                console.log(`Loaded ${inventoryItems.length} items from character profile_data`);
-                return;
+            if (payload && payload.scrollTypes && typeof payload.scrollTypes === 'object') {
+                scrollTypeStore = payload.scrollTypes;
+            } else {
+                scrollTypeStore = {};
             }
 
-            // Fallback for V1: keep local inventory if profile doesn't have data yet
-            scrollTypeStore = {};
-            loadFromLocalStorage();
+            try {
+                const rows = await inventoryApi.getInventoryRows?.(character?.id);
+                if (Array.isArray(rows)) {
+                    hydrateInventoryFromRows(rows);
+                    console.log(`Loaded ${inventoryItems.length} items from character_inventory`);
+                    return;
+                }
+            } catch (error) {
+                console.warn('Inventory load error (character_inventory):', error);
+            }
+            hydrateInventoryFromRows([]);
         }
 
         async function saveInventoryToCharacterProfile() {
@@ -554,6 +599,23 @@
             }
         }
 
+        async function saveInventoryToBackend() {
+            if (inventoryStorageMode !== 'character' || !authApi || !inventoryApi) return;
+
+            const character = authApi.getActiveCharacter?.();
+            if (!character || !character.id) return;
+
+            const rows = buildInventoryRows(character.id);
+
+            try {
+                await inventoryApi.replaceInventoryRows?.(character.id, rows);
+            } catch (error) {
+                console.warn('Inventory save error (character_inventory):', error);
+            }
+
+            await saveInventoryToCharacterProfile();
+        }
+
         function persistInventory() {
             // Always keep local backup (handy for offline testing)
             saveToLocalStorage();
@@ -567,7 +629,7 @@
 
             pendingProfileSaveTimer = setTimeout(() => {
                 pendingProfileSaveTimer = null;
-                void saveInventoryToCharacterProfile();
+                void saveInventoryToBackend();
             }, 500);
         }
 

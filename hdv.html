@@ -16,10 +16,28 @@
                     <h1 class="page-title" id="hdvTitle">Hôtel de vente</h1>
                     <p class="page-subtitle">Rechercher, vendre et consulter l'historique.</p>
                 </div>
-                <div class="hdv-header-right">
-                    <span class="stats-badge" id="hdvKaelsBadge" hidden>0 kaels</span>
-                    <a class="btn-secondary hdv-login-link" id="hdvLoginLink" href="login.html" hidden>Se connecter</a>
+                <div class="character-summary" id="hdvCharacterSummary" aria-label="Résumé du personnage" hidden>
+                    <div class="character-avatar-wrapper">
+                        <div class="character-avatar character-avatar--clickable" id="hdvCharacterAvatar" role="button" tabindex="0" aria-haspopup="true" aria-label="Changer de personnage">
+                            <img class="character-avatar-img" id="characterSummaryAvatar" alt="Avatar" hidden>
+                            <div class="character-avatar-circle" id="characterSummaryInitial" hidden></div>
+                        </div>
+                        <!-- Dropdown personnages (toggle on click avatar) -->
+                        <div class="character-dropdown" id="hdvCharacterDropdown" hidden aria-label="Sélectionner un personnage"></div>
+                    </div>
+                    <div class="character-summary-text">
+                        <a class="character-name" id="characterSummaryName" href="profil.html">Nom du personnage</a>
+                        <span class="character-tagline" id="characterSummaryTagline">Classe / Role / Surnom</span>
+                        <div class="character-summary-meta">
+                            <span class="stats-badge" id="hdvKaelsBadge" hidden>0 kaels</span>
+                            <div class="character-souls" id="hdvSouls" hidden>
+                                <span class="soul-count" title="Âmes consommation"><span class="soul-icon">🔥</span><span id="hdvSoulConso">0</span></span>
+                                <span class="soul-count" title="Âmes progression"><span class="soul-icon">⭐</span><span id="hdvSoulProg">0</span></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                <a class="btn-secondary hdv-login-link" id="hdvLoginLink" href="login.html" hidden>Se connecter</a>
             </div>
         </header>
 
