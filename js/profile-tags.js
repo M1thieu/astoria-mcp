@@ -191,9 +191,9 @@ const TAG_LABEL_BY_ID = TAG_GROUPS.reduce((acc, group) => {
 
 let singleton = null;
 
-export function initProfileTagSelector({ characterId }) {
+export function initProfileTagSelector({ characterId, isAdmin = false } = {}) {
     if (singleton) {
-        singleton.setCharacterId(characterId);
+        singleton.setCharacterId(characterId, isAdmin);
         return;
     }
 
@@ -211,6 +211,7 @@ export function initProfileTagSelector({ characterId }) {
     menu.classList.add('profile-tags-menu');
 
     let canEdit = !!characterId;
+    let userIsAdmin = isAdmin;
     toggle.disabled = false;
     toggle.title = canEdit ? '' : 'Selectionnez un personnage pour modifier les tags';
 
@@ -318,7 +319,13 @@ export function initProfileTagSelector({ characterId }) {
         const query = searchQuery.trim().toLowerCase();
         const matches = (text) => (query ? String(text || '').toLowerCase().includes(query) : true);
 
-        for (const group of TAG_GROUPS) {
+        // Filter tag groups: hide "Admin" group for non-admins
+        const visibleGroups = TAG_GROUPS.filter(group => {
+            if (group.title === 'Admin' && !userIsAdmin) return false;
+            return true;
+        });
+
+        for (const group of visibleGroups) {
             const filteredTags = group.tags.filter((t) => matches(t.label) || matches(group.title));
             if (query && filteredTags.length === 0) continue;
 
@@ -453,8 +460,9 @@ export function initProfileTagSelector({ characterId }) {
     setOpen(false);
 
     singleton = {
-        setCharacterId(nextCharacterId) {
+        setCharacterId(nextCharacterId, nextIsAdmin = false) {
             characterId = nextCharacterId;
+            userIsAdmin = nextIsAdmin;
             canEdit = !!characterId;
             toggle.disabled = false;
             toggle.title = canEdit ? '' : 'Selectionnez un personnage pour modifier les tags';
