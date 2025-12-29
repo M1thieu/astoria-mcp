@@ -1,4 +1,4 @@
-import { getCurrentUser, getActiveCharacter, refreshSessionUser } from './auth.js';
+import { getCurrentUser, getActiveCharacter, refreshSessionUser, getUserCharacters, setActiveCharacter } from './auth.js';
 import {
     buyListing,
     cancelListing,
@@ -9,6 +9,7 @@ import {
     searchListings
 } from './market.js';
 import { getInventoryRows, setInventoryItem } from './api/inventory-service.js';
+import { initCharacterSummary } from './ui/character-summary.js';
 
 const dom = {
     kaelsBadge: document.getElementById('hdvKaelsBadge'),
@@ -69,28 +70,74 @@ const state = {
 };
 
 function resolveCurrentUser() {
-    const direct = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (direct && direct.id) return direct;
+    console.log('[HDV] resolveCurrentUser - location:', window.location.href);
+
+    // PRIORITÉ 1 : Lire directement localStorage (plus fiable sur GitHub Pages)
     try {
         const raw = localStorage.getItem('astoria_session');
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return parsed && parsed.user ? parsed.user : null;
-    } catch {
-        return null;
+        console.log('[HDV] localStorage astoria_session:', raw ? '✓ EXISTE' : '✗ NULL');
+
+        if (raw) {
+            const parsed = JSON.parse(raw);
+
+            // Vérifier expiration
+            const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+            const isExpired = !parsed.timestamp || (Date.now() - parsed.timestamp) > SESSION_MAX_AGE_MS;
+
+            if (!isExpired && parsed.user && parsed.user.id) {
+                console.log('[HDV] ✅ User trouvé via localStorage:', parsed.user.username);
+                return parsed.user;
+            } else if (isExpired) {
+                console.warn('[HDV] ⚠️ Session expirée');
+            }
+        }
+    } catch (err) {
+        console.error('[HDV] Erreur lecture localStorage:', err);
     }
+
+    // PRIORITÉ 2 : Fallback sur getCurrentUser()
+    try {
+        const direct = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+        console.log('[HDV] getCurrentUser():', direct ? `✓ ${direct.username}` : '✗ NULL');
+        if (direct && direct.id) return direct;
+    } catch (err) {
+        console.error('[HDV] Erreur getCurrentUser():', err);
+    }
+
+    console.error('[HDV] ❌ AUCUN USER - Affichage "Se connecter"');
+    return null;
 }
 
 function resolveActiveCharacter() {
-    const direct = typeof getActiveCharacter === 'function' ? getActiveCharacter() : null;
-    if (direct && direct.id) return direct;
+    console.log('[HDV] resolveActiveCharacter appelé');
+
+    // PRIORITÉ 1 : Lire directement localStorage
     try {
         const raw = localStorage.getItem('astoria_active_character');
-        if (!raw) return null;
-        return JSON.parse(raw);
-    } catch {
-        return null;
+        console.log('[HDV] localStorage astoria_active_character:', raw ? '✓ EXISTE' : '✗ NULL');
+
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.id) {
+                console.log('[HDV] ✅ Character trouvé via localStorage:', parsed.name);
+                return parsed;
+            }
+        }
+    } catch (err) {
+        console.error('[HDV] Erreur lecture localStorage character:', err);
     }
+
+    // PRIORITÉ 2 : Fallback sur getActiveCharacter()
+    try {
+        const direct = typeof getActiveCharacter === 'function' ? getActiveCharacter() : null;
+        console.log('[HDV] getActiveCharacter():', direct ? `✓ ${direct.name}` : '✗ NULL');
+        if (direct && direct.id) return direct;
+    } catch (err) {
+        console.error('[HDV] Erreur getActiveCharacter():', err);
+    }
+
+    console.warn('[HDV] ⚠️ Aucun character actif');
+    return null;
 }
 
 function asInt(value) {
@@ -554,6 +601,9 @@ async function refreshProfile() {
     state.user = resolveCurrentUser();
     state.character = resolveActiveCharacter();
 
+    // Initialiser le character-summary widget (avatar, nom, dropdown, âmes)
+    await initCharacterSummary({ enableDropdown: true });
+
     if (!state.user) {
         state.profile = null;
         state.character = null;
@@ -961,7 +1011,7 @@ function wireEvents() {
         }
 
         dom.mine.create.disabled = true;
-        setStatus(dom.mine.status, 'Creation de l'offre...', 'info');
+        setStatus(dom.mine.status, "Creation de l'offre...", 'info');
         try {
             await createListing({ itemId, item: entry, quantity, unitPrice });
             await applyInventoryDelta(itemId, -quantity);
@@ -979,6 +1029,10 @@ function wireEvents() {
 }
 
 async function init() {
+    console.log('[HDV] ========== INIT HDV ==========');
+    console.log('[HDV] Location:', window.location.href);
+    console.log('[HDV] Origin:', window.location.origin);
+
     state.items =
         (typeof inventoryData !== 'undefined' && Array.isArray(inventoryData) ? inventoryData : null) ||
         (Array.isArray(window.inventoryData) ? window.inventoryData : null) ||
@@ -990,10 +1044,26 @@ async function init() {
 
     if (typeof refreshSessionUser === 'function') {
         try {
-            await refreshSessionUser();
-        } catch {
-            // ignore
+            console.log('[HDV] Tentative refreshSessionUser...');
+            const result = await refreshSessionUser();
+            console.log('[HDV] refreshSessionUser result:', result);
+
+            // Attendre que localStorage soit écrit
+            await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (err) {
+            console.error('[HDV] refreshSessionUser error:', err);
         }
+    } else {
+        console.warn('[HDV] refreshSessionUser non disponible');
+    }
+
+    // Log localStorage après refresh
+    try {
+        const hasSession = !!localStorage.getItem('astoria_session');
+        const hasChar = !!localStorage.getItem('astoria_active_character');
+        console.log('[HDV] Après refresh - Session:', hasSession, '| Character:', hasChar);
+    } catch (err) {
+        console.error('[HDV] Erreur check localStorage:', err);
     }
 
     await refreshProfile();

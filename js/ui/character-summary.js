@@ -1,6 +1,19 @@
 const CHARACTER_STORAGE_KEY = "astoria_active_character";
 const LEGACY_SUMMARY_KEY = "astoria_character_summary";
 
+let authModule = null;
+
+async function loadAuthModule() {
+    if (authModule) return authModule;
+    try {
+        authModule = await import("../auth.js");
+        return authModule;
+    } catch (error) {
+        console.error("Character-summary: Failed to load auth module:", error);
+        return null;
+    }
+}
+
 export function getActiveCharacterFromStorage() {
     const raw = localStorage.getItem(CHARACTER_STORAGE_KEY);
     if (!raw) return null;
@@ -119,10 +132,183 @@ export function applySummaryToElements(elements, summary) {
     }
 }
 
-export function initCharacterSummary({ includeQueryParam = false, elements } = {}) {
+/**
+ * Lit les compteurs d'âmes depuis localStorage (fiche-{characterId}-eater)
+ */
+function readSoulCounts(characterId) {
+    if (!characterId) return { conso: 0, prog: 0 };
+    const key = `fiche-${characterId}-eater`;
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return { conso: 0, prog: 0 };
+        const data = JSON.parse(raw);
+        const conso = Number.parseInt(data?.eaterAmesConso ?? 0, 10);
+        const prog = Number.parseInt(data?.eaterAmesProgression ?? 0, 10);
+        return {
+            conso: Number.isNaN(conso) ? 0 : conso,
+            prog: Number.isNaN(prog) ? 0 : prog
+        };
+    } catch {
+        return { conso: 0, prog: 0 };
+    }
+}
+
+/**
+ * Affiche les compteurs d'âmes si les éléments existent
+ */
+function updateSoulCounts(characterId) {
+    const consoEl = document.getElementById("hdvSoulConso") || document.getElementById("soulConsoValue");
+    const progEl = document.getElementById("hdvSoulProg") || document.getElementById("soulProgValue");
+    const soulsContainer = document.getElementById("hdvSouls");
+
+    if (consoEl && progEl && characterId) {
+        const counts = readSoulCounts(characterId);
+        consoEl.textContent = String(counts.conso);
+        progEl.textContent = String(counts.prog);
+        if (soulsContainer) soulsContainer.hidden = false;
+    }
+}
+
+/**
+ * Construit le dropdown des personnages disponibles
+ */
+async function buildCharacterDropdown(dropdownEl, currentCharacterId) {
+    if (!dropdownEl) return;
+
+    const auth = await loadAuthModule();
+    if (!auth || !auth.getCurrentUser || !auth.getUserCharacters) {
+        console.warn("Character-summary: Auth module not available for dropdown");
+        return;
+    }
+
+    const user = auth.getCurrentUser();
+    if (!user || !user.id) {
+        dropdownEl.hidden = true;
+        return;
+    }
+
+    try {
+        const characters = await auth.getUserCharacters(user.id);
+        if (!characters || characters.length === 0) {
+            dropdownEl.hidden = true;
+            return;
+        }
+
+        dropdownEl.innerHTML = "";
+        dropdownEl.className = "character-dropdown";
+
+        characters.forEach((char) => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "character-dropdown-item";
+            if (char.id === currentCharacterId) {
+                item.classList.add("character-dropdown-item--active");
+            }
+
+            const avatar = document.createElement("div");
+            avatar.className = "character-dropdown-avatar";
+            const profileData = char.profile_data || {};
+            if (profileData.avatar_url) {
+                const img = document.createElement("img");
+                img.src = profileData.avatar_url;
+                img.alt = char.name || "Avatar";
+                avatar.appendChild(img);
+            } else {
+                avatar.textContent = (char.name || "?").charAt(0).toUpperCase();
+            }
+
+            const text = document.createElement("div");
+            text.className = "character-dropdown-text";
+
+            const name = document.createElement("div");
+            name.className = "character-dropdown-name";
+            name.textContent = char.name || "Sans nom";
+
+            const role = document.createElement("div");
+            role.className = "character-dropdown-role";
+            const parts = [];
+            if (char.race) parts.push(char.race);
+            if (char.class) parts.push(char.class);
+            role.textContent = parts.length ? parts.join(" - ") : "Personnage";
+
+            text.appendChild(name);
+            text.appendChild(role);
+
+            item.appendChild(avatar);
+            item.appendChild(text);
+
+            item.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                if (char.id === currentCharacterId) {
+                    dropdownEl.hidden = true;
+                    return;
+                }
+
+                // Appeler la même fonction que app-dock
+                if (auth.setActiveCharacter) {
+                    const result = await auth.setActiveCharacter(char.id);
+                    if (result && result.success) {
+                        // Recharger la page pour appliquer le changement
+                        window.location.reload();
+                    }
+                }
+            });
+
+            dropdownEl.appendChild(item);
+        });
+    } catch (error) {
+        console.error("Character-summary: Error building dropdown:", error);
+        dropdownEl.hidden = true;
+    }
+}
+
+/**
+ * Active le dropdown au clic sur l'avatar
+ */
+function wireDropdownToggle(avatarEl, dropdownEl) {
+    if (!avatarEl || !dropdownEl) return;
+
+    avatarEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdownEl.hidden = !dropdownEl.hidden;
+    });
+
+    avatarEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            dropdownEl.hidden = !dropdownEl.hidden;
+        }
+    });
+
+    // Fermer le dropdown si on clique ailleurs
+    document.addEventListener("click", (e) => {
+        if (!dropdownEl.hidden && !dropdownEl.contains(e.target) && !avatarEl.contains(e.target)) {
+            dropdownEl.hidden = true;
+        }
+    });
+}
+
+export async function initCharacterSummary({ includeQueryParam = false, elements, enableDropdown = true } = {}) {
     const resolvedElements = elements || getDefaultSummaryElements();
     const context = resolveCharacterContext({ includeQueryParam });
     const summary = buildSummary(context);
     applySummaryToElements(resolvedElements, summary);
+
+    // Update soul counts if character available
+    if (context?.character?.id) {
+        updateSoulCounts(context.character.id);
+    }
+
+    // Setup dropdown if enabled
+    if (enableDropdown) {
+        const avatarEl = document.getElementById("hdvCharacterAvatar") || document.querySelector(".character-avatar--clickable");
+        const dropdownEl = document.getElementById("hdvCharacterDropdown") || document.querySelector(".character-dropdown");
+
+        if (avatarEl && dropdownEl) {
+            wireDropdownToggle(avatarEl, dropdownEl);
+            await buildCharacterDropdown(dropdownEl, context?.character?.id);
+        }
+    }
+
     return { context, summary, elements: resolvedElements };
 }
