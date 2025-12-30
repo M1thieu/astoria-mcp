@@ -358,30 +358,13 @@ async function uploadImage(dbId, nameHint) {
         return null;
     }
 
-    // TEMP SOLUTION: Convert blob to data URL instead of uploading to storage
-    // TODO: Create 'items' bucket in Supabase Storage for production use
-    try {
-        const dataUrl = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(imageBlob);
-        });
-        console.log('Image converted to data URL, size:', imageBlob.size);
-        return dataUrl;
-    } catch (error) {
-        console.error('Failed to convert image to data URL:', error);
-        setError('Impossible de traiter l\'image');
-        return null;
-    }
-
-    /* ORIGINAL STORAGE UPLOAD CODE (requires 'items' bucket to exist):
+    // Upload to Supabase Storage bucket 'items'
     const safeName = String(nameHint || 'item')
         .toLowerCase()
         .replace(/[^a-z0-9_.-]/g, '_');
-    const filePath = `items/${dbId}/${Date.now()}_${safeName}.png`;
+    const filePath = `${dbId}/${Date.now()}_${safeName}.png`;
 
-    console.log('Uploading image:', filePath, 'Size:', imageBlob.size);
+    console.log('[UPLOAD] Uploading image:', filePath, 'Size:', imageBlob.size);
 
     const { error: uploadError } = await supabase.storage
         .from(ITEMS_BUCKET)
@@ -392,16 +375,15 @@ async function uploadImage(dbId, nameHint) {
         });
 
     if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('[UPLOAD] Upload error:', uploadError);
         setError(`Upload impossible: ${uploadError.message || 'Verifie le bucket items'}`);
         return null;
     }
 
     const { data } = supabase.storage.from(ITEMS_BUCKET).getPublicUrl(filePath);
     const publicUrl = data?.publicUrl || null;
-    console.log('Image uploaded successfully:', publicUrl);
+    console.log('[UPLOAD] Image uploaded successfully:', publicUrl);
     return publicUrl;
-    */
 }
 
 async function saveItem(event) {
