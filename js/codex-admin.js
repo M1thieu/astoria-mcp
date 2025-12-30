@@ -173,6 +173,7 @@ function openAdminModal(item) {
 function closeAdminModal() {
     closeBackdrop(dom.backdrop);
     resetImagePreview();
+    imageBlob = null;
     editingItem = null;
 }
 
@@ -311,11 +312,17 @@ async function applyCropper() {
 }
 
 async function uploadImage(dbId, nameHint) {
-    if (!imageBlob || !supabase) return null;
+    if (!imageBlob || !supabase) {
+        console.warn('Upload skipped: no imageBlob or no supabase');
+        return null;
+    }
+
     const safeName = String(nameHint || 'item')
         .toLowerCase()
         .replace(/[^a-z0-9_.-]/g, '_');
     const filePath = `items/${dbId}/${Date.now()}_${safeName}.png`;
+
+    console.log('Uploading image:', filePath, 'Size:', imageBlob.size);
 
     const { error: uploadError } = await supabase.storage
         .from(ITEMS_BUCKET)
@@ -326,13 +333,15 @@ async function uploadImage(dbId, nameHint) {
         });
 
     if (uploadError) {
-        console.error(uploadError);
-        setError('Upload image impossible. Verifie le bucket items.');
+        console.error('Upload error:', uploadError);
+        setError(`Upload impossible: ${uploadError.message || 'Verifie le bucket items'}`);
         return null;
     }
 
     const { data } = supabase.storage.from(ITEMS_BUCKET).getPublicUrl(filePath);
-    return data?.publicUrl || null;
+    const publicUrl = data?.publicUrl || null;
+    console.log('Image uploaded successfully:', publicUrl);
+    return publicUrl;
 }
 
 async function saveItem(event) {
@@ -360,7 +369,9 @@ async function saveItem(event) {
 
     try {
         let row = null;
-        if (editingItem && editingItem._dbId) {
+        const isUpdate = editingItem && editingItem._dbId;
+
+        if (isUpdate) {
             const { data, error } = await supabase
                 .from('items')
                 .update(payload)
@@ -379,6 +390,7 @@ async function saveItem(event) {
             row = data;
         }
 
+        // Upload image if present
         let imageUrl = null;
         if (imageBlob && row?.id) {
             imageUrl = await uploadImage(row.id, name);
@@ -390,17 +402,22 @@ async function saveItem(event) {
                     .eq('id', row.id)
                     .select()
                     .single();
-                if (!error && data) row = data;
+                if (!error && data) {
+                    row = data;
+                } else {
+                    console.warn('Failed to update item with image URL:', error);
+                }
+            }
+        } else if (isUpdate && editingItem.images) {
+            // Preserve existing images when updating without new image
+            if (!row.images) {
+                row.images = editingItem.images;
             }
         }
 
         const mapped = mapDbItem(row);
-        if (imageUrl) {
-            mapped.image = imageUrl;
-            mapped.images = { primary: imageUrl };
-        }
 
-        if (editingItem && editingItem._dbId) {
+        if (isUpdate) {
             window.astoriaCodex?.updateItemById(editingItem._dbId, mapped);
         } else {
             if (editingItem) {
@@ -408,10 +425,13 @@ async function saveItem(event) {
             }
             window.astoriaCodex?.addItems([mapped]);
         }
+
+        // Reset image state
+        imageBlob = null;
         closeAdminModal();
     } catch (error) {
-        console.error(error);
-        setError('Impossible de sauvegarder.');
+        console.error('Save error:', error);
+        setError(`Impossible de sauvegarder: ${error.message || 'Erreur inconnue'}`);
     } finally {
         dom.saveBtn.disabled = false;
     }
