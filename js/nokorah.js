@@ -353,11 +353,29 @@ function openModal(id) {
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
 
-    // Force styles as fallback
+    // Force styles as fallback on overlay
     modal.style.display = 'flex';
     modal.style.position = 'fixed';
     modal.style.inset = '0';
     modal.style.zIndex = '2000';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.padding = '1.5rem';
+    modal.style.background = 'rgba(32, 18, 18, 0.6)';
+
+    // Force styles on modal content (.modal)
+    const modalContent = modal.querySelector('.modal');
+    if (modalContent) {
+        modalContent.style.background = '#fff';
+        modalContent.style.borderRadius = '18px';
+        modalContent.style.padding = '2rem';
+        modalContent.style.maxWidth = '520px';
+        modalContent.style.width = '100%';
+        modalContent.style.boxShadow = '0 20px 40px rgba(0,0,0,0.3)';
+        modalContent.style.border = '2px solid rgba(255, 186, 148, 0.6)';
+        modalContent.style.position = 'relative';
+        modalContent.style.zIndex = '2001';
+    }
 
     // Debug: check computed styles
     const computedStyle = window.getComputedStyle(modal);
@@ -374,11 +392,29 @@ function closeModal(id) {
     modal.classList.remove("open");
     modal.setAttribute("aria-hidden", "true");
 
-    // Reset inline styles
+    // Reset inline styles on overlay
     modal.style.display = '';
     modal.style.position = '';
     modal.style.inset = '';
     modal.style.zIndex = '';
+    modal.style.alignItems = '';
+    modal.style.justifyContent = '';
+    modal.style.padding = '';
+    modal.style.background = '';
+
+    // Reset inline styles on modal content
+    const modalContent = modal.querySelector('.modal');
+    if (modalContent) {
+        modalContent.style.background = '';
+        modalContent.style.borderRadius = '';
+        modalContent.style.padding = '';
+        modalContent.style.maxWidth = '';
+        modalContent.style.width = '';
+        modalContent.style.boxShadow = '';
+        modalContent.style.border = '';
+        modalContent.style.position = '';
+        modalContent.style.zIndex = '';
+    }
 }
 
 function showAlert(message) {
