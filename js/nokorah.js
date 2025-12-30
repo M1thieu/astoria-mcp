@@ -266,8 +266,12 @@ function getNextRarity(rarity) {
 }
 
 function ensureModalShell() {
-    if (document.getElementById("nokorahInvokeModal")) return;
+    if (document.getElementById("nokorahInvokeModal")) {
+        console.log('[NOKORAH] Modal shell already exists');
+        return;
+    }
 
+    console.log('[NOKORAH] Creating modal shell');
     const wrapper = document.createElement("div");
     wrapper.innerHTML = `
         <div class="modal-overlay" id="nokorahInvokeModal" aria-hidden="true">
@@ -341,9 +345,14 @@ function ensureModalShell() {
 
 function openModal(id) {
     const modal = document.getElementById(id);
-    if (!modal) return;
+    console.log('[NOKORAH] openModal:', id, 'found:', !!modal);
+    if (!modal) {
+        console.error('[NOKORAH] Modal not found:', id);
+        return;
+    }
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
+    console.log('[NOKORAH] Modal opened:', id);
 }
 
 function closeModal(id) {
@@ -386,8 +395,12 @@ function renderEmpty(root) {
     `;
 
     const invokeBtn = root.querySelector("[data-action='invoke']");
+    console.log('[NOKORAH] renderEmpty - invokeBtn found:', !!invokeBtn);
     if (invokeBtn) {
-        invokeBtn.addEventListener("click", () => openInvokeModal());
+        invokeBtn.addEventListener("click", () => {
+            console.log('[NOKORAH] Invoke button clicked');
+            openInvokeModal();
+        });
     }
 }
 
@@ -513,11 +526,17 @@ async function ensureLuckySoul(cost) {
 }
 
 function openInvokeModal() {
+    console.log('[NOKORAH] openInvokeModal called');
     ensureModalShell();
+    console.log('[NOKORAH] ensureModalShell done');
     const nameInput = document.getElementById("nokorahNameInput");
     const uploadInput = document.getElementById("nokorahUploadInput");
     const grid = document.getElementById("nokorahAppearanceGrid");
-    if (!nameInput || !grid) return;
+    console.log('[NOKORAH] Found elements:', { nameInput: !!nameInput, uploadInput: !!uploadInput, grid: !!grid });
+    if (!nameInput || !grid) {
+        console.error('[NOKORAH] Missing required elements, aborting modal open');
+        return;
+    }
 
     let selected = PRESET_APPEARANCES[0];
     let uploadDataUrl = "";
