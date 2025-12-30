@@ -6,7 +6,14 @@ export const adminPanel = {
   title: "Admin",
   renderPanel(ctx) {
     const wrapper = el("div", "panel-card");
-    wrapper.appendChild(el("h3", "panel-card-title", "Overview"));
+
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.alignItems = "center";
+    header.style.gap = "8px";
+    header.appendChild(el("h3", "panel-card-title", "Overview"));
+    header.appendChild(el("span", "panel-admin-badge", "ADMIN"));
+    wrapper.appendChild(header);
 
     if (!ctx?.isAdmin) {
       wrapper.appendChild(el("p", "panel-muted", "Admin access required."));
@@ -46,15 +53,20 @@ export const adminPanel = {
     actions.append(selectLabel, select, hint);
     wrapper.appendChild(actions);
 
-    const stub = el("div", "panel-admin-stub");
-    const stubTitle = el("h4", "panel-admin-stub-title", "Admin panel (stub)");
-    const stubBody = el(
+    const placeholder = el("div", "panel-admin-placeholder");
+    const placeholderTitle = el("h4", "panel-admin-placeholder-title", "Future Features");
+    const placeholderBody = el(
       "p",
       "panel-muted",
-      "Roles, permissions, moderation et audit seront ajoutes ici."
+      "User management coming soon (Issue #18)"
     );
-    stub.append(stubTitle, stubBody);
-    wrapper.appendChild(stub);
+    const timestamp = el(
+      "p",
+      "panel-admin-timestamp",
+      `Accessed: ${new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}`
+    );
+    placeholder.append(placeholderTitle, placeholderBody, timestamp);
+    wrapper.appendChild(placeholder);
 
     select.addEventListener("change", async () => {
       const value = select.value;
