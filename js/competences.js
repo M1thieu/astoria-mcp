@@ -341,6 +341,7 @@
         skillsTitleEl.textContent = category.label;
         skillsListEl.innerHTML = "";
         const allocations = getCategoryAllocations(category.id);
+        const bonusBySkill = getNokorahBonuses();
         const isLocked = Boolean(skillsState.locksByCategory[category.id]);
 
         if (!category.skills || !category.skills.length) {
@@ -352,9 +353,9 @@
             const allocation = allocations[skill.name] || 0;
             const savedBase = skillsState.baseValuesByCategory[category.id]?.[skill.name];
             const base = savedBase ?? 0;
-            const totalValue = base + allocation;
-            const cappedTotal = Math.min(totalValue, MAX_SKILL_POINTS);
-            const isMaxed = cappedTotal >= MAX_SKILL_POINTS;
+            const bonus = bonusBySkill[skill.name] || 0;
+            const totalValue = base + allocation + bonus;
+            const isMaxed = base + allocation >= MAX_SKILL_POINTS;
             const li = document.createElement("li");
             li.className = "skills-line";
 
@@ -379,7 +380,7 @@
 
             const value = document.createElement("span");
             value.className = "skills-value";
-            value.textContent = `${cappedTotal} / ${MAX_SKILL_POINTS}`;
+            value.textContent = `${totalValue} / ${MAX_SKILL_POINTS}`;
 
             const incBtn = document.createElement("button");
             incBtn.type = "button";
@@ -432,12 +433,14 @@
         saveToStorage(skillsAllocStorageKey, skillsState.allocationsByCategory);
         saveToStorage(skillsStorageKey, skillsState.pointsByCategory);
 
+        const bonusBySkill = getNokorahBonuses();
         const nextAlloc = allocations[skill.name] || 0;
-        const newTotal = Math.min(base + nextAlloc, MAX_SKILL_POINTS);
+        const bonus = bonusBySkill[skill.name] || 0;
+        const newTotal = base + nextAlloc + bonus;
         valueEl.textContent = `${newTotal} / ${MAX_SKILL_POINTS}`;
         const isLocked = skillsState.locksByCategory[categoryId];
         decBtn.disabled = nextAlloc <= 0 || isLocked;
-        incBtn.disabled = newTotal >= MAX_SKILL_POINTS || (skillsState.pointsByCategory[categoryId] ?? 0) <= 0 || isLocked;
+        incBtn.disabled = base + nextAlloc >= MAX_SKILL_POINTS || (skillsState.pointsByCategory[categoryId] ?? 0) <= 0 || isLocked;
 
         updateSkillsPointsDisplay();
         updatePendingHighlights(categoryId);
@@ -449,6 +452,52 @@
         li.className = "skills-line skills-placeholder";
         li.textContent = message;
         skillsListEl.appendChild(li);
+    }
+
+    function getNokorahBonuses() {
+        const key = getNokorahStorageKey();
+        try {
+            const raw = localStorage.getItem(key);
+            const list = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(list)) return {};
+            return list.reduce((acc, bonus) => {
+                const name = bonus?.name;
+                const points = Number(bonus?.points) || 0;
+                if (!name || points <= 0) return acc;
+                acc[name] = (acc[name] || 0) + points;
+                return acc;
+            }, {});
+        } catch {
+            return {};
+        }
+    }
+
+    function getNokorahStorageKey() {
+        const suffix = persistState.characterId || resolveCharacterIdFallback();
+        return `nokorahBonuses:${suffix}`;
+    }
+
+    function resolveCharacterIdFallback() {
+        try {
+            const raw = localStorage.getItem("astoria_active_character");
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed?.id) return String(parsed.id);
+            }
+        } catch {
+            // ignore
+        }
+        try {
+            const raw = localStorage.getItem("astoria_character_summary");
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed?.id) return String(parsed.id);
+            }
+        } catch {
+            // ignore
+        }
+        const params = new URLSearchParams(window.location.search);
+        return params.get("character") || "default";
     }
 
     // -----------------------------------------------------------------
@@ -480,6 +529,7 @@
         }
         const hasPoints = currentPoints > 0;
         const isLocked = skillsState.locksByCategory[skillsState.activeCategoryId];
+        const bonusBySkill = getNokorahBonuses();
 
         skillsPointsMinusEl.disabled = !skillsState.isAdmin || !hasPoints || isLocked;
         skillsPointsPlusEl.disabled = !skillsState.isAdmin || isLocked;
@@ -503,11 +553,12 @@
             const savedBase = skillsState.baseValuesByCategory[activeCategory.id]?.[nameEl.textContent];
             const base = savedBase ?? 0;
             const allocation = allocations[nameEl.textContent] || 0;
-            const total = Math.min(base + allocation, MAX_SKILL_POINTS);
+            const bonus = bonusBySkill[nameEl.textContent] || 0;
+            const total = base + allocation + bonus;
             if (valueEl) {
                 valueEl.textContent = `${total} / ${MAX_SKILL_POINTS}`;
             }
-            const atMax = total >= MAX_SKILL_POINTS;
+            const atMax = base + allocation >= MAX_SKILL_POINTS;
             decBtn.disabled = allocation <= 0 || skillsState.locksByCategory[activeCategory.id];
             incBtn.disabled = atMax || currentPoints <= 0 || skillsState.locksByCategory[activeCategory.id];
         });
@@ -668,4 +719,11 @@
             skillsConfirmEl.classList.toggle(HIGHLIGHT_CONFIRM_CLASS, hasPendingChanges(categoryId));
         }
     }
+
+    window.addEventListener("storage", (event) => {
+        if (!event?.key) return;
+        if (event.key === getNokorahStorageKey()) {
+            renderSkillsCategory(getActiveCategory());
+        }
+    });
 })();

@@ -174,6 +174,15 @@ const inventoryData = [
             "Effet : Lumière Aveuglante — illumine les consommateurs (maximum 2). " +
             "Durée : 10 tours pour 1 utilisateur, 5 tours pour 2 utilisateurs. " +
             "Permet d'éclairer la nuit, le brouillard et d'être visible à distance pour les alliés."
+    },
+    {
+        name: "Lucky Soul",
+        category: "consommable",
+        image: "assets/nokorah/lucky-soul.svg",
+        description: "Ressource rare consommee pour invoquer, ameliorer ou abandonner un Nokorah.",
+        buyPrice: "",
+        sellPrice: "",
+        effect: ""
     }
     // Pour ajouter / éditer un objet :
     // - modifiez les champs ci-dessus (description, prix, effet, image)
@@ -406,3 +415,4 @@ window.skillsCategories = [
         ]
     }
 ];
+
