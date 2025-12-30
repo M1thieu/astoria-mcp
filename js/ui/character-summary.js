@@ -232,11 +232,13 @@ async function buildCharacterDropdown(dropdownEl, currentCharacterId) {
 
     try {
         let characters = [];
-        if (adminMode && typeof auth.getAllCharacters === "function") {
-            characters = await auth.getAllCharacters();
-        } else {
+        // TODO: Re-enable admin mode to view all characters (issue #18)
+        // Temporarily disabled to show only user's own characters
+        // if (adminMode && typeof auth.getAllCharacters === "function") {
+        //     characters = await auth.getAllCharacters();
+        // } else {
             characters = await auth.getUserCharacters(user.id);
-        }
+        // }
         if (!characters || characters.length === 0) {
             dropdownEl.hidden = true;
             return;
@@ -270,12 +272,13 @@ async function buildCharacterDropdown(dropdownEl, currentCharacterId) {
 
             const name = document.createElement("div");
             name.className = "character-dropdown-name";
-            if (adminMode && char.user_id) {
-                const shortId = String(char.user_id).slice(0, 8);
-                name.textContent = `${char.name || "Sans nom"} • ${shortId}`;
-            } else {
+            // TODO: Re-enable user_id display for admins (issue #18)
+            // if (adminMode && char.user_id) {
+            //     const shortId = String(char.user_id).slice(0, 8);
+            //     name.textContent = `${char.name || "Sans nom"} • ${shortId}`;
+            // } else {
                 name.textContent = char.name || "Sans nom";
-            }
+            // }
 
             const role = document.createElement("div");
             role.className = "character-dropdown-role";

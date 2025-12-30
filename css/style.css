@@ -1811,4 +1811,98 @@ tbody tr.keyboard-selected {
     }
 }
 
+/* =================================================================
+   ENHANCED RESPONSIVE & ANIMATIONS
+   ================================================================= */
+
+/* Smooth transitions for interactive elements */
+button,
+a,
+.character-avatar,
+.character-dropdown-item,
+.stats-badge,
+.soul-count {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover lift effect for clickable cards */
+.character-dropdown-item:hover,
+.profile-panel:hover,
+.profile-presentation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Character summary responsive improvements */
+@media (max-width: 1024px) {
+    .character-summary {
+        gap: var(--space-4);
+    }
+
+    .character-summary-text {
+        font-size: var(--text-sm);
+    }
+
+    .stats-badge {
+        font-size: var(--text-xs);
+    }
+}
+
+@media (max-width: 768px) {
+    .character-summary {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .character-summary-meta {
+        justify-content: center;
+    }
+}
+
+/* Dropdown fade-in animation */
+.character-dropdown:not([hidden]) {
+    animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}
+
 /* (page-specific styles live in `css/*.css`) */
