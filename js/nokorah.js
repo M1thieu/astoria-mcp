@@ -352,7 +352,14 @@ function openModal(id) {
     }
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
+
+    // Debug: check computed styles
+    const computedStyle = window.getComputedStyle(modal);
     console.log('[NOKORAH] Modal opened:', id);
+    console.log('[NOKORAH] Display:', computedStyle.display);
+    console.log('[NOKORAH] Z-index:', computedStyle.zIndex);
+    console.log('[NOKORAH] Position:', computedStyle.position);
+    console.log('[NOKORAH] Modal element:', modal);
 }
 
 function closeModal(id) {
