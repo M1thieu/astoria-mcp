@@ -55,7 +55,10 @@ const state = {
     upgradeLevel: 0,
     skills: [],
     inventory: null,
-    storageKeys: null
+    storageKeys: null,
+    nokorahService: null,
+    characterId: null,
+    mode: 'local' // 'local' or 'supabase'
 };
 
 function readJson(key, fallback) {
@@ -104,8 +107,42 @@ function buildStorageKeys() {
     };
 }
 
-function loadState() {
+async function loadState() {
     state.storageKeys = buildStorageKeys();
+
+    // Try to load from Supabase first if we have service and characterId
+    if (state.mode === 'supabase' && state.nokorahService && state.characterId) {
+        try {
+            const data = await state.nokorahService.getNokorahByCharacterId(state.characterId);
+            if (data) {
+                console.log('[NOKORAH] Loaded from Supabase:', data);
+                state.active = {
+                    name: data.name,
+                    rarity: data.rarity,
+                    appearanceId: data.appearance_id,
+                    appearanceSrc: data.appearance_src,
+                    statusLabel: data.status_label,
+                    isAccessory: data.is_accessory,
+                    effectsAdmin: data.effects_admin || '',
+                    rainbowFrame: data.rainbow_frame
+                };
+                state.rarity = data.rarity;
+                state.bonuses = data.bonuses || [];
+                state.upgradeLevel = data.upgrade_level || 0;
+
+                // Also cache to localStorage
+                writeJson(state.storageKeys.active, state.active);
+                writeJson(state.storageKeys.rarity, state.rarity);
+                writeJson(state.storageKeys.bonuses, state.bonuses);
+                writeJson(state.storageKeys.upgrade, state.upgradeLevel);
+                return;
+            }
+        } catch (error) {
+            console.warn('[NOKORAH] Failed to load from Supabase, falling back to localStorage:', error);
+        }
+    }
+
+    // Fallback to localStorage
     state.active = readJson(state.storageKeys.active, null);
     state.rarity = readJson(state.storageKeys.rarity, state.active?.rarity || "commun");
     state.bonuses = readJson(state.storageKeys.bonuses, []);
@@ -118,11 +155,45 @@ function loadState() {
     }
 }
 
-function saveState() {
+async function saveState() {
+    // Always save to localStorage as cache
     writeJson(state.storageKeys.active, state.active);
     writeJson(state.storageKeys.rarity, state.rarity);
     writeJson(state.storageKeys.bonuses, state.bonuses);
     writeJson(state.storageKeys.upgrade, state.upgradeLevel);
+
+    // Save to Supabase if available
+    if (state.mode === 'supabase' && state.nokorahService && state.characterId) {
+        try {
+            if (state.active) {
+                const result = await state.nokorahService.upsertNokorah(state.characterId, {
+                    name: state.active.name,
+                    appearanceId: state.active.appearanceId,
+                    appearanceSrc: state.active.appearanceSrc,
+                    rarity: state.rarity,
+                    upgradeLevel: state.upgradeLevel,
+                    bonuses: state.bonuses,
+                    statusLabel: state.active.statusLabel,
+                    isAccessory: state.active.isAccessory,
+                    rainbowFrame: state.active.rainbowFrame,
+                    effectsAdmin: state.active.effectsAdmin || ''
+                });
+                if (result.success) {
+                    console.log('[NOKORAH] Saved to Supabase successfully');
+                } else {
+                    console.error('[NOKORAH] Failed to save to Supabase:', result.error);
+                }
+            } else {
+                // Nokorah was abandoned - delete from Supabase
+                const result = await state.nokorahService.deleteNokorah(state.characterId);
+                if (result.success) {
+                    console.log('[NOKORAH] Deleted from Supabase successfully');
+                }
+            }
+        } catch (error) {
+            console.error('[NOKORAH] Error saving to Supabase:', error);
+        }
+    }
 }
 
 function slugify(input) {
@@ -399,9 +470,9 @@ function renderActive(root) {
     if (appearanceBtn) appearanceBtn.addEventListener("click", openAppearanceModal);
     if (abandonBtn) abandonBtn.addEventListener("click", handleAbandon);
     if (rainbowToggle) {
-        rainbowToggle.addEventListener("change", (event) => {
+        rainbowToggle.addEventListener("change", async (event) => {
             state.active.rainbowFrame = event.target.checked;
-            saveState();
+            await saveState();
             renderAll();
         });
     }
@@ -496,7 +567,7 @@ function openInvokeModal() {
         state.rarity = "commun";
         state.bonuses = [];
         state.upgradeLevel = 0;
-        saveState();
+        await saveState();
         closeModal("nokorahInvokeModal");
         renderAll();
     };
@@ -544,10 +615,10 @@ function openAppearanceModal() {
         reader.readAsDataURL(file);
     };
 
-    confirm.onclick = () => {
+    confirm.onclick = async () => {
         state.active.appearanceId = selected.id;
         state.active.appearanceSrc = uploadDataUrl || selected.src;
-        saveState();
+        await saveState();
         closeModal("nokorahAppearanceModal");
         renderAll();
     };
@@ -563,7 +634,7 @@ async function handleRarityUpgrade() {
     if (!ok) return;
     state.rarity = next;
     if (state.active) state.active.rarity = next;
-    saveState();
+    await saveState();
     renderAll();
 }
 
@@ -601,7 +672,7 @@ async function handleStatsUpgrade() {
     }
 
     state.upgradeLevel = nextLevel;
-    saveState();
+    await saveState();
     renderAll();
     animateRoulette(results);
 }
@@ -657,12 +728,36 @@ function handleAbandon() {
         state.rarity = "commun";
         state.bonuses = [];
         state.upgradeLevel = 0;
-        saveState();
+        await saveState();
         closeModal("nokorahFarewellModal");
         renderAll();
     };
 
     openModal("nokorahFarewellModal");
+}
+
+async function buildNokorahAdapter() {
+    try {
+        const auth = await import('./auth.js');
+        if (typeof auth.refreshSessionUser === 'function') {
+            await auth.refreshSessionUser();
+        }
+        const character = auth.getActiveCharacter?.();
+        if (character?.id) {
+            // Import Nokorah service
+            const nokorahService = await import('./api/nokorah-service.js');
+            state.nokorahService = nokorahService;
+            state.characterId = character.id;
+            state.mode = 'supabase';
+            console.log('[NOKORAH] Using Supabase mode for character:', character.id);
+        } else {
+            state.mode = 'local';
+            console.log('[NOKORAH] Using localStorage mode');
+        }
+    } catch (error) {
+        state.mode = 'local';
+        console.warn('[NOKORAH] Failed to load auth, using localStorage mode:', error);
+    }
 }
 
 async function buildInventoryAdapter() {
@@ -783,7 +878,8 @@ async function initNokorah() {
     const roots = document.querySelectorAll("[data-nokorah-root]");
     if (!roots.length) return;
 
-    loadState();
+    await buildNokorahAdapter();
+    await loadState();
     state.skills = await loadSkills();
     state.inventory = await buildInventoryAdapter();
     await refreshLuckySoul();
