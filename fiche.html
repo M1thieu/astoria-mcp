@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="assets/images/ALICE_ACADEMIA.ico">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/fiche.css">
+    <link rel="stylesheet" href="css/nokorah.css">
 </head>
 <body>
     <main class="fiche-page" aria-labelledby="fichePageTitle">
@@ -39,6 +40,7 @@
                 <button type="button" class="tab-button active" data-tab="identite">Identité</button>
                 <button type="button" class="tab-button" data-tab="appartenance">Appartenance</button>
                 <button type="button" class="tab-button" data-tab="combat">Combat</button>
+                <button type="button" class="tab-button" data-tab="nokorah">Mon Nokorah</button>
                 <button type="button" class="tab-button" data-tab="alice">Alice</button>
                 <button type="button" class="tab-button" data-tab="sorcellerie">Sorcellerie</button>
                 <button type="button" class="tab-button" data-tab="eater">Eater</button>
@@ -283,6 +285,14 @@
                                 <!-- Dynamically populated -->
                             </ul>
                         </div>
+                    </section>
+
+                    <!-- Nokorah -->
+                    <section id="tab-nokorah" class="tab-panel" aria-label="Mon Nokorah">
+                        <div class="tab-panel-header">
+                            <h2 class="section-title section-title--inline">Mon Nokorah</h2>
+                        </div>
+                        <div class="nokorah-manager" data-nokorah-root="fiche"></div>
                     </section>
 
                     <!-- Alice -->
@@ -918,6 +928,7 @@
     </main>
 
     <script type="module" src="js/ui/app-shell.js"></script>
+    <script type="module" src="js/nokorah.js"></script>
     <script>
         (async function () {
             const tabButtons = Array.from(document.querySelectorAll('.tab-button'));
