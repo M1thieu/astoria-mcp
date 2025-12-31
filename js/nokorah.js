@@ -344,7 +344,7 @@ function renderActive(root) {
                             ${buildAccessoryTag(active)}
                         </div>
                     </div>
-                    <div class="lucky-soul-meter">Lucky Soul: <strong>${formatLuckySoul(state.luckySoulCount)}</strong></div>
+                    <div class="lucky-soul-meter">Lucky Soul: <strong>${state.luckySoulCount}</strong></div>
                 </div>
 
                 <div class="nokorah-section-block">
@@ -420,22 +420,39 @@ function renderAll() {
 }
 
 async function refreshLuckySoul() {
-    if (!state.inventory) return;
-    state.luckySoulCount = await state.inventory.getCount();
+    if (!state.inventory) {
+        console.log('[NOKORAH LS] No inventory adapter');
+        return;
+    }
+    const count = await state.inventory.getCount();
+    console.log('[NOKORAH LS] Refreshed Lucky Soul count:', count);
+    state.luckySoulCount = count;
+    renderAll();
 }
 
 async function ensureLuckySoul(cost) {
+    console.log('[NOKORAH LS] Checking Lucky Souls, need:', cost);
     const current = await state.inventory.getCount();
+    console.log('[NOKORAH LS] Current count:', current);
+
     if (current < cost) {
+        console.log('[NOKORAH LS] Insufficient Lucky Souls!', current, '/', cost);
         alert(`Lucky Soul insuffisantes (${current}/${cost}).`);
         return false;
     }
+
+    console.log('[NOKORAH LS] Applying delta:', -cost);
     const ok = await state.inventory.applyDelta(-cost);
+    console.log('[NOKORAH LS] Delta applied:', ok);
+
     if (!ok) {
         alert("Impossible de consommer les Lucky Soul pour le moment.");
         return false;
     }
+
     state.luckySoulCount = current - cost;
+    console.log('[NOKORAH LS] New count after consumption:', state.luckySoulCount);
+    await refreshLuckySoul();
     return true;
 }
 
@@ -681,8 +698,12 @@ async function buildInventoryAdapter() {
             characterId = character.id;
             inventoryApi = await import("./api/inventory-service.js");
             mode = "character";
+            console.log('[NOKORAH LS] Using Supabase inventory mode for character:', characterId);
+        } else {
+            console.log('[NOKORAH LS] No active character, using localStorage mode');
         }
-    } catch {
+    } catch (err) {
+        console.log('[NOKORAH LS] Failed to load auth, using localStorage mode:', err.message);
         mode = "local";
     }
 
@@ -721,28 +742,41 @@ async function buildInventoryAdapter() {
                     row?.item_key === LUCKY_SOUL_ITEM.name
                 ) ||
                     rows.find((row) => Number(row?.item_index) === 9999);
-                return Math.max(0, Math.floor(Number(entry?.qty) || 0));
-            } catch {
+                const count = Math.max(0, Math.floor(Number(entry?.qty) || 0));
+                console.log('[NOKORAH LS] getCount (Supabase):', count);
+                return count;
+            } catch (err) {
+                console.error('[NOKORAH LS] Error getting count from Supabase:', err);
                 return 0;
             }
         }
         const items = await loadLocalInventory();
+        console.log('[NOKORAH LS] localStorage inventory items:', items.length);
         const entry = await getLocalEntry(items);
-        return Math.max(0, Math.floor(Number(entry?.quantity) || 0));
+        const count = Math.max(0, Math.floor(Number(entry?.quantity) || 0));
+        console.log('[NOKORAH LS] getCount (localStorage):', count, 'entry:', entry);
+        return count;
     }
 
     async function applyDelta(delta) {
         const safeDelta = Math.trunc(Number(delta) || 0);
+        console.log('[NOKORAH LS] applyDelta called with:', safeDelta);
         if (!safeDelta) return true;
 
         if (mode === "character" && inventoryApi && characterId) {
             const current = await getCount();
             const next = current + safeDelta;
-            if (next < 0) return false;
+            console.log('[NOKORAH LS] Supabase mode:', current, '+', safeDelta, '=', next);
+            if (next < 0) {
+                console.log('[NOKORAH LS] Cannot go negative');
+                return false;
+            }
             try {
                 await inventoryApi.setInventoryItem(characterId, LUCKY_SOUL_ITEM.key, 9999, next);
+                console.log('[NOKORAH LS] Supabase updated successfully');
                 return true;
-            } catch {
+            } catch (err) {
+                console.error('[NOKORAH LS] Supabase update failed:', err);
                 return false;
             }
         }
@@ -751,11 +785,18 @@ async function buildInventoryAdapter() {
         const entry = await getLocalEntry(items);
         const current = entry ? Math.floor(Number(entry.quantity) || 0) : 0;
         const next = current + safeDelta;
-        if (next < 0) return false;
+        console.log('[NOKORAH LS] localStorage mode:', current, '+', safeDelta, '=', next);
+
+        if (next < 0) {
+            console.log('[NOKORAH LS] Cannot go negative');
+            return false;
+        }
 
         if (entry) {
+            console.log('[NOKORAH LS] Updating existing entry from', entry.quantity, 'to', next);
             entry.quantity = next;
         } else {
+            console.log('[NOKORAH LS] Creating new Lucky Soul entry with quantity:', next);
             items.push({
                 id: Date.now(),
                 name: LUCKY_SOUL_ITEM.name,
@@ -769,10 +810,12 @@ async function buildInventoryAdapter() {
 
         if (entry && entry.quantity <= 0) {
             const idx = items.indexOf(entry);
+            console.log('[NOKORAH LS] Removing empty entry at index:', idx);
             if (idx >= 0) items.splice(idx, 1);
         }
 
         await saveLocalInventory(items);
+        console.log('[NOKORAH LS] localStorage saved successfully');
         return true;
     }
 
