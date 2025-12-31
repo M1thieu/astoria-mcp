@@ -90,11 +90,11 @@ export async function register(username, password) {
                 message.includes('already exists');
 
             if (isDuplicate) {
-                return { success: false, error: "Nom d'utilisateur dÇ¸jÇÿ utilisÇ¸" };
+                return { success: false, error: "Nom d'utilisateur déjà utilisé" };
             }
 
             console.error('Register error:', error);
-            return { success: false, error: "Impossible de crÇ¸er le compte" };
+            return { success: false, error: "Impossible de créer le compte" };
         }
 
         const session = {
@@ -112,7 +112,7 @@ export async function register(username, password) {
         return { success: true, user: session.user };
     } catch (error) {
         console.error('Register error:', error);
-        return { success: false, error: "Impossible de crÇ¸er le compte" };
+        return { success: false, error: "Impossible de créer le compte" };
     }
 }
 
@@ -176,7 +176,7 @@ export async function refreshSessionUser() {
 
 export async function setUserRoleByUsername(username, role) {
     if (!isAdmin()) {
-        return { success: false, error: 'AccÇùs non autorisÇ¸' };
+        return { success: false, error: 'Accès non autorisé' };
     }
 
     const cleanUsername = String(username || '').trim();
@@ -197,7 +197,7 @@ export async function setUserRoleByUsername(username, role) {
 
         if (error) {
             console.error('Error updating user role:', error);
-            return { success: false, error: 'Impossible de modifier le rÇïle' };
+            return { success: false, error: 'Impossible de modifier le rôle' };
         }
 
         const current = getCurrentUser();
@@ -211,19 +211,19 @@ export async function setUserRoleByUsername(username, role) {
         return { success: true, user: data };
     } catch (error) {
         console.error('Error in setUserRoleByUsername:', error);
-        return { success: false, error: 'Impossible de modifier le rÇïle' };
+        return { success: false, error: 'Impossible de modifier le rôle' };
     }
 }
 
 export async function resetUserPassword(username, newPassword) {
     if (!isAdmin()) {
-        return { success: false, error: 'AccÇùs non autorisÇ¸' };
+        return { success: false, error: 'Accès non autorisé' };
     }
 
     const cleanUsername = String(username || '').trim();
     const cleanPassword = String(newPassword || '').trim();
     if (!cleanUsername || !cleanPassword) {
-        return { success: false, error: 'Nom dƒ?Tutilisateur et mot de passe requis' };
+        return { success: false, error: 'Nom d'utilisateur et mot de passe requis' };
     }
 
     try {
@@ -238,13 +238,13 @@ export async function resetUserPassword(username, newPassword) {
 
         if (error) {
             console.error('Error resetting user password:', error);
-            return { success: false, error: 'Impossible de rÇ¸initialiser le mot de passe' };
+            return { success: false, error: 'Impossible de réinitialiser le mot de passe' };
         }
 
         return { success: true, user: data };
     } catch (error) {
         console.error('Error in resetUserPassword:', error);
-        return { success: false, error: 'Impossible de rÇ¸initialiser le mot de passe' };
+        return { success: false, error: 'Impossible de réinitialiser le mot de passe' };
     }
 }
 

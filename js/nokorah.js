@@ -36,6 +36,38 @@ const LUCKY_SOUL_ITEM = {
     description: "Ressource rare consommée pour invoquer et évoluer un Nokorah."
 };
 
+function resolveLuckySoulIndex() {
+    if (typeof window === "undefined") return null;
+    const items = window.inventoryData;
+    if (!Array.isArray(items)) return null;
+    const idx = items.findIndex((item) => item?.name === LUCKY_SOUL_ITEM.name || item?.name === LUCKY_SOUL_ITEM.key);
+    return idx >= 0 ? idx : null;
+}
+
+function isLuckySoulKey(value, luckyIndex) {
+    if (value == null) return false;
+    const key = String(value);
+    if (!key) return false;
+    if (key === LUCKY_SOUL_ITEM.key || key === LUCKY_SOUL_ITEM.name) return true;
+    if (LUCKY_SOUL_ITEM.aliases.includes(key)) return true;
+    if (luckyIndex != null && key === String(luckyIndex)) return true;
+    return false;
+}
+
+function isLuckySoulIndex(value, luckyIndex) {
+    if (luckyIndex == null) return false;
+    return Number(value) === luckyIndex;
+}
+
+function findLuckySoulRow(rows) {
+    const luckyIndex = resolveLuckySoulIndex();
+    return rows.find((row) =>
+        isLuckySoulKey(row?.item_key, luckyIndex) ||
+        isLuckySoulIndex(row?.item_index, luckyIndex) ||
+        Number(row?.item_index) === 9999
+    ) || null;
+}
+
 const PRESET_APPEARANCES = [
     { id: "sprout", label: "Sprout", src: "assets/nokorah/silhouette-1.svg" },
     { id: "puff", label: "Puff", src: "assets/nokorah/silhouette-2.svg" },
@@ -725,10 +757,13 @@ async function buildInventoryAdapter() {
     }
 
     async function getLocalEntry(items) {
+        const luckyIndex = resolveLuckySoulIndex();
         return items.find((item) =>
-            item?.itemKey === LUCKY_SOUL_ITEM.key ||
-            LUCKY_SOUL_ITEM.aliases.includes(item?.itemKey) ||
-            item?.name === LUCKY_SOUL_ITEM.name
+            isLuckySoulKey(item?.itemKey, luckyIndex) ||
+            isLuckySoulKey(item?.name, luckyIndex) ||
+            isLuckySoulIndex(item?.sourceIndex, luckyIndex) ||
+            isLuckySoulIndex(item?.idx, luckyIndex) ||
+            isLuckySoulIndex(item?.item_index, luckyIndex)
         ) || null;
     }
 
@@ -736,12 +771,7 @@ async function buildInventoryAdapter() {
         if (mode === "character" && inventoryApi && characterId) {
             try {
                 const rows = await inventoryApi.getInventoryRows(characterId);
-                const entry = rows.find((row) =>
-                    row?.item_key === LUCKY_SOUL_ITEM.key ||
-                    LUCKY_SOUL_ITEM.aliases.includes(row?.item_key) ||
-                    row?.item_key === LUCKY_SOUL_ITEM.name
-                ) ||
-                    rows.find((row) => Number(row?.item_index) === 9999);
+                const entry = findLuckySoulRow(rows);
                 const count = Math.max(0, Math.floor(Number(entry?.qty) || 0));
                 console.log('[NOKORAH LS] getCount (Supabase):', count);
                 return count;
@@ -764,7 +794,16 @@ async function buildInventoryAdapter() {
         if (!safeDelta) return true;
 
         if (mode === "character" && inventoryApi && characterId) {
-            const current = await getCount();
+            let entry = null;
+            let current = 0;
+            try {
+                const rows = await inventoryApi.getInventoryRows(characterId);
+                entry = findLuckySoulRow(rows);
+                current = Math.max(0, Math.floor(Number(entry?.qty) || 0));
+            } catch (err) {
+                console.error('[NOKORAH LS] Error getting rows from Supabase:', err);
+                return false;
+            }
             const next = current + safeDelta;
             console.log('[NOKORAH LS] Supabase mode:', current, '+', safeDelta, '=', next);
             if (next < 0) {
@@ -772,7 +811,13 @@ async function buildInventoryAdapter() {
                 return false;
             }
             try {
-                await inventoryApi.setInventoryItem(characterId, LUCKY_SOUL_ITEM.key, 9999, next);
+                const luckyIndex = resolveLuckySoulIndex();
+                const fallbackKey = luckyIndex != null ? String(luckyIndex) : LUCKY_SOUL_ITEM.key;
+                const itemKey = entry?.item_key ? String(entry.item_key) : fallbackKey;
+                const itemIndex = Number.isFinite(Number(entry?.item_index))
+                    ? Number(entry.item_index)
+                    : (luckyIndex != null ? luckyIndex : 9999);
+                await inventoryApi.setInventoryItem(characterId, itemKey, itemIndex, next);
                 console.log('[NOKORAH LS] Supabase updated successfully');
                 return true;
             } catch (err) {
@@ -796,16 +841,22 @@ async function buildInventoryAdapter() {
             console.log('[NOKORAH LS] Updating existing entry from', entry.quantity, 'to', next);
             entry.quantity = next;
         } else {
+            const luckyIndex = resolveLuckySoulIndex();
+            const fallbackKey = luckyIndex != null ? String(luckyIndex) : LUCKY_SOUL_ITEM.key;
             console.log('[NOKORAH LS] Creating new Lucky Soul entry with quantity:', next);
-            items.push({
+            const payload = {
                 id: Date.now(),
                 name: LUCKY_SOUL_ITEM.name,
-                itemKey: LUCKY_SOUL_ITEM.key,
+                itemKey: fallbackKey,
                 category: LUCKY_SOUL_ITEM.category,
                 description: LUCKY_SOUL_ITEM.description,
                 image: LUCKY_SOUL_ITEM.image,
                 quantity: next
-            });
+            };
+            if (luckyIndex != null) {
+                payload.sourceIndex = luckyIndex;
+            }
+            items.push(payload);
         }
 
         if (entry && entry.quantity <= 0) {

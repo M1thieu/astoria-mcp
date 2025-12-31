@@ -3,7 +3,7 @@ import { isAdmin } from './auth-service.js';
 
 export async function toggleItemState(itemId, enabled) {
     if (!isAdmin()) {
-        return { success: false, error: 'AccÇùs non autorisÇ¸' };
+        return { success: false, error: 'Accès non autorisé' };
     }
 
     try {

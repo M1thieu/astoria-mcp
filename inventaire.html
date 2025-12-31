@@ -802,7 +802,7 @@
             }
 
             if (quantity < 1) {
-                alert('La quantit? doit ?tre au moins 1');
+                alert('La quantité doit être au moins 1');
                 return;
             }
 
@@ -1605,7 +1605,7 @@
                     </div>
                     ${item.quantity > 1 ? `
                     <div class="detail-section">
-                        <span class="detail-label">Quantit?</span>
+                        <span class="detail-label">Quantité</span>
                         <p class="detail-text">x${item.quantity}</p>
                     </div>
                     ` : ''}
@@ -1679,7 +1679,7 @@
             const item = inventoryItems[itemIndex];
 
             if (item.quantity < 1) {
-                alert('Quantit? insuffisante pour utiliser cet objet');
+                alert('Quantité insuffisante pour utiliser cet objet');
                 return;
             }
 
@@ -1751,7 +1751,7 @@
             const qtyToDelete = parseInt(deleteQuantityInput.value) || 1;
 
             if (qtyToDelete < 1) {
-                alert('La quantit? doit ?tre au moins 1');
+                alert('La quantité doit être au moins 1');
                 return;
             }
 
@@ -1945,7 +1945,6 @@
     </script>
 </body>
 </html>
-
 
 
 

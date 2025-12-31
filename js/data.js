@@ -197,6 +197,7 @@ const inventoryData = [
     //   }
 ];
 
+window.inventoryData = inventoryData;
 
 // -----------------------------------------------------------------------------
 // Compétences (compétences par catégorie)

@@ -69,13 +69,13 @@ export async function createCharacter(userId, characterData) {
 
         if (error) {
             console.error('Error creating character:', error);
-            return { success: false, error: 'Erreur lors de la crÇ¸ation du personnage' };
+            return { success: false, error: 'Erreur lors de la création du personnage' };
         }
 
         return { success: true, character: data[0] };
     } catch (error) {
         console.error('Error in createCharacter:', error);
-        return { success: false, error: 'Erreur lors de la crÇ¸ation du personnage' };
+        return { success: false, error: 'Erreur lors de la création du personnage' };
     }
 }
 
