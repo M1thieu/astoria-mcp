@@ -520,6 +520,7 @@
             border-radius: var(--radius-md);
             border: 1px solid #F48FB1;
             padding: 6px 10px;
+            min-height: 54px;
             box-shadow: 0 1px 2px rgba(244, 143, 177, 0.15);
             transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: default;
@@ -570,7 +571,13 @@
 
         .skills-name {
             flex: 1;
+            min-width: 0;
             font-size: var(--text-base-minus);
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             color: #2e3644;
         }
 

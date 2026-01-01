@@ -223,7 +223,7 @@ export async function resetUserPassword(username, newPassword) {
     const cleanUsername = String(username || '').trim();
     const cleanPassword = String(newPassword || '').trim();
     if (!cleanUsername || !cleanPassword) {
-        return { success: false, error: 'Nom d'utilisateur et mot de passe requis' };
+        return { success: false, error: "Nom d'utilisateur et mot de passe requis" };
     }
 
     try {
