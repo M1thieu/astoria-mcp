@@ -418,6 +418,17 @@
             text-transform: uppercase;
             color: var(--color-primary);
             font-weight: var(--font-bold);
+            position: relative;
+        }
+
+        .skills-panel-title::after {
+            content: "";
+            display: block;
+            width: min(160px, 60%);
+            height: 2px;
+            margin-top: var(--space-2);
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(216, 27, 96, 0.45), rgba(216, 27, 96, 0));
         }
 
         .skills-points-box {
@@ -490,7 +501,7 @@
         }
 
         .skills-points-btn:focus-visible {
-            outline: 2px solid var(--color-primary);
+            outline: 2px solid rgba(216, 27, 96, 0.45);
             outline-offset: 1px;
         }
 
@@ -520,11 +531,11 @@
             border-radius: var(--radius-md);
             border: 1px solid #F48FB1;
             padding: 6px 10px;
-            min-height: 54px;
             box-shadow: 0 1px 2px rgba(244, 143, 177, 0.15);
             transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: default;
             color: #4A148C;
+            gap: var(--space-2);
         }
 
         .skills-line.skills-line-highlight {
@@ -574,10 +585,8 @@
             min-width: 0;
             font-size: var(--text-base-minus);
             line-height: 1.2;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            word-break: break-word;
+            hyphens: auto;
             color: #2e3644;
         }
 
@@ -621,6 +630,11 @@
             color: #4A148C;
             box-shadow: 0 1px 2px rgba(244, 143, 177, 0.2);
             transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .skill-point-btn:focus-visible {
+            outline: 2px solid rgba(216, 27, 96, 0.45);
+            outline-offset: 1px;
         }
 
         .skill-point-btn:disabled,
@@ -702,6 +716,22 @@
 
         .skills-line:hover .skills-icon {
             transform: scale(1.1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .skills-layout,
+            .skills-tab-btn,
+            .skills-tab-circle,
+            .skills-tab-circle img,
+            .skills-line,
+            .skills-confirm-btn,
+            .skills-page-hint,
+            .skills-icon,
+            .skills-value,
+            .skills-points-btn,
+            .skill-point-btn {
+                transition: none;
+            }
         }
 
         /* Responsive */
@@ -799,8 +829,8 @@
                         <div class="character-summary-meta">
                             <span class="stats-badge" id="characterKaelsBadge" hidden>0 kaels</span>
                             <div class="character-souls" id="characterSouls" hidden>
-                                <span class="soul-count" title="Âmes consommation"><span class="soul-icon">🔥</span><span id="soulConsoValue">0</span></span>
-                                <span class="soul-count" title="Âmes progression"><span class="soul-icon">⭐</span><span id="soulProgValue">0</span></span>
+                                <span class="soul-count" title="&Acirc;mes consommation"><span class="soul-icon">🔥</span><span id="soulConsoValue">0</span></span>
+                                <span class="soul-count" title="&Acirc;mes progression"><span class="soul-icon">⭐</span><span id="soulProgValue">0</span></span>
                             </div>
                         </div>
                     </div>

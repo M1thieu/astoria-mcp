@@ -29,8 +29,8 @@
                     <div class="character-summary-meta">
                         <span class="stats-badge" id="characterKaelsBadge" hidden>0 kaels</span>
                         <div class="character-souls" id="characterSouls" hidden>
-                            <span class="soul-count" title="Âmes consommation"><span class="soul-icon">🔥</span><span id="soulConsoValue">0</span></span>
-                            <span class="soul-count" title="Âmes progression"><span class="soul-icon">⭐</span><span id="soulProgValue">0</span></span>
+                            <span class="soul-count" title="&Acirc;mes consommation"><span class="soul-icon">🔥</span><span id="soulConsoValue">0</span></span>
+                            <span class="soul-count" title="&Acirc;mes progression"><span class="soul-icon">⭐</span><span id="soulProgValue">0</span></span>
                         </div>
                     </div>
                 </div>
@@ -43,26 +43,42 @@
                 </button>
             </div>
         </div>
+        <!-- Category filter bar + search -->
+        <div class="inventory-toolbar">
+            <nav class="inventory-categories" aria-label="Cat&eacute;gories d'inventaire">
+                <button class="category-btn active" data-category="all">
+                    <span class="category-icon">&#x1F4E6;</span>
+                    <span class="category-label">Tous</span>
+                </button>
+                <button class="category-btn" data-category="equipement">
+                    <span class="category-icon">&#x2694;&#xFE0F;</span>
+                    <span class="category-label">&Eacute;quipements</span>
+                </button>
+                <button class="category-btn" data-category="consommable">
+                    <span class="category-icon">&#x1F9EA;</span>
+                    <span class="category-label">Consommables</span>
+                </button>
+                <button class="category-btn" data-category="agricole">
+                    <span class="category-icon">&#x1F33E;</span>
+                    <span class="category-label">Agricole</span>
+                </button>
+            </nav>
 
-        <!-- Category filter bar -->
-        <nav class="inventory-categories" aria-label="Catégories d'inventaire">
-            <button class="category-btn active" data-category="all">
-                <span class="category-icon">&#x1F4E6;</span>
-                <span class="category-label">Tous</span>
-            </button>
-            <button class="category-btn" data-category="equipement">
-                <span class="category-icon">&#x2694;&#xFE0F;</span>
-                <span class="category-label">Équipements</span>
-            </button>
-            <button class="category-btn" data-category="consommable">
-                <span class="category-icon">&#x1F9EA;</span>
-                <span class="category-label">Consommables</span>
-            </button>
-            <button class="category-btn" data-category="agricole">
-                <span class="category-icon">&#x1F33E;</span>
-                <span class="category-label">Agricole</span>
-            </button>
-        </nav>
+            <div class="inventory-search" id="inventorySearch">
+                <button type="button" class="inventory-search-toggle" id="inventorySearchToggle" aria-label="Rechercher" aria-expanded="false">
+                    <span class="inventory-search-icon">&#x1F50D;</span>
+                </button>
+                <input
+                    type="search"
+                    id="inventorySearchInput"
+                    class="inventory-search-input"
+                    placeholder="Rechercher un objet..."
+                    aria-label="Rechercher un objet"
+                >
+                <button type="button" class="inventory-search-clear" id="inventorySearchClear" aria-label="Effacer la recherche" hidden>x</button>
+                <div class="recent-searches-dropdown inventory-search-history" id="inventorySearchHistory"></div>
+            </div>
+        </div>
 
         <!-- Main content area: grid + details -->
         <div class="inventory-content">
@@ -130,7 +146,7 @@
                     <label for="categorySelect">Catégorie *</label>
                     <select id="categorySelect" required>
                         <option value="all">&#x1F4E6; Toutes catégories</option>
-                        <option value="equipement">&#x2694;&#xFE0F; Équipement</option>
+                        <option value="equipement">&#x2694;&#xFE0F; &Eacute;quipement</option>
                         <option value="consommable">&#x1F9EA; Consommable</option>
                         <option value="agricole">&#x1F33E; Agricole</option>
                     </select>
@@ -151,7 +167,7 @@
                     <div class="form-group">
                         <label>Aperçu</label>
                         <div class="item-preview-card">
-                            <img id="previewImage" class="item-preview-image" src="" alt="" loading="lazy" decoding="async">
+                            <img id="previewImage" class="item-preview-image" src="" alt="" decoding="async">
                             <div>
                                 <div class="item-preview-name" id="previewName"></div>
                                 <div class="item-preview-description" id="previewDescription"></div>
@@ -195,6 +211,9 @@
     <!-- Load shared data -->
     <script src="js/image-helpers.js"></script>
     <script src="js/data.js"></script>
+    <script src="js/ui/list-helpers.js"></script>
+    <script src="js/ui/search-history.js"></script>
+    <script src="js/ui/searchbar.js"></script>
     <script type="module" src="js/ui/app-shell.js"></script>
     <script type="module">
         import { initCharacterSummary } from './js/ui/character-summary.js';
@@ -306,7 +325,7 @@
             { key: 'meteorologie', emoji: '🌦️', label: 'Météorologie', matchers: ['meteorologie', 'météorologie'] },
             { key: 'chimie-magique', emoji: '⚗️', label: 'Chimie magique', matchers: ['chimie magique'] },
             { key: 'magie-astral', emoji: '🌌', label: 'Magie astral', matchers: ['magie astral', 'magie astrale'] },
-            { key: 'elasticite', emoji: '🧶', label: 'Élasticité', matchers: ['elasticite', 'élasticité'] }
+            { key: 'elasticite', emoji: '🧶', label: '\u00c9lasticit\u00e9', matchers: ['elasticite', '\u00e9lasticit\u00e9'] }
         ];
 
         // =================================================================
@@ -315,6 +334,7 @@
         // =================================================================
 
         let currentCategory = 'all';
+        let currentSearchQuery = '';
         let selectedItemIndex = null;
         let inventoryItems = []; // Starts EMPTY
         let nextItemId = 1; // Auto-increment ID for new items
@@ -337,8 +357,14 @@
         const grid = document.getElementById('inventoryGrid');
         const detailPanel = document.getElementById('itemDetail');
         const emptyState = document.getElementById('emptyState');
+        const emptyStateMessage = emptyState ? emptyState.querySelector('.empty-state-message') : null;
         const itemCountEl = document.getElementById('itemCount');
         const categoryButtons = document.querySelectorAll('.category-btn');
+        const searchRoot = document.getElementById('inventorySearch');
+        const searchInput = document.getElementById('inventorySearchInput');
+        const searchToggle = document.getElementById('inventorySearchToggle');
+        const searchClear = document.getElementById('inventorySearchClear');
+        const searchHistoryDropdown = document.getElementById('inventorySearchHistory');
         const inventoryContent = document.querySelector('.inventory-content');
         const scrollTypesPanel = document.getElementById('scrollTypesPanel');
         const scrollPanelTitle = document.getElementById('scrollPanelTitle');
@@ -368,6 +394,21 @@
         const previewDescription = document.getElementById('previewDescription');
         const inventoryWrapper = document.querySelector('.inventory-wrapper');
         let inventoryAccessAllowed = true;
+
+        const listHelpers = window.astoriaListHelpers || {};
+        const filterItems = listHelpers.filterItems;
+        const searchFields = [
+            (item) => item?.name,
+            (item) => item?.description,
+            (item) => item?.effect
+        ];
+
+        const searchHistory = window.astoriaSearchHistory
+            ? window.astoriaSearchHistory.createSearchHistory({
+                storageKey: 'astoriaInventoryRecentSearches',
+                maxItems: 4
+            })
+            : null;
 
         // =================================================================
         // INITIALIZATION
@@ -985,6 +1026,23 @@
             });
         });
 
+        if (searchRoot && searchInput && window.astoriaSearchBar) {
+            window.astoriaSearchBar.bind({
+                root: searchRoot,
+                input: searchInput,
+                toggle: searchToggle,
+                clearButton: searchClear,
+                dropdown: searchHistoryDropdown,
+                history: searchHistory,
+                hotkey: ' ',
+                debounceWait: 200,
+                onSearch: (value) => {
+                    currentSearchQuery = String(value || '').trim().toLowerCase();
+                    renderInventory();
+                }
+            });
+        }
+
         // =================================================================
         // IMAGE RESOLUTION
         // =================================================================
@@ -1019,13 +1077,7 @@
         // =================================================================
         // SCROLL TYPES PANEL
         // =================================================================
-
-        function normalizeText(value) {
-            return String(value || '')
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .toLowerCase();
-        }
+        const normalizeText = window.astoriaListHelpers.normalizeText;
 
         function getScrollCategory(item) {
             if (!item || !item.name) return null;
@@ -1280,7 +1332,7 @@
         function renderScrollPanelList(category, counts) {
             if (!scrollPanelTitle || !scrollPanelList || !scrollPanelEmpty) return;
 
-            const titleText = category === 'eveil' ? 'Éveil' : 'Ascension';
+            const titleText = category === 'eveil' ? '\u00c9veil' : 'Ascension';
             const visibleTypes = SCROLL_TYPES.filter((type) => (counts[type.key] || 0) > 0);
             scrollPanelTitle.textContent = titleText;
 
@@ -1424,10 +1476,33 @@
          * - Creates item cards
          */
         function renderInventory() {
-            // Filter items by category
+            // Filter items by category + search
             let filtered = inventoryItems;
-            if (currentCategory !== 'all') {
-                filtered = inventoryItems.filter(item => item.category === currentCategory);
+            const activeCategory = currentCategory === 'all' ? '' : currentCategory;
+            if (filterItems) {
+                filtered = filterItems(inventoryItems, {
+                    category: activeCategory,
+                    getCategory: (item) => item?.category,
+                    query: currentSearchQuery,
+                    fields: searchFields
+                });
+            } else {
+                if (activeCategory) {
+                    filtered = inventoryItems.filter(item => item.category === activeCategory);
+                }
+                if (currentSearchQuery) {
+                    filtered = filtered.filter(item => {
+                        const name = String(item?.name || '').toLowerCase();
+                        const description = String(item?.description || '').toLowerCase();
+                        const effect = String(item?.effect || '').toLowerCase();
+                        return name.includes(currentSearchQuery) || description.includes(currentSearchQuery) || effect.includes(currentSearchQuery);
+                    });
+                }
+            }
+
+            if (selectedItemIndex !== null && !filtered.some(item => item.id === selectedItemIndex)) {
+                selectedItemIndex = null;
+                showDetailPlaceholder();
             }
 
             // Update count (shows currently filtered count)
@@ -1438,6 +1513,11 @@
 
             // Show empty state if no items
             if (filtered.length === 0) {
+                if (emptyStateMessage) {
+                    emptyStateMessage.textContent = currentSearchQuery
+                        ? 'Aucun objet trouv\u00e9 pour cette recherche.'
+                        : 'Votre inventaire est vide dans cette cat\u00e9gorie';
+                }
                 grid.style.display = 'none';
                 emptyState.style.display = 'flex';
                 showDetailPlaceholder();
@@ -1476,7 +1556,6 @@
                 <div class="item-image">
                     <img src="${escapeHtml(imageSrc)}"
                          alt="${escapeHtml(item.name)}"
-                         loading="lazy"
                          decoding="async"
                          onerror="this.src='${PLACEHOLDER_IMAGE}'">
                 </div>
@@ -1523,7 +1602,7 @@
          */
         function showItemDetail(item) {
             const categoryLabels = {
-                equipement: '&#x2694;&#xFE0F; ?quipement',
+                equipement: '&#x2694;&#xFE0F; &Eacute;quipement',
                 consommable: '&#x1F9EA; Consommable',
                 agricole: '&#x1F33E; Agricole'
             };
@@ -1584,7 +1663,6 @@
                 <div class="detail-image">
                     <img src="${escapeHtml(imageSrc)}"
                          alt="${escapeHtml(item.name)}"
-                         loading="lazy"
                          decoding="async"
                          onerror="this.src='${PLACEHOLDER_IMAGE}'">
                 </div>
@@ -1945,7 +2023,6 @@
     </script>
 </body>
 </html>
-
 
 
 

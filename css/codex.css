@@ -1,6 +1,27 @@
 /* =====================================================================
    CODEX ADMIN - codex.html
    ===================================================================== */
+.top-nav-placeholder {
+    display: inline-block;
+    width: 24px;
+}
+
+.codex-admin-actions-group {
+    margin-left: auto;
+    display: flex;
+    gap: var(--space-2);
+}
+
+.codex-delete-warning {
+    color: var(--color-error);
+    margin-top: var(--space-3);
+}
+
+.empty-state-cell {
+    padding: 0;
+    border: none;
+}
+
 .admin-add-btn {
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-md);

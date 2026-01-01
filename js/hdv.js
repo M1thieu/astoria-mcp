@@ -325,7 +325,7 @@ function buildCategories() {
 
 function categoryLabel(category) {
     if (category === 'all') return 'Toutes';
-    if (category === 'equipement') return 'Équipement';
+    if (category === 'equipement') return '\u00c9quipement';
     if (category === 'consommable') return 'Consommable';
     if (category === 'agricole') return 'Agricole';
     return String(category)
