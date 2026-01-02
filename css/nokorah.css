@@ -12,7 +12,7 @@
     --nokorah-glow: 0 0 0 3px rgba(255, 255, 255, 0.6), 0 10px 24px rgba(255, 140, 120, 0.25);
 }
 
-body {
+body.nokorah-theme {
     background: radial-gradient(circle at 20% 20%, rgba(255, 231, 205, 0.9), transparent 48%),
         radial-gradient(circle at 85% 10%, rgba(200, 235, 255, 0.8), transparent 45%),
         linear-gradient(140deg, #fff8f3, #f7f2ff 45%, #eff9ff 100%);

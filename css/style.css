@@ -128,16 +128,19 @@
    ================================================================= */
 body {
     font-family: var(--font-family);
+    margin: 0;
+    padding: var(--space-10);
+    color: var(--color-gray-900);
+    line-height: var(--line-height-normal);
+}
+
+body:not(.nokorah-theme) {
     background-color: var(--color-white);
     background-image: url('../assets/images/general_background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    margin: 0;
-    padding: var(--space-10);
-    color: var(--color-gray-900);
-    line-height: var(--line-height-normal);
 }
 
 a:focus-visible,
