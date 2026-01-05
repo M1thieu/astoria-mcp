@@ -16,11 +16,21 @@
   </label>
 
   <nav id="sidebarMenu" aria-label="Raccourcis">
-    <ul class="sidebarMenuInner">
-      <li class="menu-header">
+    <div class="sidebar-topbar">
+      <div class="menu-header">
         <span class="menu-header-title" aria-hidden="true">&nbsp;</span>
         <span class="menu-header-sub">Astoria</span>
-      </li>
+      </div>
+      <button type="button" class="theme-toggle sidebar-theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Basculer le theme">
+        <span class="theme-toggle-track">
+          <span class="theme-toggle-thumb">
+            <span class="theme-toggle-icon theme-toggle-sun" aria-hidden="true">&#9728;</span>
+            <span class="theme-toggle-icon theme-toggle-moon" aria-hidden="true">&#9790;</span>
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul class="sidebarMenuInner">
       <li class="menu-item">
         <div class="sidebar-row">
           <button type="button" class="menu-link" data-panel="fiche">
@@ -82,5 +92,6 @@
     <p>Le menu s'ouvre avec l'icone en haut a gauche.</p>
   </main>
   <script src="js/sidebar.js"></script>
+  <script src="js/theme-toggle.js"></script>
 </body>
 </html>

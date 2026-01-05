@@ -14,6 +14,12 @@
     link.href = "css/sidebar.css";
     head.appendChild(link);
   }
+  if (head && !document.querySelector('link[href="css/theme-toggle.css"]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "css/theme-toggle.css";
+    head.appendChild(link);
+  }
 
   if (document.getElementById("sidebarMenu")) return;
 
@@ -26,11 +32,21 @@
     </label>
 
     <nav id="sidebarMenu" aria-label="Raccourcis">
-      <ul class="sidebarMenuInner">
-        <li class="menu-header">
+      <div class="sidebar-topbar">
+        <div class="menu-header">
           <span class="menu-header-title" aria-hidden="true">&nbsp;</span>
           <span class="menu-header-sub">Astoria</span>
-        </li>
+        </div>
+        <button type="button" class="theme-toggle sidebar-theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Basculer le theme">
+          <span class="theme-toggle-track">
+            <span class="theme-toggle-thumb">
+              <span class="theme-toggle-icon theme-toggle-sun" aria-hidden="true">&#9728;</span>
+              <span class="theme-toggle-icon theme-toggle-moon" aria-hidden="true">&#9790;</span>
+            </span>
+          </span>
+        </button>
+      </div>
+      <ul class="sidebarMenuInner">
         <li class="menu-item">
           <div class="sidebar-row">
             <button type="button" class="menu-link" data-panel="fiche">
@@ -88,6 +104,21 @@
   `;
 
   body.insertAdjacentHTML("afterbegin", markup);
+
+  const themeScriptLoaded = () => {
+    if (typeof window.initThemeToggle === "function") {
+      window.initThemeToggle(body);
+    }
+  };
+
+  if (!document.querySelector('script[src="js/theme-toggle.js"]')) {
+    const script = document.createElement("script");
+    script.src = "js/theme-toggle.js";
+    script.onload = themeScriptLoaded;
+    document.body.appendChild(script);
+  } else {
+    themeScriptLoaded();
+  }
 
   const toggle = document.getElementById("openSidebarMenu");
   const sidebar = document.getElementById("sidebarMenu");

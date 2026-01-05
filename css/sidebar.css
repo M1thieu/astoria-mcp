@@ -40,10 +40,26 @@ body.sidebar-layout {
 
 .sidebar-layout .sidebarMenuInner {
   margin: 0;
-  padding: 10px 8px 16px;
+  padding: 6px 8px 16px;
   display: flex;
   flex-direction: column;
   min-height: 100%;
+}
+
+.sidebar-layout .sidebar-topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px 2px;
+}
+
+.sidebar-layout .sidebar-topbar .menu-header {
+  padding: 0;
+}
+
+.sidebar-layout .sidebar-theme-toggle {
+  margin-bottom: 0;
 }
 
 .sidebar-layout .menu-header {
@@ -246,4 +262,43 @@ body.sidebar-layout {
 
 .sidebar-layout [hidden] {
   display: none;
+}
+
+:root[data-theme="dark"] .sidebar-layout #sidebarMenu {
+  background: rgba(18, 16, 24, 0.96);
+  border-right-color: rgba(216, 27, 96, 0.18);
+  box-shadow: 6px 0 18px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .sidebar-layout .menu-header-sub {
+  color: rgba(248, 187, 208, 0.7);
+}
+
+:root[data-theme="dark"] .sidebar-layout .menu-link {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f3e7ee;
+  border-color: rgba(216, 27, 96, 0.12);
+}
+
+:root[data-theme="dark"] .sidebar-layout .menu-link:hover,
+:root[data-theme="dark"] .sidebar-layout .menu-link:focus-visible {
+  background: rgba(216, 27, 96, 0.22);
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .sidebar-layout .menu-icon {
+  background: rgba(216, 27, 96, 0.28);
+  color: #ffd6e6;
+}
+
+:root[data-theme="dark"] .sidebar-layout .menu-open {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(248, 187, 208, 0.35);
+  color: #ffd6e6;
+}
+
+:root[data-theme="dark"] .sidebar-layout .menu-footer .character-select-logout {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffd6e6;
+  border-color: rgba(248, 187, 208, 0.5);
 }

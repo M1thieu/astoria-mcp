@@ -155,6 +155,8 @@ body.nokorah-theme {
     position: relative;
     padding: var(--space-4);
     background: linear-gradient(160deg, #fff6f0, #f7f7ff);
+    align-self: start;
+    justify-self: start;
 }
 
 .rarity-frame {
@@ -202,8 +204,11 @@ body.nokorah-theme {
 }
 
 .rarity-legendaire.rainbow {
-    border-color: transparent;
-    background: linear-gradient(90deg, #ffb3b3, #ffd8a6, #fff6a6, #b8ffcc, #a7e3ff, #c9b1ff);
+    border: 4px solid transparent;
+    background:
+        linear-gradient(160deg, #fff6f0, #f7f7ff) padding-box,
+        linear-gradient(90deg, #ffb3b3, #ffd8a6, #fff6a6, #b8ffcc, #a7e3ff, #c9b1ff) border-box;
+    background-clip: padding-box, border-box;
     padding: 4px;
 }
 
