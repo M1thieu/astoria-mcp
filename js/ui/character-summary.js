@@ -224,11 +224,7 @@ async function buildCharacterDropdown(dropdownEl, currentCharacterId) {
     }
 
     const adminMode = typeof auth.isAdmin === "function" && auth.isAdmin();
-    if (adminMode) {
-        document.body.dataset.admin = "true";
-    } else {
-        document.body.dataset.admin = "false";
-    }
+    document.body.dataset.admin = adminMode ? "true" : "false";
 
     try {
         let characters = [];
@@ -275,7 +271,7 @@ async function buildCharacterDropdown(dropdownEl, currentCharacterId) {
             // TODO: Re-enable user_id display for admins (issue #18)
             // if (adminMode && char.user_id) {
             //     const shortId = String(char.user_id).slice(0, 8);
-            //     name.textContent = `${char.name || "Sans nom"} • ${shortId}`;
+            //     name.textContent = `${char.name || "Sans nom"} - ${shortId}`;
             // } else {
                 name.textContent = char.name || "Sans nom";
             // }
@@ -358,7 +354,7 @@ function initShareButton(characterId) {
             try {
                 await navigator.clipboard.writeText(url);
                 const originalText = shareBtn.textContent;
-                shareBtn.textContent = "✓";
+                shareBtn.textContent = "Copie !";
                 shareBtn.style.opacity = "1";
                 setTimeout(() => {
                     shareBtn.textContent = originalText;

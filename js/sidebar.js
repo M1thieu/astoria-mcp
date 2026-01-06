@@ -47,25 +47,28 @@
         </button>
       </div>
       <ul class="sidebarMenuInner">
-        <li class="menu-item">
-          <div class="sidebar-row">
-            <button type="button" class="menu-link" data-panel="fiche">
-              <span class="menu-icon" aria-hidden="true">&#128100;</span>
-              <span class="menu-text">Personnage</span>
-            </button>
-            <a class="menu-open" href="fiche.html" title="Ouvrir la page compl&#232;te">&#8599;</a>
-          </div>
+        <li class="menu-item" id="adminShortcut" hidden>
+          <button type="button" class="menu-link" data-panel="admin">
+            <span class="menu-icon" aria-hidden="true">&#9881;</span>
+            <span class="menu-text">Admin</span>
+          </button>
         </li>
         <li class="menu-item">
-          <a class="menu-link" href="magie.html">
-            <span class="menu-icon" aria-hidden="true">&#10024;</span>
-            <span class="menu-text">Magie</span>
+          <a class="menu-link" href="codex.html">
+            <span class="menu-icon" aria-hidden="true">&#128214;</span>
+            <span class="menu-text">Codex</span>
           </a>
         </li>
         <li class="menu-item">
           <a class="menu-link" href="competences.html">
             <span class="menu-icon" aria-hidden="true">&#9876;</span>
             <span class="menu-text">Comp&#233;tences</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a class="menu-link" href="hdv.html">
+            <span class="menu-icon" aria-hidden="true">&#127963;</span>
+            <span class="menu-text">H&#244;tel de vente</span>
           </a>
         </li>
         <li class="menu-item">
@@ -77,23 +80,26 @@
             <a class="menu-open" href="inventaire.html" title="Ouvrir la page compl&#232;te">&#8599;</a>
           </div>
         </li>
-        <li class="menu-item" id="adminShortcut" hidden>
-          <button type="button" class="menu-link" data-panel="admin">
-            <span class="menu-icon" aria-hidden="true">&#9881;</span>
-            <span class="menu-text">Admin</span>
-          </button>
-        </li>
         <li class="menu-item">
-          <a class="menu-link" href="hdv.html">
-            <span class="menu-icon" aria-hidden="true">&#127963;</span>
-            <span class="menu-text">H&#244;tel de vente</span>
+          <a class="menu-link" href="magie.html">
+            <span class="menu-icon" aria-hidden="true">&#10024;</span>
+            <span class="menu-text">Magie</span>
           </a>
         </li>
         <li class="menu-item">
-          <a class="menu-link" href="codex.html">
-            <span class="menu-icon" aria-hidden="true">&#128214;</span>
-            <span class="menu-text">Codex</span>
+          <a class="menu-link" href="nokorah.html">
+            <span class="menu-icon" aria-hidden="true">&#128123;</span>
+            <span class="menu-text">Nokorah</span>
           </a>
+        </li>
+        <li class="menu-item">
+          <div class="sidebar-row">
+            <button type="button" class="menu-link" data-panel="fiche">
+              <span class="menu-icon" aria-hidden="true">&#128100;</span>
+              <span class="menu-text">Personnage</span>
+            </button>
+            <a class="menu-open" href="fiche.html" title="Ouvrir la page compl&#232;te">&#8599;</a>
+          </div>
         </li>
         <li class="menu-item menu-footer">
           <button type="button" class="character-select-logout" id="logoutButton" hidden>D&#233;connexion</button>
@@ -151,6 +157,7 @@
 
   const logoutBtn = document.getElementById("logoutButton");
   const loginBtn = document.getElementById("loginButton");
+  const adminShortcut = document.getElementById("adminShortcut");
 
   const setAuthButtons = async () => {
     if (!logoutBtn || !loginBtn) return;
@@ -160,10 +167,12 @@
       const isLoggedIn = typeof auth.isAuthenticated === "function"
         ? auth.isAuthenticated()
         : !!auth.getCurrentUser?.();
+      const isAdmin = typeof auth.isAdmin === "function" ? auth.isAdmin() : false;
 
       if (isLoggedIn) {
         logoutBtn.hidden = false;
         loginBtn.hidden = true;
+        if (adminShortcut) adminShortcut.hidden = !isAdmin;
         logoutBtn.addEventListener("click", () => {
           if (typeof auth.logout === "function") {
             auth.logout();
@@ -173,6 +182,7 @@
       } else {
         logoutBtn.hidden = true;
         loginBtn.hidden = false;
+        if (adminShortcut) adminShortcut.hidden = true;
         loginBtn.addEventListener("click", () => {
           window.location.href = "login.html";
         });
@@ -181,6 +191,7 @@
       console.warn("Sidebar auth load failed:", error);
       logoutBtn.hidden = true;
       loginBtn.hidden = false;
+      if (adminShortcut) adminShortcut.hidden = true;
       loginBtn.addEventListener("click", () => {
         window.location.href = "login.html";
       });
@@ -188,4 +199,19 @@
   };
 
   setAuthButtons();
+
+  const setupPanelShortcuts = async () => {
+    try {
+      const panelShortcuts = await import("./ui/panel-shortcuts.js");
+      if (typeof panelShortcuts.initPanelShortcuts === "function") {
+        panelShortcuts.initPanelShortcuts({
+          selector: ".sidebarMenuInner [data-panel]",
+        });
+      }
+    } catch (error) {
+      console.warn("Sidebar panel shortcuts failed:", error);
+    }
+  };
+
+  setupPanelShortcuts();
 })();

@@ -413,6 +413,31 @@ CREATE POLICY "Anyone can update avatars"
     ON storage.objects FOR UPDATE
     USING (bucket_id = 'avatars');
 
+-- =================================================================
+-- STORAGE (Items)
+-- =================================================================
+
+-- NOTE: This project uses custom auth + anon key, so policies are permissive.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('items', 'items', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Public can read items images"
+    ON storage.objects FOR SELECT
+    USING (bucket_id = 'items');
+
+CREATE POLICY "Anyone can upload items images"
+    ON storage.objects FOR INSERT
+    WITH CHECK (bucket_id = 'items');
+
+CREATE POLICY "Anyone can update items images"
+    ON storage.objects FOR UPDATE
+    USING (bucket_id = 'items');
+
+CREATE POLICY "Anyone can delete items images"
+    ON storage.objects FOR DELETE
+    USING (bucket_id = 'items');
+
 -- ============================================================================
 -- NOTES
 -- ============================================================================

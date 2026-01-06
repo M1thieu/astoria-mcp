@@ -141,7 +141,6 @@
             <div class="profile-header-main">
                 <div class="profile-title-block">
                     <h1 class="profile-title" id="profileTitle">Mon look</h1>
-                    <p class="profile-subtitle">Espace personnel - version de base.</p>
                 </div>
                 <div class="character-summary" aria-label="Résumé du personnage">
                     <div class="character-avatar-wrapper">
@@ -206,28 +205,7 @@
                     </div>
                 </section>
 
-                <section class="profile-panel" id="profileShortcutsPanel">
-                    <h2 class="profile-panel-title">Raccourcis</h2>
-                    <ul class="profile-links-list">
-                        <li class="profile-shortcut-item">
-                            <button type="button" class="profile-shortcut-btn" data-panel="fiche"><span class="shortcut-icon">👤</span> Fiche personnage</button>
-                            <a class="profile-shortcut-open" href="fiche.html" title="Ouvrir la page complète">↗</a>
-                        </li>
-                        <li><a href="magie.html"><span class="shortcut-icon">✨</span> Fiche magie</a></li>
-                        <li><a href="competences.html"><span class="shortcut-icon">⚔️</span> Compétences</a></li>
-                        <li class="profile-shortcut-item">
-                            <button type="button" class="profile-shortcut-btn" data-panel="inventaire"><span class="shortcut-icon">🎒</span> Inventaire</button>
-                            <a class="profile-shortcut-open" href="inventaire.html" title="Ouvrir la page complète">↗</a>
-                        </li>
-
-                        <li class="profile-shortcut-item" id="adminShortcut" hidden>
-                            <button type="button" class="profile-shortcut-btn" data-panel="admin"><span class="shortcut-icon">⚙️</span> Admin</button>
-                        </li>
-
-                        <li><a href="hdv.html"><span class="shortcut-icon">🏛️</span> Hôtel de vente</a></li>
-                        <li><a href="codex.html"><span class="shortcut-icon">📖</span> Codex</a></li>
-                    </ul>
-                </section>
+                
             </aside>
 
             <!-- Colonne droite : contenu principal -->
@@ -236,7 +214,6 @@
                     <header class="profile-section-header">
                         <div class="profile-section-title-wrap">
                             <h2 class="profile-section-title">Presentation</h2>
-                            <p class="profile-section-subtitle">Carte perso a personnaliser pour chaque joueur.</p>
                         </div>
                         <div class="profile-section-actions">
                             <button type="button" class="profile-edit-btn" id="presentationEditBtn" hidden>Modifier</button>
@@ -423,14 +400,10 @@
             isAdmin
         } from './js/auth.js';
         import { initProfileTagSelector } from './js/profile-tags.js';
-        import { createPanelHost } from './js/ui/panel-host.js';
-        import { getPanelById } from './js/panels/registry.js';
         import { initCharacterSummary } from './js/ui/character-summary.js';
 
         const authControls = document.getElementById('authControls');
         const profileContent = document.getElementById('profileContent');
-        const shortcutsPanel = document.getElementById('profileShortcutsPanel');
-        const adminShortcut = document.getElementById('adminShortcut');
         const avatarTrigger = document.getElementById('avatarUploadTrigger');
         const avatarInput = document.getElementById('avatarUploadInput');
         const avatarImg = document.getElementById('characterAvatarImg');
@@ -453,7 +426,6 @@
         let dockSouls = null;
         let soulConsoValue = null;
         let soulProgValue = null;
-        let panelHost = null;
         let avatarCropper = null;
         let avatarPreviewUrl = '';
         let pendingAvatarFile = null;
@@ -611,11 +583,6 @@
             avatarTrigger.classList.toggle('is-editable', editable);
             avatarTrigger.disabled = !editable;
             avatarInput.disabled = !editable;
-        }
-
-        function updateAdminShortcut() {
-            if (!adminShortcut) return;
-            adminShortcut.hidden = !isAdmin();
         }
 
         function escapePresentationHtml(raw) {
@@ -1432,54 +1399,6 @@
             }
         }
 
-        function updateShortcutsVisibility() {
-            if (!shortcutsPanel) return;
-            const ownerId = currentCharacter && currentCharacter.user_id ? currentCharacter.user_id : null;
-            const isOwner = !!currentUser && (!ownerId || ownerId === currentUser.id);
-            shortcutsPanel.hidden = !(isOwner || isAdmin());
-        }
-
-        function renderPanel(panelId) {
-            if (!panelHost) panelHost = createPanelHost();
-            const panel = getPanelById(panelId);
-            if (!panel) return;
-
-            const node = panel.renderPanel(getPanelContext());
-            panelHost.open({
-                panelId: panel.id,
-                titleText: panel.title,
-                fullPageHref: panel.fullPageHref,
-                fullPageLabel: panel.fullPageLabel,
-                node,
-            });
-        }
-
-        function rerenderOpenPanelIfAny() {
-            if (!panelHost || !panelHost.isOpen()) return;
-            const current = panelHost.getCurrentPanelId();
-            if (current) renderPanel(current);
-        }
-
-        function setupShortcutPanels() {
-            if (!panelHost) panelHost = createPanelHost();
-
-            document.querySelectorAll('.profile-shortcut-btn[data-panel]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    renderPanel(btn.getAttribute('data-panel'));
-                });
-            });
-
-            // Cross-tab updates
-            window.addEventListener('storage', (event) => {
-                if (event.key !== 'astoria_active_character') return;
-                rerenderOpenPanelIfAny();
-            });
-
-            window.addEventListener('astoria:character-changed', () => {
-                void loadActiveCharacter();
-            });
-        }
-
         // Initialize page
         async function init() {
             currentUser = getCurrentUser();
@@ -1511,7 +1430,6 @@
                     await renderAuthControls();
                 }
 
-                setupShortcutPanels();
 
                 if (currentUser) {
                     // Load user's characters for context
@@ -1524,7 +1442,6 @@
                 updateAuthUserLabel();
                 syncAdminSelector();
                 renderSoulCounts(currentCharacter);
-                updateShortcutsVisibility();
                 updateAvatarControls();
                 updatePresentationControls();
 
@@ -1545,7 +1462,6 @@
                 return;
             }
 
-            setupShortcutPanels();
 
             // Logged in - render auth controls
             await renderAuthControls();
@@ -1665,7 +1581,6 @@
             }
 
             authControls.append(dockMetaRow);
-            updateAdminShortcut();
         }
 
         async function buildAdminSelector() {
@@ -1781,7 +1696,6 @@
             renderSoulCounts(currentCharacter);
             await initCharacterSummary({ enableDropdown: true, showKaels: true });
             rerenderOpenPanelIfAny();
-            updateShortcutsVisibility();
             updateAvatarControls();
         }
 
@@ -1804,7 +1718,6 @@
             }
             syncAdminSelector();
             renderSoulCounts(currentCharacter);
-            updateShortcutsVisibility();
             updateAvatarControls();
         }
 
