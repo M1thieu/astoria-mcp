@@ -633,7 +633,7 @@ function renderListings(listings) {
                     setStatus(dom.search.status, 'Achat effectue.', 'success');
                 } catch (err) {
                     console.error(err);
-                    setStatus(dom.search.status, err?.message || 'Erreur lors de l'achat.', 'error');
+                    setStatus(dom.search.status, err?.message || "Erreur lors de l'achat.", 'error');
                 } finally {
                     btn.disabled = false;
                 }

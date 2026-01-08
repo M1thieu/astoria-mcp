@@ -136,7 +136,10 @@ export function createPanelHost({ root = document.body, variant = "drawer" } = {
 
   window.addEventListener("keydown", (event) => {
     if (!isOpen) return;
-    if (event.key === "Escape") close();
+    if (event.key === "Escape") {
+      event.preventDefault();
+      close();
+    }
   });
 
   return {

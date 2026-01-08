@@ -164,11 +164,22 @@
     document.addEventListener("click", (event) => {
       if (!body.classList.contains("sidebar-open")) return;
       const target = event.target;
+      if (target && target.closest && target.closest(".panel-backdrop, .panel-drawer")) return;
+      if (document.documentElement.classList.contains("panel-open")) return;
       if (sidebar.contains(target) || iconToggle.contains(target)) return;
       body.classList.remove("sidebar-open");
       toggle.checked = false;
     });
   }
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (event.defaultPrevented) return;
+    if (document.documentElement.classList.contains("panel-open")) return;
+    if (!body.classList.contains("sidebar-open")) return;
+    body.classList.remove("sidebar-open");
+    if (toggle) toggle.checked = false;
+  });
 
   const logoutBtn = document.getElementById("logoutButton");
   const loginBtn = document.getElementById("loginButton");

@@ -1426,6 +1426,10 @@ tbody tr.keyboard-selected {
     z-index: var(--z-modal);
 }
 
+body.sidebar-layout.sidebar-open .panel-backdrop {
+    left: var(--sidebar-width);
+}
+
 .panel-drawer {
     position: fixed;
     top: 0;
