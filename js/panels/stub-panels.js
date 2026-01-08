@@ -1,12 +1,30 @@
 import { el } from "./panel-utils.js";
 
+function readJson(key, fallback = null) {
+  if (!key) return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function sumValues(map) {
+  if (!map || typeof map !== "object") return 0;
+  return Object.values(map).reduce((sum, value) => {
+    const n = Number(value);
+    return sum + (Number.isFinite(n) ? n : 0);
+  }, 0);
+}
+
 function buildStubPanel({ id, title, fullPageHref, fullPageLabel, blurb, load }) {
   return {
     id,
     title,
     fullPageHref,
     fullPageLabel,
-    renderPanel() {
+    renderPanel(ctx) {
       const wrapper = el("div", "panel-card");
       wrapper.appendChild(el("h3", "panel-card-title", "Apercu"));
       const summary = el("p", "panel-muted", blurb);
@@ -20,7 +38,7 @@ function buildStubPanel({ id, title, fullPageHref, fullPageLabel, blurb, load })
       );
 
       if (typeof load === "function") {
-        void load(summary).catch((error) => {
+        void load(summary, ctx).catch((error) => {
           console.warn("Panel stub load failed:", error);
         });
       }
@@ -55,6 +73,53 @@ export const competencesPanel = buildStubPanel({
   fullPageHref: "competences.html",
   fullPageLabel: "Ouvrir les competences",
   blurb: "Panel en preparation. Statistiques et validation seront centralisees ici.",
+  load: async (summary, ctx) => {
+    const character = ctx?.character || null;
+    if (!character?.id) {
+      summary.textContent = "Selectionnez un personnage pour voir les competences.";
+      return;
+    }
+
+    const profileData = character.profile_data || {};
+    let competences = profileData.competences || null;
+
+    if (!competences) {
+      const prefix = `astoria_competences_${character.id}:`;
+      competences = {
+        pointsByCategory: readJson(`${prefix}skillsPointsByCategory`, {}),
+        allocationsByCategory: readJson(`${prefix}skillsAllocationsByCategory`, {}),
+        baseValuesByCategory: readJson(`${prefix}skillsBaseValuesByCategory`, {}),
+        locksByCategory: readJson(`${prefix}skillsLocksByCategory`, {}),
+      };
+    }
+
+    const pointsByCategory = competences?.pointsByCategory || {};
+    const allocationsByCategory = competences?.allocationsByCategory || {};
+    const baseValuesByCategory = competences?.baseValuesByCategory || {};
+    const locksByCategory = competences?.locksByCategory || {};
+
+    const categoryCount = Object.keys(pointsByCategory).length;
+    const pointsLeft = sumValues(pointsByCategory);
+    const lockedCount = Object.values(locksByCategory || {}).filter(Boolean).length;
+
+    let allocated = 0;
+    Object.values(allocationsByCategory || {}).forEach((category) => {
+      allocated += sumValues(category);
+    });
+    Object.values(baseValuesByCategory || {}).forEach((category) => {
+      allocated += sumValues(category);
+    });
+
+    if (!categoryCount) {
+      summary.textContent = "Aucune competence enregistree.";
+      return;
+    }
+
+    summary.textContent = `${categoryCount} categories - ${pointsLeft} points dispo - ${allocated} investis`;
+    if (lockedCount > 0) {
+      summary.textContent += ` - ${lockedCount} verrouillee(s)`;
+    }
+  },
 });
 
 export const hdvPanel = buildStubPanel({
@@ -83,6 +148,32 @@ export const magiePanel = buildStubPanel({
   fullPageHref: "magie.html",
   fullPageLabel: "Ouvrir la magie",
   blurb: "Panel en preparation. Acces rapide aux notes et validations.",
+  load: async (summary, ctx) => {
+    const character = ctx?.character || null;
+    if (!character?.id) {
+      summary.textContent = "Selectionnez un personnage pour voir la magie.";
+      return;
+    }
+
+    const profilePayload = character.profile_data?.magic_sheet || null;
+    const key = `magicSheetPages-${character.id}`;
+    const stored = readJson(key, null) || readJson("magicSheetPages", null);
+    const payload = stored && Array.isArray(stored.pages) ? stored : profilePayload;
+
+    const pages = Array.isArray(payload?.pages) ? payload.pages : [];
+    const pageCount = pages.length;
+    const capCount = pages.reduce(
+      (sum, page) => sum + (Array.isArray(page?.capacities) ? page.capacities.length : 0),
+      0
+    );
+
+    if (!pageCount) {
+      summary.textContent = "Aucune page de magie.";
+      return;
+    }
+
+    summary.textContent = `${pageCount} page(s) - ${capCount} capacite(s)`;
+  },
 });
 
 export const nokorahPanel = buildStubPanel({
@@ -91,4 +182,26 @@ export const nokorahPanel = buildStubPanel({
   fullPageHref: "nokorah.html",
   fullPageLabel: "Ouvrir Nokorah",
   blurb: "Panel en preparation. Apercu des effets et ressources.",
+  load: async (summary, ctx) => {
+    const character = ctx?.character || null;
+    if (!character?.id) {
+      summary.textContent = "Selectionnez un personnage pour voir le Nokorah.";
+      return;
+    }
+
+    const suffix = character.id;
+    const active = readJson(`nokorahActive:${suffix}`, null);
+    const rarity = readJson(`nokorahRarity:${suffix}`, active?.rarity || null);
+    const upgrade = Number(readJson(`nokorahUpgradeLevel:${suffix}`, 0)) || 0;
+    const bonuses = readJson(`nokorahBonuses:${suffix}`, []);
+    const bonusCount = Array.isArray(bonuses) ? bonuses.length : 0;
+
+    if (!active?.name) {
+      summary.textContent = "Aucun Nokorah actif.";
+      return;
+    }
+
+    const rarityLabel = rarity ? String(rarity) : "Inconnu";
+    summary.textContent = `${active.name} - ${rarityLabel} - niv ${upgrade} - ${bonusCount} bonus`;
+  },
 });

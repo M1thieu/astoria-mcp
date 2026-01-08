@@ -167,14 +167,14 @@ export async function buyListing(listingId) {
 }
 
 export async function getMyListings() {
-    const { character } = requireCharacter();
+    const { user, character } = requireCharacter();
     const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
         .from('market')
         .select('*')
-        .eq('seller_character_id', character.id)
         .in('status', ['active'])
+        .or(`seller_id.eq.${user.id},seller_character_id.eq.${character.id}`)
         .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -182,14 +182,14 @@ export async function getMyListings() {
 }
 
 export async function cancelListing(listingId) {
-    const { character } = requireCharacter();
+    const { user } = requireCharacter();
     const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
         .from('market')
         .update({ status: 'cancelled' })
         .eq('id', listingId)
-        .eq('seller_character_id', character.id)
+        .eq('seller_id', user.id)
         .eq('status', 'active')
         .select('*')
         .maybeSingle();

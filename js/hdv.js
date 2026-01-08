@@ -630,10 +630,10 @@ function renderListings(listings) {
                     await applyInventoryDelta(listing.item_id, listing.quantity);
                     populateSellSelect();
                     await refreshSearch();
-                    setStatus(dom.search.status, 'Achat effectué.', 'success');
+                    setStatus(dom.search.status, 'Achat effectue.', 'success');
                 } catch (err) {
                     console.error(err);
-                    setStatus(dom.search.status, err?.message || 'Erreur lors de l’achat.', 'error');
+                    setStatus(dom.search.status, err?.message || 'Erreur lors de l'achat.', 'error');
                 } finally {
                     btn.disabled = false;
                 }
@@ -818,29 +818,44 @@ function renderMyListings(listings) {
         const tdAction = document.createElement('td');
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'btn-danger hdv-action-btn';
-        btn.textContent = 'Retirer';
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const ok = window.confirm(`Retirer l'offre "${item.name}" ?`);
-            if (!ok) return;
 
-            btn.disabled = true;
-            btn.textContent = '...';
-            try {
-                await cancelListing(listing.id);
-                await applyInventoryDelta(listing.item_id, listing.quantity);
-                populateSellSelect();
-                await refreshMine();
-                setStatus(dom.mine.status, 'Offre retirée.', 'success');
-            } catch (err) {
-                console.error(err);
-                setStatus(dom.mine.status, err?.message || 'Erreur lors du retrait.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Retirer';
-            }
-        });
+        const needsSwitch = !state.character || listing.seller_character_id !== state.character.id;
+        if (needsSwitch) {
+            btn.className = 'btn-secondary hdv-action-btn';
+            btn.textContent = 'Choisir perso';
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (typeof setActiveCharacter !== 'function') return;
+                const res = await setActiveCharacter(listing.seller_character_id);
+                if (res && res.success) {
+                    window.location.reload();
+                }
+            });
+        } else {
+            btn.className = 'btn-danger hdv-action-btn';
+            btn.textContent = 'Retirer';
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const ok = window.confirm(`Retirer l'offre "${item.name}" ?`);
+                if (!ok) return;
+
+                btn.disabled = true;
+                btn.textContent = '...';
+                try {
+                    await cancelListing(listing.id);
+                    await applyInventoryDelta(listing.item_id, listing.quantity);
+                    populateSellSelect();
+                    await refreshMine();
+                    setStatus(dom.mine.status, 'Offre retiree.', 'success');
+                } catch (err) {
+                    console.error(err);
+                    setStatus(dom.mine.status, err?.message || 'Erreur lors du retrait.', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Retirer';
+                }
+            });
+        }
 
         tdAction.appendChild(btn);
         tr.appendChild(tdItem);

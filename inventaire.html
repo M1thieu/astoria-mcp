@@ -661,8 +661,20 @@
             try {
                 const rows = await inventoryApi.getInventoryRows?.(character?.id);
                 if (Array.isArray(rows)) {
-                    hydrateInventoryFromRows(rows);
-                    console.log(`Loaded ${inventoryItems.length} items from character_inventory`);
+                    if (rows.length > 0) {
+                        hydrateInventoryFromRows(rows);
+                        console.log(`Loaded ${inventoryItems.length} items from character_inventory`);
+                        return;
+                    }
+
+                    loadFromLocalStorage();
+                    if (inventoryItems.length > 0) {
+                        console.log('Migrating local inventory to character_inventory...');
+                        await saveInventoryToBackend();
+                        return;
+                    }
+
+                    hydrateInventoryFromRows([]);
                     return;
                 }
             } catch (error) {

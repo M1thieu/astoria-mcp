@@ -20,9 +20,15 @@ export const inventairePanel = {
     const summary = el("p", "panel-muted", "Chargement...");
     wrapper.appendChild(summary);
 
-    wrapper.appendChild(
-      el("p", "panel-muted panel-spacer", "Ce panneau est un apercu. Les details restent sur la page inventaire.")
+    const grid = el("div", "panel-inventory-grid");
+    wrapper.appendChild(grid);
+
+    const footerHint = el(
+      "p",
+      "panel-muted panel-spacer",
+      "Ce panneau est un apercu. Les details restent sur la page inventaire."
     );
+    wrapper.appendChild(footerHint);
 
     (async () => {
       try {
@@ -38,9 +44,98 @@ export const inventairePanel = {
         if (typeof totalQty === "number") pieces.push(`${totalQty} total`);
 
         summary.textContent = pieces.length ? pieces.join(" - ") : "Inventaire vide.";
+
+        grid.innerHTML = "";
+        const helpers = window?.astoriaImageHelpers;
+        const placeholder = helpers?.smallPlaceholder || "";
+        let baseItems = Array.isArray(window?.inventoryData) ? window.inventoryData : [];
+        if (!baseItems.length) {
+          try {
+            const existing = document.querySelector('script[src="js/data.js"]');
+            if (!existing) {
+              await new Promise((resolve) => {
+                const script = document.createElement("script");
+                script.src = "js/data.js";
+                script.onload = resolve;
+                script.onerror = resolve;
+                document.head.appendChild(script);
+              });
+            }
+          } catch {}
+          baseItems = Array.isArray(window?.inventoryData) ? window.inventoryData : [];
+        }
+        let dbItemsByName = null;
+
+        if (!baseItems.length) {
+          try {
+            const itemsApi = await import("../api/items-service.js");
+            const dbItems = await itemsApi.getAllItems();
+            if (Array.isArray(dbItems)) {
+              dbItemsByName = new Map(
+                dbItems
+                  .filter((item) => item?.name)
+                  .map((item) => [String(item.name).toLowerCase(), item])
+              );
+            }
+          } catch (error) {
+            console.warn("Inventaire panel items lookup failed:", error);
+          }
+        }
+
+        const previewRows = Array.isArray(rows) ? rows.slice(0, 12) : [];
+        previewRows.forEach((row) => {
+          const rawIndex = row?.item_index ?? row?.item_key;
+          const idx = Number(rawIndex);
+          const qty = Math.max(0, Math.floor(safeNumber(row?.qty) || 0));
+          if (!Number.isFinite(qty) || qty <= 0) return;
+
+          let item = Number.isFinite(idx) ? baseItems[idx] : null;
+          if (!item && dbItemsByName && row?.item_key) {
+            item = dbItemsByName.get(String(row.item_key).toLowerCase()) || null;
+          }
+
+          const name = item?.name || (row?.item_key ? String(row.item_key) : "Objet");
+          let img = placeholder;
+          if (item) {
+            if (helpers?.resolveItemImages) {
+              img = helpers.resolveItemImages(item)?.primary || placeholder;
+            } else if (item.images?.primary) {
+              img = item.images.primary;
+            } else if (item.image) {
+              img = item.image;
+            }
+          }
+
+          const tile = el("div", "panel-inventory-item");
+          tile.title = `${name} x${qty}`;
+
+          const thumb = el("div", "panel-inventory-thumb");
+          const image = document.createElement("img");
+          image.src = img;
+          image.alt = name;
+          image.loading = "lazy";
+          image.decoding = "async";
+          if (placeholder) {
+            image.onerror = () => {
+              image.src = placeholder;
+            };
+          }
+          thumb.appendChild(image);
+
+          const qtyBadge = el("div", "panel-inventory-qty", `x${qty}`);
+          tile.append(thumb, qtyBadge);
+          grid.appendChild(tile);
+        });
+
+        if (Array.isArray(rows) && rows.length > previewRows.length) {
+          const remaining = rows.length - previewRows.length;
+          const more = el("p", "panel-inventory-more", `+ ${remaining} autres`);
+          grid.appendChild(more);
+        }
       } catch (error) {
         console.error("Inventaire panel error:", error);
         summary.textContent = "Impossible de charger l'inventaire.";
+        grid.innerHTML = "";
       }
     })();
 
