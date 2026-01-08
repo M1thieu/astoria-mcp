@@ -152,6 +152,16 @@ function asInt(value) {
     return Math.trunc(numberValue);
 }
 
+function parsePriceInput(value) {
+    if (value === null || value === undefined) return null;
+    const raw = String(value).trim();
+    if (!raw) return null;
+    const normalized = raw.replace(/\s+/g, "").replace(",", ".");
+    const numberValue = Number(normalized);
+    if (!Number.isFinite(numberValue)) return null;
+    return Math.trunc(numberValue);
+}
+
 function formatKaels(value) {
     const safe = Math.max(0, asInt(value) ?? 0);
     return safe.toLocaleString('fr-FR');
@@ -1053,7 +1063,7 @@ function wireEvents() {
         const entry = getInventoryEntry(itemId);
         const available = entry ? Math.max(0, Number(entry.quantity) || 0) : 0;
         const quantity = asInt(dom.mine.qty.value) ?? 1;
-        const unitPrice = asInt(dom.mine.unitPrice.value) ?? 0;
+        const unitPrice = parsePriceInput(dom.mine.unitPrice.value);
 
         if (!itemId) {
             setStatus(dom.mine.status, 'Selectionnez un objet.', 'error');
@@ -1071,7 +1081,7 @@ function wireEvents() {
             setStatus(dom.mine.status, 'Stock insuffisant.', 'error');
             return;
         }
-        if (unitPrice < 0) {
+        if (unitPrice === null || unitPrice < 0) {
             setStatus(dom.mine.status, 'Prix invalide.', 'error');
             return;
         }
