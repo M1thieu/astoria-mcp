@@ -62,7 +62,7 @@ export async function searchListings(filters = {}, sort = 'price_asc', page = 1,
 
     let query = supabase
         .from('market')
-        .select('*', { count: 'exact' })
+        .select('*, seller_character:characters!market_seller_character_id_fkey(id,name)', { count: 'exact' })
         .eq('status', 'active');
 
     const q = String(filters.q || '').trim();
@@ -205,7 +205,7 @@ export async function getMyHistory() {
 
     const { data, error } = await supabase
         .from('market')
-        .select('*')
+        .select('*, seller_character:characters!market_seller_character_id_fkey(id,name), buyer_character:characters!market_buyer_character_id_fkey(id,name)')
         .eq('status', 'sold')
         .or(`buyer_character_id.eq.${character.id},seller_character_id.eq.${character.id}`)
         .order('sold_at', { ascending: false });

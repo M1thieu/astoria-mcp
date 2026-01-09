@@ -606,7 +606,8 @@ function renderListings(listings) {
         const tdItem = document.createElement('td');
         const metaLines = [];
         if (item.category) metaLines.push(`<div class="hdv-item-meta">${categoryLabel(item.category)}</div>`);
-        const sellerLink = formatCharacterLink(listing.seller_character_id, 'Profil');
+        const sellerName = listing.seller_character?.name;
+        const sellerLink = formatCharacterLink(listing.seller_character_id, sellerName || 'Profil');
         if (sellerLink) {
             metaLines.push(`<div class="hdv-item-meta">Vendeur: ${sellerLink}</div>`);
         }
@@ -977,7 +978,8 @@ function renderHistory(transactions) {
 
         const tdProfile = document.createElement('td');
         const profileId = isBuy ? tx.seller_character_id : tx.buyer_character_id;
-        const profileLink = formatCharacterLink(profileId, 'Profil');
+        const profileName = isBuy ? tx.seller_character?.name : tx.buyer_character?.name;
+        const profileLink = formatCharacterLink(profileId, profileName || 'Profil');
         tdProfile.innerHTML = profileLink || '-';
 
         tr.appendChild(tdDate);
