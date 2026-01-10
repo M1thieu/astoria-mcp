@@ -1689,6 +1689,37 @@
                 }
             }
 
+            const actionHtml = isCurrency
+                ? ''
+                : `
+                    <div class="detail-actions">
+                        <button class="item-action-use"
+                                onclick="useItem(${item.id})"
+                                title="Utiliser l'objet"
+                                ${item.quantity < 1 ? 'disabled' : ''}
+                                aria-label="Utiliser l'objet">
+                            &#x2728;
+                        </button>
+                        <div class="action-stack">
+                            <button class="item-action-delete"
+                                    onclick="openDeleteModal(${item.id})"
+                                    title="Supprimer l'objet"
+                                    aria-label="Supprimer l'objet">
+                                &#x1F5D1;&#xFE0F;
+                            </button>
+                            <button class="item-action-scroll-toggle"
+                                    type="button"
+                                    id="scrollTypesToggle"
+                                    title="Types de parchemins"
+                                    aria-label="Afficher les types de parchemins"
+                                    aria-expanded="false"
+                                    aria-controls="scrollTypesPanel">
+                                &#x25BE;
+                            </button>
+                        </div>
+                    </div>
+                `;
+
             const priceInfo = [];
             if (item.buyPrice) priceInfo.push(`Achat: ${item.buyPrice}`);
             if (item.sellPrice) priceInfo.push(`Vente: ${item.sellPrice}`);
