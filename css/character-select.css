@@ -45,6 +45,10 @@
 .character-select-user {
     font-weight: var(--font-semibold);
     color: var(--color-gray-800);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .character-select-badge {
@@ -120,11 +124,19 @@
     font-weight: var(--font-semibold);
     color: var(--color-primary);
     font-size: var(--text-base);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
 }
 
 .character-card-subtitle {
     font-size: var(--text-sm);
     color: var(--color-gray-700);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .character-card-avatar {
@@ -281,6 +293,15 @@
         padding: var(--space-8) var(--space-4) var(--space-10);
     }
 
+    .character-select-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .character-card {
+        padding: var(--space-4);
+    }
+
     .character-card {
         min-height: 240px;
     }
@@ -288,5 +309,16 @@
     .character-card-avatar {
         width: 120px;
         height: 160px;
+    }
+}
+
+@media (max-width: 520px) {
+    .character-select-grid {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        gap: var(--space-4);
+    }
+
+    .character-card {
+        min-height: 220px;
     }
 }

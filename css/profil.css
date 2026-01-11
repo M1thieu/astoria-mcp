@@ -40,6 +40,11 @@
     font-size: var(--text-3xl);
     font-weight: var(--font-semibold);
     letter-spacing: var(--letter-spacing-wide);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
 }
 
 .profile-subtitle {
@@ -85,6 +90,9 @@
 
 .profile-summary-title {
     font-weight: var(--font-bold);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .profile-summary-card--compact .profile-summary-infos {
@@ -206,6 +214,11 @@
     font-size: var(--text-lg);
     color: var(--color-primary);
     text-decoration: none;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
 }
 
 .profile-username:hover {
@@ -1378,5 +1391,20 @@
     .profile-header-main {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .profile-summary-card {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .profile-summary-card--compact {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-summary-card--compact .profile-summary-infos {
+        align-items: center;
     }
 }

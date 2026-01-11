@@ -13,9 +13,12 @@
 }
 
 body.nokorah-theme {
-    background: radial-gradient(circle at 20% 20%, rgba(255, 231, 205, 0.9), transparent 48%),
-        radial-gradient(circle at 85% 10%, rgba(200, 235, 255, 0.8), transparent 45%),
-        linear-gradient(140deg, #fff8f3, #f7f2ff 45%, #eff9ff 100%);
+    background-color: var(--color-white);
+    background-image: url('../assets/images/general_background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: var(--nokorah-ink);
 }
 

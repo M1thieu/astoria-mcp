@@ -51,24 +51,26 @@ export const adminPanel = {
     kv.append(usersLabel, userValue, charLabel, charValue);
     wrapper.appendChild(kv);
 
-    const actions = el("div", "panel-admin-actions");
-    const selectLabel = document.createElement("label");
-    selectLabel.textContent = "View character";
-    selectLabel.setAttribute("for", "adminPanelSelect");
+    const characterSection = el("div", "panel-admin-actions");
+    const characterLabel = document.createElement("label");
+    characterLabel.textContent = "Recherche personnage";
+    characterLabel.setAttribute("for", "adminCharacterSearch");
 
-    const select = document.createElement("select");
-    select.id = "adminPanelSelect";
-    select.className = "panel-select";
+    const characterInput = document.createElement("input");
+    characterInput.type = "search";
+    characterInput.id = "adminCharacterSearch";
+    characterInput.className = "panel-select";
+    characterInput.placeholder = "Nom du personnage...";
 
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = "Select a character...";
-    select.appendChild(placeholder);
+    const characterHint = el(
+      "p",
+      "panel-admin-hint",
+      "Tapez au moins 2 lettres."
+    );
+    const characterList = el("div", "panel-user-list panel-character-list");
 
-    const hint = el("p", "panel-admin-hint", "Admin view. Use profile tools for detailed edits.");
-
-    actions.append(selectLabel, select, hint);
-    wrapper.appendChild(actions);
+    characterSection.append(characterLabel, characterInput, characterHint, characterList);
+    wrapper.appendChild(characterSection);
 
     const editSection = el("div", "panel-admin-actions");
     const kaelsLabel = document.createElement("label");
@@ -143,15 +145,6 @@ export const adminPanel = {
       kaelsSave.disabled = false;
     }
 
-    select.addEventListener("change", async () => {
-      const value = select.value;
-      if (!value) return;
-      const res = await setActiveCharacter(value);
-      if (res && res.success) {
-        window.dispatchEvent(new CustomEvent("astoria:character-changed"));
-      }
-    });
-
     kaelsSave.addEventListener("click", async () => {
       const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
       if (!active || !active.id) {
@@ -185,7 +178,9 @@ export const adminPanel = {
     });
 
     let userSearchTimer = null;
+    let characterSearchTimer = null;
     let supabaseRef = null;
+    let allCharacters = [];
 
     async function loadUsers(query = "") {
       if (!supabaseRef) {
@@ -232,10 +227,57 @@ export const adminPanel = {
       });
     }
 
+    function renderCharacters(query = "") {
+      const term = String(query || "").trim().toLowerCase();
+      if (term.length < 2) {
+        characterList.innerHTML = "";
+        characterHint.textContent = "Tapez au moins 2 lettres.";
+        return;
+      }
+
+      const matches = allCharacters.filter((character) => {
+        const name = String(character?.name || "").toLowerCase();
+        return name.includes(term);
+      });
+
+      if (matches.length === 0) {
+        characterList.innerHTML = "";
+        characterHint.textContent = "Aucun resultat.";
+        return;
+      }
+
+      characterHint.textContent = `${matches.length} personnage(s)`;
+      characterList.innerHTML = "";
+      matches.slice(0, 8).forEach((character) => {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "panel-user-row panel-character-row";
+        const shortId = character.user_id ? character.user_id.slice(0, 8) : "????";
+        row.innerHTML = `
+          <div class="panel-user-name">${character.name || "Sans nom"}</div>
+          <div class="panel-user-meta">Utilisateur ${shortId}</div>
+        `;
+        row.addEventListener("click", async () => {
+          const res = await setActiveCharacter(character.id);
+          if (res && res.success) {
+            window.dispatchEvent(new CustomEvent("astoria:character-changed"));
+          }
+        });
+        characterList.appendChild(row);
+      });
+    }
+
     userInput.addEventListener("input", () => {
       window.clearTimeout(userSearchTimer);
       userSearchTimer = window.setTimeout(() => {
         loadUsers(userInput.value);
+      }, 200);
+    });
+
+    characterInput.addEventListener("input", () => {
+      window.clearTimeout(characterSearchTimer);
+      characterSearchTimer = window.setTimeout(() => {
+        renderCharacters(characterInput.value);
       }, 200);
     });
 
@@ -248,17 +290,11 @@ export const adminPanel = {
           .select("id", { count: "exact", head: true });
 
         const characters = await getAllCharacters();
+        allCharacters = Array.isArray(characters) ? characters : [];
         userValue.textContent = userCount ?? "-";
-        charValue.textContent = characters.length;
+        charValue.textContent = allCharacters.length;
 
-        characters.forEach((char) => {
-          const option = document.createElement("option");
-          option.value = char.id;
-          option.textContent = `${char.name} - ${char.user_id.slice(0, 6)}...`;
-          select.appendChild(option);
-        });
-
-        status.textContent = "Select a character to preview their profile.";
+        status.textContent = "Recherchez un personnage pour basculer le contexte.";
       } catch (error) {
         console.error("Admin panel error:", error);
         status.textContent = "Unable to load admin data.";
@@ -267,9 +303,6 @@ export const adminPanel = {
 
     const syncAdminState = () => {
       const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
-      if (active && active.id) {
-        select.value = active.id;
-      }
       updateAdminContext(active);
     };
 

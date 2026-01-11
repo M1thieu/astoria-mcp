@@ -38,9 +38,19 @@ body.sidebar-layout {
   font-family: var(--font-family, "Segoe UI", Arial, sans-serif);
 }
 
+.sidebar-layout #sidebarMenu::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.sidebar-layout #sidebarMenu {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 .sidebar-layout .sidebarMenuInner {
   margin: 0;
-  padding: 6px 8px 16px;
+  padding: 6px 8px calc(16px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   min-height: 100%;
@@ -93,6 +103,11 @@ body.sidebar-layout {
 .sidebar-layout .menu-footer {
   margin-top: auto;
   padding-top: 8px;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.92);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
 }
 
 .sidebar-layout .menu-footer .character-select-logout {
@@ -306,4 +321,41 @@ body.sidebar-layout {
   background: rgba(255, 255, 255, 0.06);
   color: #ffd6e6;
   border-color: rgba(248, 187, 208, 0.5);
+}
+
+:root[data-theme="dark"] .sidebar-layout .menu-footer {
+  background: rgba(18, 16, 24, 0.9);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --sidebar-width: 72vw;
+  }
+
+  .sidebar-layout #sidebarMenu {
+    width: var(--sidebar-width);
+  }
+
+  .sidebar-layout .menu-link {
+    font-size: 0.88rem;
+    padding: 6px 10px;
+  }
+
+  .sidebar-layout .menu-open {
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+  }
+
+  .sidebar-layout .menu-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+
+  .sidebar-layout .sidebarIconToggle {
+    top: 10px;
+    left: 10px;
+  }
 }
