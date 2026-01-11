@@ -221,6 +221,15 @@
                     </header>
                     <div class="profile-presentation-shell">
                         <div class="profile-presentation-view" id="presentationView">
+                            <div class="profile-presentation-hero" id="presentationHero" hidden>
+                                <div class="profile-presentation-hero-media" id="presentationHeroMedia" hidden>
+                                    <img id="presentationHeroImage" alt="">
+                                </div>
+                                <div class="profile-presentation-hero-text">
+                                    <h3 id="presentationHeroTitle"></h3>
+                                    <p id="presentationHeroSubtitle"></p>
+                                </div>
+                            </div>
                             <p class="profile-placeholder-text" id="presentationPlaceholder">
                                 Zone de presentation du joueur et de son personnage. Ajoute du texte, des images et des blocs HTML personnalises.
                             </p>
@@ -289,6 +298,23 @@
                                     </div>
                                     <div class="profile-presentations-list" id="presentationList"></div>
                                     <button type="button" class="profile-new-presentation" id="presentationCreateBtn">+ Nouvelle presentation</button>
+                                    <div class="profile-presentation-custom">
+                                        <h4 class="profile-sidebar-title">Personnalisation</h4>
+                                        <label class="profile-custom-label" for="presentationHeroTitleInput">Titre</label>
+                                        <input class="profile-custom-input" id="presentationHeroTitleInput" maxlength="80" placeholder="Titre du header">
+                                        <label class="profile-custom-label" for="presentationHeroSubtitleInput">Sous-titre</label>
+                                        <input class="profile-custom-input" id="presentationHeroSubtitleInput" maxlength="160" placeholder="Sous-titre ou tagline">
+                                        <label class="profile-custom-label" for="presentationHeroImageInput">Image (URL)</label>
+                                        <input class="profile-custom-input" id="presentationHeroImageInput" placeholder="https://...">
+                                        <label class="profile-custom-label" for="presentationAccentInput">Couleur accent</label>
+                                        <input type="color" class="profile-custom-input profile-custom-color" id="presentationAccentInput" value="#e91e63">
+                                        <label class="profile-custom-label" for="presentationLayoutSelect">Disposition</label>
+                                        <select class="profile-custom-input" id="presentationLayoutSelect">
+                                            <option value="center">Centré</option>
+                                            <option value="split">Image + texte</option>
+                                        </select>
+                                        <button type="button" class="profile-custom-reset" id="presentationHeroReset">Réinitialiser l'en-tête</button>
+                                    </div>
                                 </aside>
                             </div>
                         </div>
@@ -479,6 +505,17 @@
         const presentationQuill = document.getElementById('presentationQuill');
         const presentationSave = document.getElementById('presentationSave');
         const presentationCancel = document.getElementById('presentationCancel');
+        const presentationHero = document.getElementById('presentationHero');
+        const presentationHeroMedia = document.getElementById('presentationHeroMedia');
+        const presentationHeroImage = document.getElementById('presentationHeroImage');
+        const presentationHeroTitle = document.getElementById('presentationHeroTitle');
+        const presentationHeroSubtitle = document.getElementById('presentationHeroSubtitle');
+        const presentationHeroTitleInput = document.getElementById('presentationHeroTitleInput');
+        const presentationHeroSubtitleInput = document.getElementById('presentationHeroSubtitleInput');
+        const presentationHeroImageInput = document.getElementById('presentationHeroImageInput');
+        const presentationAccentInput = document.getElementById('presentationAccentInput');
+        const presentationLayoutSelect = document.getElementById('presentationLayoutSelect');
+        const presentationHeroReset = document.getElementById('presentationHeroReset');
         const imageInsertBackdrop = document.getElementById('imageInsertBackdrop');
         const imageInsertError = document.getElementById('imageInsertError');
         const imageUrlInput = document.getElementById('imageUrlInput');
@@ -721,6 +758,28 @@
             return trimmed.slice(0, 30);
         }
 
+        function sanitizeHexColor(value) {
+            const raw = String(value || '').trim();
+            return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw) ? raw : '';
+        }
+
+        function normalizePresentationLayout(layout) {
+            const data = layout && typeof layout === 'object' ? layout : {};
+            return {
+                title: String(data.title || '').trim().slice(0, 80),
+                subtitle: String(data.subtitle || '').trim().slice(0, 160),
+                imageUrl: String(data.imageUrl || '').trim().slice(0, 300),
+                accentColor: sanitizeHexColor(data.accentColor || ''),
+                layout: data.layout === 'split' ? 'split' : 'center'
+            };
+        }
+
+        function isSafeImageUrl(value) {
+            if (!value) return false;
+            const raw = String(value).trim();
+            return /^https?:\/\//i.test(raw) || /^data:image\//i.test(raw);
+        }
+
         function sanitizePresentationHtml(raw) {
             if (!raw) return '';
             if (window.DOMPurify) {
@@ -799,7 +858,8 @@
                     htmlContent: sanitizePresentationHtml(legacyRaw),
                     isActive: true,
                     order: 1,
-                    color: getPresentationColor(0)
+                    color: getPresentationColor(0),
+                    layout: normalizePresentationLayout({})
                 }];
                 activeId = list[0].id;
             }
@@ -815,7 +875,8 @@
                         htmlContent: String(item.htmlContent || ''),
                         isActive: id === activeId || item.isActive,
                         order: Number.isFinite(item.order) ? item.order : index + 1,
-                        color: item.color || getPresentationColor(index)
+                        color: item.color || getPresentationColor(index),
+                        layout: normalizePresentationLayout(item.layout)
                     };
                 })
                 .sort((a, b) => a.order - b.order);
@@ -853,9 +914,48 @@
             }
         }
 
+        function applyPresentationHero(layout) {
+            if (!presentationHero) return false;
+            const normalized = normalizePresentationLayout(layout);
+            const hasContent = !!(normalized.title || normalized.subtitle || normalized.imageUrl);
+            if (!hasContent) {
+                presentationHero.hidden = true;
+                return false;
+            }
+
+            presentationHero.hidden = false;
+            presentationHero.classList.toggle('is-split', normalized.layout === 'split');
+            presentationHero.style.setProperty(
+                '--presentation-accent',
+                normalized.accentColor || 'rgba(216, 27, 96, 0.35)'
+            );
+
+            if (presentationHeroTitle) {
+                presentationHeroTitle.textContent = normalized.title || '';
+                presentationHeroTitle.hidden = !normalized.title;
+            }
+            if (presentationHeroSubtitle) {
+                presentationHeroSubtitle.textContent = normalized.subtitle || '';
+                presentationHeroSubtitle.hidden = !normalized.subtitle;
+            }
+            if (presentationHeroMedia && presentationHeroImage) {
+                if (isSafeImageUrl(normalized.imageUrl)) {
+                    presentationHeroImage.src = normalized.imageUrl;
+                    presentationHeroImage.alt = normalized.title || 'Illustration';
+                    presentationHeroMedia.hidden = false;
+                } else {
+                    presentationHeroImage.removeAttribute('src');
+                    presentationHeroMedia.hidden = true;
+                }
+            }
+
+            return true;
+        }
+
         function renderPresentationView() {
             if (!presentationPlaceholder || !presentationContent) return;
             if (!currentCharacter) {
+                if (presentationHero) presentationHero.hidden = true;
                 const placeholderText = presentationPlaceholder ? presentationPlaceholder.textContent.trim() : 'Aucune presentation.';
                 presentationPlaceholder.hidden = true;
                 presentationContent.hidden = false;
@@ -864,12 +964,13 @@
             }
 
             const active = getActivePresentation();
+            const hasHero = applyPresentationHero(active?.layout || {});
             const html = active ? sanitizePresentationHtml(active.htmlContent) : '';
             if (!html.trim()) {
                 const placeholderText = presentationPlaceholder ? presentationPlaceholder.textContent.trim() : 'Aucune presentation.';
                 presentationPlaceholder.hidden = true;
                 presentationContent.hidden = false;
-                presentationContent.innerHTML = `<p class="profile-placeholder-text">${escapeAttribute(placeholderText)}</p>`;
+                presentationContent.innerHTML = hasHero ? '' : `<p class="profile-placeholder-text">${escapeAttribute(placeholderText)}</p>`;
                 return;
             }
 
@@ -951,6 +1052,22 @@
             presentationSave.disabled = !isPresentationDirty;
         }
 
+        function updateLayoutFromInputs() {
+            const target = getEditingPresentation();
+            if (!target) return;
+            const nextLayout = normalizePresentationLayout({
+                title: presentationHeroTitleInput?.value || '',
+                subtitle: presentationHeroSubtitleInput?.value || '',
+                imageUrl: presentationHeroImageInput?.value || '',
+                accentColor: presentationAccentInput?.value || '',
+                layout: presentationLayoutSelect?.value || 'center'
+            });
+            target.layout = nextLayout;
+            applyPresentationHero(nextLayout);
+            isPresentationDirty = true;
+            updateSaveButtonState();
+        }
+
         function setEditorPresentation(presentationId) {
             ensureQuill();
             const target = presentations.find((item) => item.id === presentationId);
@@ -973,6 +1090,16 @@
             }
             if (presentationHtmlSource) {
                 presentationHtmlSource.value = safeHtml;
+            }
+            const layout = normalizePresentationLayout(target.layout);
+            if (presentationHeroTitleInput) presentationHeroTitleInput.value = layout.title;
+            if (presentationHeroSubtitleInput) presentationHeroSubtitleInput.value = layout.subtitle;
+            if (presentationHeroImageInput) presentationHeroImageInput.value = layout.imageUrl;
+            if (presentationAccentInput) {
+                presentationAccentInput.value = layout.accentColor || '#e91e63';
+            }
+            if (presentationLayoutSelect) {
+                presentationLayoutSelect.value = layout.layout;
             }
             renderPresentationList();
         }
@@ -1015,7 +1142,8 @@
                 htmlContent: String(item.htmlContent || ''),
                 isActive: item.id === activePresentationId,
                 order: index + 1,
-                color: item.color
+                color: item.color,
+                layout: normalizePresentationLayout(item.layout)
             }));
             const nextProfileData = {
                 ...profileData,
@@ -1131,7 +1259,8 @@
                 htmlContent: '<div></div>',
                 isActive: false,
                 order: presentations.length + 1,
-                color: getPresentationColor(presentations.length)
+                color: getPresentationColor(presentations.length),
+                layout: normalizePresentationLayout({})
             };
             presentations = [newItem, ...presentations].map((item, index) => ({
                 ...item,
@@ -2014,6 +2143,23 @@
                 if (action === 'color' || action === 'background') {
                     applyToolbarAction(action, control.value);
                 }
+            });
+        }
+
+        [presentationHeroTitleInput, presentationHeroSubtitleInput, presentationHeroImageInput, presentationAccentInput, presentationLayoutSelect].forEach((input) => {
+            if (!input) return;
+            input.addEventListener('input', updateLayoutFromInputs);
+            input.addEventListener('change', updateLayoutFromInputs);
+        });
+
+        if (presentationHeroReset) {
+            presentationHeroReset.addEventListener('click', () => {
+                if (presentationHeroTitleInput) presentationHeroTitleInput.value = '';
+                if (presentationHeroSubtitleInput) presentationHeroSubtitleInput.value = '';
+                if (presentationHeroImageInput) presentationHeroImageInput.value = '';
+                if (presentationAccentInput) presentationAccentInput.value = '#e91e63';
+                if (presentationLayoutSelect) presentationLayoutSelect.value = 'center';
+                updateLayoutFromInputs();
             });
         }
 

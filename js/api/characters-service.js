@@ -63,7 +63,8 @@ export async function createCharacter(userId, characterData) {
                 name: characterData.name,
                 race: characterData.race,
                 class: characterData.class,
-                profile_data: characterData.profileData || {}
+                profile_data: characterData.profileData || {},
+                kaels: 0
             }])
             .select();
 
