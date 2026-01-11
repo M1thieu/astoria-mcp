@@ -47,6 +47,65 @@ function buildStubPanel({ id, title, fullPageHref, fullPageLabel, blurb, load })
   };
 }
 
+function ensureStyleLink(href) {
+  const head = document.head;
+  if (!head) return;
+  if (document.querySelector(`link[href="${href}"]`)) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  head.appendChild(link);
+}
+
+function ensureNokorahModals() {
+  if (document.getElementById("invokeModal")) return;
+  const markup = `
+    <div class="modal" id="invokeModal">
+      <div class="modal-content">
+        <h3>Invoquer un Nokorah</h3>
+        <input type="text" id="nokorahName" placeholder="Nom du Nokorah" maxlength="24">
+        <p style="font-size: 0.85rem; color: #666; margin: 0.5rem 0;">Choisissez une apparence (style Cookie Run):</p>
+        <div class="appearance-grid" id="appearanceGrid"></div>
+        <label style="font-size: 0.85rem; color: #666;">Ou televerser (optionnel)</label>
+        <input type="file" id="appearanceUpload" accept="image/*">
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+          <button class="btn btn-secondary" id="invokeCancelBtn" style="width: auto;">Annuler</button>
+          <button class="btn btn-primary" id="invokeConfirmBtn">Confirmer <span>25 LS</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="farewellModal">
+      <div class="modal-content">
+        <h3>Scene d'adieux</h3>
+        <p style="font-size: 0.85rem; color: #666;">Explique pourquoi tu abandonnes ton Nokorah (min 80 caracteres):</p>
+        <textarea id="farewellText" placeholder="Ecris un message sincere..."></textarea>
+        <p style="font-size: 0.85rem; color: #666;" id="farewellCount">0 / 80</p>
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+          <button class="btn btn-secondary" id="farewellCancelBtn" style="width: auto;">Annuler</button>
+          <button class="btn btn-danger" id="farewellConfirmBtn">Abandonner <span>100 LS</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="appearanceModal">
+      <div class="modal-content">
+        <h3>Changer l'apparence</h3>
+        <p style="font-size: 0.85rem; color: #666; margin: 0.5rem 0;">Choisissez une apparence (style Cookie Run):</p>
+        <div class="appearance-grid" id="appearanceEditGrid"></div>
+        <label style="font-size: 0.85rem; color: #666;">Ou televerser (optionnel)</label>
+        <input type="file" id="appearanceEditUpload" accept="image/*">
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+          <button class="btn btn-secondary" id="appearanceCancelBtn" style="width: auto;">Annuler</button>
+          <button class="btn btn-primary" id="appearanceConfirmBtn">Confirmer</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", markup);
+}
+
 export const codexPanel = buildStubPanel({
   id: "codex",
   title: "Codex",
@@ -122,25 +181,120 @@ export const competencesPanel = buildStubPanel({
   },
 });
 
-export const hdvPanel = buildStubPanel({
+function formatKaels(value) {
+  const safe = Number(value);
+  if (!Number.isFinite(safe)) return "-";
+  return safe.toLocaleString("fr-FR");
+}
+
+function formatRarity(value) {
+  const raw = String(value || "").toLowerCase();
+  const labels = {
+    commun: "Commun",
+    rare: "Rare",
+    epique: "Epique",
+    mythique: "Mythique",
+    legendaire: "Legendaire",
+  };
+  return labels[raw] || (value ? String(value) : "Inconnu");
+}
+
+export const hdvPanel = {
   id: "hdv",
   title: "Hotel de vente",
   fullPageHref: "hdv.html",
   fullPageLabel: "Ouvrir le marche",
-  blurb: "Panel en preparation. Suivi des ventes et alertes a venir.",
-  load: async (summary) => {
-    try {
-      const marketApi = await import("../api/market-service.js");
-      if (!marketApi?.getMyListings || !marketApi?.getMyHistory) return;
-      const listings = await marketApi.getMyListings();
-      const history = await marketApi.getMyHistory();
-      if (!Array.isArray(listings) || !Array.isArray(history)) return;
-      summary.textContent = `${listings.length} offre(s) active(s) - ${history.length} vente(s)`;
-    } catch {
-      // keep fallback text
-    }
+  renderPanel(ctx) {
+    const wrapper = el("div", "panel-card");
+    wrapper.appendChild(el("h3", "panel-card-title", "Hotel de vente"));
+    const summary = el("p", "panel-muted", "Chargement des offres...");
+    wrapper.appendChild(summary);
+
+    const list = el("div", "panel-mini-list");
+    wrapper.appendChild(list);
+    wrapper.appendChild(
+      el(
+        "p",
+        "panel-muted panel-spacer",
+        "Ouvrez la page complete pour gerer les ventes."
+      )
+    );
+
+    const renderEmpty = (text) => {
+      list.replaceChildren();
+      list.appendChild(el("div", "panel-mini-empty", text));
+    };
+
+    const renderSection = (titleText) => {
+      const title = el("div", "panel-mini-section", titleText);
+      list.appendChild(title);
+    };
+
+    const renderRow = (labelText, valueText) => {
+      const row = el("div", "panel-mini-item");
+      row.appendChild(el("span", "panel-mini-label", labelText));
+      row.appendChild(el("span", "panel-mini-value", valueText));
+      list.appendChild(row);
+    };
+
+    void (async () => {
+      try {
+        const marketApi = await import("../api/market-service.js");
+        if (!marketApi?.getMyListings || !marketApi?.getMyHistory) {
+          renderEmpty("Aucune donnee HDV disponible.");
+          return;
+        }
+        const listings = await marketApi.getMyListings();
+        const history = await marketApi.getMyHistory();
+        if (!Array.isArray(listings) || !Array.isArray(history)) {
+          renderEmpty("Aucune activite recente.");
+          return;
+        }
+
+        summary.textContent = `${listings.length} offre(s) active(s) • ${history.length} vente(s)`;
+        list.replaceChildren();
+
+        const recentListings = listings.slice(0, 3);
+        if (recentListings.length) {
+          renderSection("Offres actives");
+          recentListings.forEach((entry) => {
+            const name = entry.item_name || entry.item_id || "Objet";
+            const total =
+              entry.total_price != null
+                ? entry.total_price
+                : Number(entry.unit_price || 0) * Number(entry.quantity || 1);
+            renderRow(name, `${formatKaels(total)} kaels`);
+          });
+        }
+
+        const recentHistory = history.slice(0, 2);
+        if (recentHistory.length) {
+          renderSection("Dernieres ventes");
+          recentHistory.forEach((entry) => {
+            const name = entry.item_name || entry.item_id || "Objet";
+            const total =
+              entry.total_price != null
+                ? entry.total_price
+                : Number(entry.unit_price || 0) * Number(entry.quantity || 1);
+            const isSeller = entry.seller_character_id === ctx?.character?.id;
+            const verb = isSeller ? "Vendu" : "Achete";
+            renderRow(`${verb}: ${name}`, `${formatKaels(total)} kaels`);
+          });
+        }
+
+        if (!recentListings.length && !recentHistory.length) {
+          renderEmpty("Aucune activite recente.");
+        }
+      } catch (error) {
+        console.warn("HDV panel load failed:", error);
+        summary.textContent = "Impossible de charger l'HDV.";
+        renderEmpty("Aucune activite recente.");
+      }
+    })();
+
+    return wrapper;
   },
-});
+};
 
 export const magiePanel = buildStubPanel({
   id: "magie",
@@ -176,32 +330,46 @@ export const magiePanel = buildStubPanel({
   },
 });
 
-export const nokorahPanel = buildStubPanel({
+function getNokorahUpgradeCost(level) {
+  const safeLevel = Math.max(0, Number(level) || 0);
+  return Math.round(25 + safeLevel * 15 + safeLevel * safeLevel * 2);
+}
+
+function getNextRarityGate(level) {
+  const safeLevel = Math.max(0, Number(level) || 0);
+  const nextGate = Math.ceil((safeLevel + 1) / 5) * 5;
+  return nextGate || 5;
+}
+
+export const nokorahPanel = {
   id: "nokorah",
   title: "Nokorah",
   fullPageHref: "nokorah.html",
   fullPageLabel: "Ouvrir Nokorah",
-  blurb: "Panel en preparation. Apercu des effets et ressources.",
-  load: async (summary, ctx) => {
-    const character = ctx?.character || null;
-    if (!character?.id) {
-      summary.textContent = "Selectionnez un personnage pour voir le Nokorah.";
-      return;
-    }
+  renderPanel(ctx) {
+    ensureStyleLink("css/nokorah.css");
+    ensureNokorahModals();
 
-    const suffix = character.id;
-    const active = readJson(`nokorahActive:${suffix}`, null);
-    const rarity = readJson(`nokorahRarity:${suffix}`, active?.rarity || null);
-    const upgrade = Number(readJson(`nokorahUpgradeLevel:${suffix}`, 0)) || 0;
-    const bonuses = readJson(`nokorahBonuses:${suffix}`, []);
-    const bonusCount = Array.isArray(bonuses) ? bonuses.length : 0;
+    const wrapper = el("div", "panel-card");
+    wrapper.appendChild(el("h3", "panel-card-title", "Nokorah"));
+    const root = el("div", "nokorah-panel-root");
+    root.setAttribute("data-nokorah-root", "panel");
+    wrapper.appendChild(root);
 
-    if (!active?.name) {
-      summary.textContent = "Aucun Nokorah actif.";
-      return;
-    }
+    void (async () => {
+      try {
+        const module = await import("../nokorah.js");
+        if (typeof module.initNokorah === "function") {
+          await module.initNokorah();
+        } else if (typeof window.initNokorah === "function") {
+          await window.initNokorah();
+        }
+      } catch (error) {
+        console.warn("Nokorah panel init failed:", error);
+        root.textContent = "Impossible de charger le Nokorah.";
+      }
+    })();
 
-    const rarityLabel = rarity ? String(rarity) : "Inconnu";
-    summary.textContent = `${active.name} - ${rarityLabel} - niv ${upgrade} - ${bonusCount} bonus`;
+    return wrapper;
   },
-});
+};

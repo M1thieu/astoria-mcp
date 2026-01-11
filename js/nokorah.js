@@ -2,9 +2,9 @@ const RARITY_ORDER = ["commun", "rare", "epique", "mythique", "legendaire"];
 const RARITY_LABELS = {
     commun: "Commun",
     rare: "Rare",
-    epique: "Épique",
+    epique: "&Eacute;pique",
     mythique: "Mythique",
-    legendaire: "Légendaire"
+    legendaire: "L&eacute;gendaire"
 };
 const RARITY_COSTS = {
     commun: 45,
@@ -33,7 +33,7 @@ const LUCKY_SOUL_ITEM = {
     name: "Lucky Soul",
     image: "assets/nokorah/lucky-soul.svg",
     category: "consommable",
-    description: "Ressource rare consommée pour invoquer et évoluer un Nokorah."
+    description: "Ressource rare consomm&eacute;e pour invoquer et &eacute;voluer un Nokorah."
 };
 
 function resolveLuckySoulIndex() {
@@ -339,7 +339,7 @@ function renderEmpty(root) {
         <div class="nokorah-empty">
             <img src="assets/nokorah/silhouette-1.svg" alt="Silhouette Nokorah">
             <h3>Aucun Nokorah actuellement.</h3>
-            <p>Invoque un petit esprit pour commencer l'aventure. La rareté initiale est toujours Commun.</p>
+            <p>Invoque un petit esprit pour commencer l'aventure. La raret&eacute; initiale est toujours Commun.</p>
             <button class="action-buttons focus-outline" data-action="invoke">Invoquer un Nokorah <span>25 Lucky Soul</span></button>
         </div>
     `;
@@ -379,21 +379,21 @@ function renderActive(root) {
                 </div>
 
                 <div class="nokorah-section-block">
-                    <h4>Bonus cumulés</h4>
+                    <h4>Bonus cumul&eacute;s</h4>
                     <div class="bonus-chips">${buildBonusChips()}</div>
                 </div>
 
                 <div class="nokorah-section-block">
                     <h4>Effets (admin)</h4>
-                    <div class="admin-effects">${active?.effectsAdmin || "Non révélé."}</div>
+                    <div class="admin-effects">${active?.effectsAdmin || "Non r&eacute;v&eacute;l&eacute;."}</div>
                 </div>
 
                 <div class="nokorah-actions">
                     <button class="action-buttons focus-outline" data-action="rarity" ${!canUpgradeRarity ? "disabled" : ""}>
-                        Améliorer la rareté <span>${rarityCost ? `${rarityCost} Lucky Soul` : "Max"}</span>
+                        Am&eacute;liorer la raret&eacute; <span>${rarityCost ? rarityCost + " Lucky Soul" : "Max"}</span>
                     </button>
                     <button class="action-buttons secondary focus-outline" data-action="stats">
-                        Améliorer les stats <span>${upgradeCost} Lucky Soul</span>
+                        Am&eacute;liorer les stats <span>${upgradeCost} Lucky Soul</span>
                     </button>
                     <button class="action-buttons secondary focus-outline" data-action="appearance">
                         Changer l'apparence <span>Gratuit</span>
@@ -414,7 +414,7 @@ function renderActive(root) {
                         <div class="roulette-card" data-roulette="1">?</div>
                         <div class="roulette-card" data-roulette="2">?</div>
                     </div>
-                    <div class="roulette-result" data-roulette-result>Résultat de la roulette affiché ici.</div>
+                    <div class="roulette-result" data-roulette-result>R&eacute;sultat de la roulette affich&eacute; ici.</div>
                 </div>
             </div>
         </div>
@@ -611,7 +611,7 @@ async function handleRarityUpgrade() {
 
 async function handleStatsUpgrade() {
     if (!state.skills.length) {
-        alert("Aucune compétence disponible pour la roulette.");
+        alert("Aucune comp&eacute;tence disponible pour la roulette.");
         return;
     }
     const nextLevel = state.upgradeLevel + 1;
@@ -889,7 +889,10 @@ function bindStaticEvents() {
     });
 }
 
-async function initNokorah() {
+let nokorahInitialized = false;
+
+export async function initNokorah() {
+    if (nokorahInitialized) return;
     const roots = document.querySelectorAll("[data-nokorah-root]");
     if (!roots.length) return;
 
@@ -915,6 +918,7 @@ async function initNokorah() {
         return;
     }
 
+    nokorahInitialized = true;
     bindStaticEvents();
     await buildNokorahAdapter();
     await loadState();
@@ -924,6 +928,14 @@ async function initNokorah() {
     renderAll();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+window.initNokorah = initNokorah;
+
+const bootNokorah = () => {
     void initNokorah();
-});
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootNokorah);
+} else {
+    bootNokorah();
+}
