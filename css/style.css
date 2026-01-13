@@ -2320,6 +2320,17 @@ button:hover .shortcut-icon {
     background: rgba(255, 255, 255, 0.85);
 }
 
+.panel-user-actions {
+    margin-top: var(--space-2);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.panel-user-delete {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
 .panel-mini-list {
     display: grid;
     gap: var(--space-2);

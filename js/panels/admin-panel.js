@@ -5,6 +5,7 @@ import {
   setActiveCharacter,
   getActiveCharacter,
   updateCharacter,
+  getCurrentUser,
 } from "../auth.js";
 
 export const adminPanel = {
@@ -181,6 +182,7 @@ export const adminPanel = {
     let characterSearchTimer = null;
     let supabaseRef = null;
     let allCharacters = [];
+    const currentUser = getCurrentUser();
 
     async function loadUsers(query = "") {
       if (!supabaseRef) {
@@ -223,6 +225,46 @@ export const adminPanel = {
           <div class="panel-user-name">${user.username || "Sans nom"}</div>
           <div class="panel-user-meta">${user.role || "player"} · ${shortId}</div>
         `;
+        const actions = document.createElement("div");
+        actions.className = "panel-user-actions";
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "auth-button secondary panel-user-delete";
+        deleteBtn.textContent = "Supprimer";
+        if (currentUser && user.id === currentUser.id) {
+          deleteBtn.disabled = true;
+          deleteBtn.textContent = "Vous";
+        }
+        deleteBtn.addEventListener("click", async () => {
+          if (deleteBtn.disabled) return;
+          const confirmed = window.confirm(
+            `Supprimer definitivement ${user.username || "cet utilisateur"} ?`
+          );
+          if (!confirmed) return;
+          userHint.textContent = "Suppression en cours...";
+          try {
+            const { error: deleteError } = await supabaseRef
+              .from("users")
+              .delete()
+              .eq("id", user.id);
+            if (deleteError) {
+              console.error("Admin panel delete user error:", deleteError);
+              userHint.textContent = "Suppression impossible.";
+              return;
+            }
+            row.remove();
+            userHint.textContent = "Utilisateur supprime.";
+            if (!userList.children.length) {
+              userHint.textContent = "Aucun resultat.";
+            }
+            await updateCounts();
+          } catch (error) {
+            console.error("Admin panel delete user error:", error);
+            userHint.textContent = "Erreur pendant la suppression.";
+          }
+        });
+        actions.appendChild(deleteBtn);
+        row.appendChild(actions);
         userList.appendChild(row);
       });
     }
@@ -281,19 +323,23 @@ export const adminPanel = {
       }, 200);
     });
 
+    async function updateCounts() {
+      if (!supabaseRef) {
+        supabaseRef = await getSupabaseClient();
+      }
+      const { count: userCount } = await supabaseRef
+        .from("users")
+        .select("id", { count: "exact", head: true });
+
+      const characters = await getAllCharacters();
+      allCharacters = Array.isArray(characters) ? characters : [];
+      userValue.textContent = userCount ?? "-";
+      charValue.textContent = allCharacters.length;
+    }
+
     (async () => {
       try {
-        const supabase = await getSupabaseClient();
-        supabaseRef = supabase;
-        const { count: userCount } = await supabase
-          .from("users")
-          .select("id", { count: "exact", head: true });
-
-        const characters = await getAllCharacters();
-        allCharacters = Array.isArray(characters) ? characters : [];
-        userValue.textContent = userCount ?? "-";
-        charValue.textContent = allCharacters.length;
-
+        await updateCounts();
         status.textContent = "Recherchez un personnage pour basculer le contexte.";
       } catch (error) {
         console.error("Admin panel error:", error);
