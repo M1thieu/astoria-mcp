@@ -151,17 +151,27 @@ function mergeLocalItems(dbItems) {
 }
 
 async function hydrateItemsFromDb() {
+    const supabaseUrl = window.ASTORIA_SUPABASE_URL || "https://eibfahbctgzqnmubrhzy.supabase.co";
+    const supabaseKey = window.ASTORIA_SUPABASE_ANON_KEY ||
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpYmZhaGJjdGd6cW5tdWJyaHp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0ODM1OTksImV4cCI6MjA4MTA1OTU5OX0.2Xc1oqi_UPhnFqJsFRO-eAHpiCLpjF16JQAGyIrl18E";
+    if (!supabaseUrl || !supabaseKey) return;
+
     try {
-        const itemsApi = await import(\"./api/items-service.js\");
-        if (!itemsApi?.getAllItems) return;
-        const rows = await itemsApi.getAllItems();
+        const res = await fetch(`${supabaseUrl}/rest/v1/items?select=*&order=name.asc`, {
+            headers: {
+                apikey: supabaseKey,
+                Authorization: `Bearer ${supabaseKey}`
+            }
+        });
+        if (!res.ok) return;
+        const rows = await res.json();
         if (!Array.isArray(rows) || rows.length === 0) return;
 
         const mapped = rows.map(mapDbItem);
         const merged = mergeLocalItems(mapped);
         replaceItems(merged);
     } catch (error) {
-        console.warn(\"Codex DB items load failed:\", error);
+        console.warn("Codex DB items load failed:", error);
     }
 }
 // Stable item keys (avoid rebuilding rows/images on each filter)
@@ -331,8 +341,8 @@ function buildRow(item, globalIndex) {
     const buy = item.buyPrice || "";
     const sell = item.sellPrice || "";
     const priceText = formatPrice(item);
-    const buyLine = buy ? `${buy} (achat)` : "—";
-    const sellLine = sell ? `${sell} (vente)` : "—";
+    const buyLine = buy ? `${buy} (achat)` : "-";
+    const sellLine = sell ? `${sell} (vente)` : "-";
     const effectSummary = summarizeEffect(effect);
     const images = resolveImages(item);
     const meta = getOrCreateItemMeta(item, globalIndex);
