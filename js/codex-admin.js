@@ -51,6 +51,7 @@ let imageBlob = null;
 let imagePreviewUrl = '';
 let cropper = null;
 let syncZoom = false;
+const knownCategories = new Set();
 
 function setError(message) {
     if (!dom.error) return;
@@ -94,6 +95,46 @@ function mapDbItem(row) {
         image: primary,
         images: images
     };
+}
+
+function normalizeCategory(value) {
+    return String(value || '').trim();
+}
+
+function collectCategories(items) {
+    (items || []).forEach((item) => {
+        const category = normalizeCategory(item?.category);
+        if (category) knownCategories.add(category);
+    });
+}
+
+function renderCategoryOptions(selectedValue) {
+    if (!dom.categoryInput) return;
+    const currentValue = normalizeCategory(selectedValue);
+    const options = Array.from(knownCategories).sort((a, b) => a.localeCompare(b, 'fr'));
+
+    dom.categoryInput.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Choisir une categorie';
+    dom.categoryInput.appendChild(placeholder);
+
+    options.forEach((category) => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        dom.categoryInput.appendChild(option);
+    });
+
+    if (currentValue) {
+        if (!options.includes(currentValue)) {
+            const option = document.createElement('option');
+            option.value = currentValue;
+            option.textContent = currentValue;
+            dom.categoryInput.appendChild(option);
+        }
+        dom.categoryInput.value = currentValue;
+    }
 }
 
 function parsePrice(raw) {
@@ -171,6 +212,7 @@ function openAdminModal(item) {
     editingItem = item || null;
     setError('');
     if (dom.note) dom.note.textContent = '';
+    renderCategoryOptions(editingItem?.category);
     if (dom.modalTitle) {
         const isDbItem = editingItem && editingItem._dbId;
         dom.modalTitle.textContent = isDbItem ? 'Modifier un objet' : 'Ajouter un objet';
@@ -189,7 +231,7 @@ function openAdminModal(item) {
 
     if (editingItem) {
         dom.nameInput.value = editingItem.name || '';
-        dom.categoryInput.value = editingItem.category || '';
+        renderCategoryOptions(editingItem.category);
         dom.buyInput.value = editingItem.buyPrice || '';
         dom.sellInput.value = editingItem.sellPrice || '';
         dom.descriptionInput.value = editingItem.description || '';
@@ -520,6 +562,8 @@ async function loadDbItems() {
     }
 
     const mapped = (data || []).map(mapDbItem);
+    collectCategories(mapped);
+    renderCategoryOptions();
     if (typeof window.astoriaCodex.setDbItems === 'function') {
         window.astoriaCodex.setDbItems(mapped);
     } else if (typeof window.astoriaCodex.setItems === 'function') {
@@ -561,6 +605,11 @@ async function init() {
 
     supabase = await getSupabaseClient();
     dom.addBtn.hidden = false;
+
+    if (typeof inventoryData !== 'undefined' && Array.isArray(inventoryData)) {
+        collectCategories(inventoryData);
+        renderCategoryOptions();
+    }
 
     dom.addBtn.addEventListener('click', () => openAdminModal(null));
     dom.closeBtn?.addEventListener('click', closeAdminModal);
