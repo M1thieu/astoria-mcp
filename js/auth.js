@@ -9,6 +9,7 @@ export {
     refreshSessionUser,
     setUserRoleByUsername,
     resetUserPassword,
+    resetUserPasswordPublic,
     createAdminUser
 } from './api/auth-service.js';
 export {

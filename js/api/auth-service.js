@@ -248,6 +248,35 @@ export async function resetUserPassword(username, newPassword) {
     }
 }
 
+export async function resetUserPasswordPublic(username, newPassword) {
+    const cleanUsername = String(username || '').trim();
+    const cleanPassword = String(newPassword || '').trim();
+    if (!cleanUsername || !cleanPassword) {
+        return { success: false, error: "Nom d'utilisateur et mot de passe requis" };
+    }
+
+    try {
+        const supabase = await getSupabaseClient();
+        const passwordHash = await simpleHash(cleanPassword);
+        const { data, error } = await supabase
+            .from('users')
+            .update({ password_hash: passwordHash })
+            .eq('username', cleanUsername)
+            .select('id, username')
+            .single();
+
+        if (error) {
+            console.error('Error resetting user password (public):', error);
+            return { success: false, error: 'Impossible de reinitialiser le mot de passe' };
+        }
+
+        return { success: true, user: data };
+    } catch (error) {
+        console.error('Error in resetUserPasswordPublic:', error);
+        return { success: false, error: 'Impossible de reinitialiser le mot de passe' };
+    }
+}
+
 async function simpleHash(str) {
     const encoder = new TextEncoder();
     const data = encoder.encode(str);
