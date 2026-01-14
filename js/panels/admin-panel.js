@@ -97,37 +97,7 @@ export const adminPanel = {
     editSection.append(kaelsLabel, kaelsInput, kaelsSave, kaelsStatus);
     wrapper.appendChild(editSection);
 
-    const userSection = el("div", "panel-admin-actions");
-    const userSearchLabel = document.createElement("label");
-    userSearchLabel.textContent = "Recherche utilisateur";
-    userSearchLabel.setAttribute("for", "adminUserSearch");
 
-    const userInput = document.createElement("input");
-    userInput.type = "search";
-    userInput.id = "adminUserSearch";
-    userInput.className = "panel-select";
-    userInput.placeholder = "Nom d'utilisateur...";
-
-    const userHint = el("p", "panel-admin-hint", "Tapez au moins 2 lettres.");
-    const userList = el("div", "panel-user-list");
-
-    userSection.append(userSearchLabel, userInput, userHint, userList);
-    wrapper.appendChild(userSection);
-
-    const futureSection = el("div", "panel-admin-placeholder");
-    const placeholderTitle = el("h4", "panel-admin-placeholder-title", "Future Features");
-    const placeholderBody = el(
-      "p",
-      "panel-muted",
-      "User management coming soon (Issue #18)"
-    );
-    const timestamp = el(
-      "p",
-      "panel-admin-timestamp",
-      `Accessed: ${new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}`
-    );
-    futureSection.append(placeholderTitle, placeholderBody, timestamp);
-    wrapper.appendChild(futureSection);
 
     function updateAdminContext(activeCharacter) {
       if (!activeCharacter || !activeCharacter.id) {
@@ -178,149 +148,74 @@ export const adminPanel = {
       }
     });
 
-    let userSearchTimer = null;
+
     let characterSearchTimer = null;
     let supabaseRef = null;
     let allCharacters = [];
-    const currentUser = getCurrentUser();
 
-    async function loadUsers(query = "") {
-      if (!supabaseRef) {
-        supabaseRef = await getSupabaseClient();
-      }
-      const term = String(query || "").trim();
-      if (term.length < 2) {
-        userList.innerHTML = "";
-        userHint.textContent = "Tapez au moins 2 lettres.";
-        return;
-      }
-      userHint.textContent = "Recherche en cours...";
-      const { data, error } = await supabaseRef
-        .from("users")
-        .select("id, username, role, created_at")
-        .ilike("username", `%${term}%`)
-        .order("username", { ascending: true })
-        .limit(8);
+    const deleteBackdrop = el("div", "panel-admin-modal");
+    deleteBackdrop.innerHTML = `
+      <div class="panel-admin-modal-card" role="dialog" aria-modal="true">
+        <div class="panel-admin-modal-header">
+          <h4 class="panel-admin-modal-title">Supprimer le personnage</h4>
+          <button type="button" class="panel-admin-modal-close" aria-label="Fermer">x</button>
+        </div>
+        <div class="panel-admin-modal-body">
+          <div class="panel-character-card">
+            <div class="panel-character-avatar" id="adminDeleteAvatar"></div>
+            <div class="panel-character-info">
+              <div class="panel-character-name" id="adminDeleteName"></div>
+              <div class="panel-character-meta" id="adminDeleteMeta"></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-admin-modal-actions">
+          <button type="button" class="auth-button secondary" id="adminDeleteCancel">Annuler</button>
+          <button type="button" class="auth-button" id="adminDeleteConfirm">Supprimer</button>
+        </div>
+      </div>
+    `;
+    wrapper.appendChild(deleteBackdrop);
 
-      if (error) {
-        console.error("Admin panel user search error:", error);
-        userHint.textContent = "Erreur pendant la recherche.";
-        userList.innerHTML = "";
-        return;
-      }
+    const deleteNameEl = deleteBackdrop.querySelector("#adminDeleteName");
+    const deleteMetaEl = deleteBackdrop.querySelector("#adminDeleteMeta");
+    const deleteAvatarEl = deleteBackdrop.querySelector("#adminDeleteAvatar");
+    const deleteClose = deleteBackdrop.querySelector(".panel-admin-modal-close");
+    const deleteCancel = deleteBackdrop.querySelector("#adminDeleteCancel");
+    const deleteConfirm = deleteBackdrop.querySelector("#adminDeleteConfirm");
+    let pendingDelete = null;
 
-      if (!data || data.length === 0) {
-        userHint.textContent = "Aucun resultat.";
-        userList.innerHTML = "";
-        return;
+    const openDeleteModal = (character) => {
+      pendingDelete = character;
+      if (deleteNameEl) deleteNameEl.textContent = character?.name || "Sans nom";
+      if (deleteMetaEl) {
+        const metaText = `${character?.race || ''} ${character?.class || ''}`.trim();
+        deleteMetaEl.textContent = metaText || "Infos indisponibles";
       }
-
-      userHint.textContent = `${data.length} utilisateur(s)`;
-      userList.innerHTML = "";
-      data.forEach((user) => {
-        const row = document.createElement("div");
-        row.className = "panel-user-row";
-        const shortId = user.id ? user.id.slice(0, 8) : "????";
-        row.innerHTML = `
-          <div class="panel-user-name">${user.username || "Sans nom"}</div>
-          <div class="panel-user-meta">${user.role || "player"} · ${shortId}</div>
-        `;
-        const actions = document.createElement("div");
-        actions.className = "panel-user-actions";
-        const deleteBtn = document.createElement("button");
-        deleteBtn.type = "button";
-        deleteBtn.className = "auth-button secondary panel-user-delete";
-        deleteBtn.textContent = "Supprimer";
-        if (currentUser && user.id === currentUser.id) {
-          deleteBtn.disabled = true;
-          deleteBtn.textContent = "Vous";
+      if (deleteAvatarEl) {
+        deleteAvatarEl.innerHTML = "";
+        const avatarUrl = character?.profile_data?.avatar_url || "";
+        if (avatarUrl) {
+          const img = document.createElement("img");
+          img.src = avatarUrl;
+          img.alt = character?.name || "Avatar";
+          deleteAvatarEl.appendChild(img);
+        } else {
+          deleteAvatarEl.textContent = (character?.name || "?").charAt(0).toUpperCase();
         }
-        deleteBtn.addEventListener("click", async () => {
-          if (deleteBtn.disabled) return;
-          const confirmed = window.confirm(
-            `Supprimer definitivement ${user.username || "cet utilisateur"} ?`
-          );
-          if (!confirmed) return;
-          userHint.textContent = "Suppression en cours...";
-          try {
-            const { error: deleteError } = await supabaseRef
-              .from("users")
-              .delete()
-              .eq("id", user.id);
-            if (deleteError) {
-              console.error("Admin panel delete user error:", deleteError);
-              userHint.textContent = "Suppression impossible.";
-              return;
-            }
-            row.remove();
-            userHint.textContent = "Utilisateur supprime.";
-            if (!userList.children.length) {
-              userHint.textContent = "Aucun resultat.";
-            }
-            await updateCounts();
-          } catch (error) {
-            console.error("Admin panel delete user error:", error);
-            userHint.textContent = "Erreur pendant la suppression.";
-          }
-        });
-        actions.appendChild(deleteBtn);
-        row.appendChild(actions);
-        userList.appendChild(row);
-      });
-    }
-
-    function renderCharacters(query = "") {
-      const term = String(query || "").trim().toLowerCase();
-      if (term.length < 2) {
-        characterList.innerHTML = "";
-        characterHint.textContent = "Tapez au moins 2 lettres.";
-        return;
       }
+      deleteBackdrop.classList.add("open");
+    };
 
-      const matches = allCharacters.filter((character) => {
-        const name = String(character?.name || "").toLowerCase();
-        return name.includes(term);
-      });
+    const closeDeleteModal = () => {
+      pendingDelete = null;
+      deleteBackdrop.classList.remove("open");
+    };
 
-      if (matches.length === 0) {
-        characterList.innerHTML = "";
-        characterHint.textContent = "Aucun resultat.";
-        return;
-      }
-
-      characterHint.textContent = `${matches.length} personnage(s)`;
-      characterList.innerHTML = "";
-      matches.slice(0, 8).forEach((character) => {
-        const row = document.createElement("button");
-        row.type = "button";
-        row.className = "panel-user-row panel-character-row";
-        const shortId = character.user_id ? character.user_id.slice(0, 8) : "????";
-        row.innerHTML = `
-          <div class="panel-user-name">${character.name || "Sans nom"}</div>
-          <div class="panel-user-meta">Utilisateur ${shortId}</div>
-        `;
-        row.addEventListener("click", async () => {
-          const res = await setActiveCharacter(character.id);
-          if (res && res.success) {
-            window.dispatchEvent(new CustomEvent("astoria:character-changed"));
-          }
-        });
-        characterList.appendChild(row);
-      });
-    }
-
-    userInput.addEventListener("input", () => {
-      window.clearTimeout(userSearchTimer);
-      userSearchTimer = window.setTimeout(() => {
-        loadUsers(userInput.value);
-      }, 200);
-    });
-
-    characterInput.addEventListener("input", () => {
-      window.clearTimeout(characterSearchTimer);
-      characterSearchTimer = window.setTimeout(() => {
-        renderCharacters(characterInput.value);
-      }, 200);
+    deleteClose?.addEventListener("click", closeDeleteModal);
+    deleteCancel?.addEventListener("click", closeDeleteModal);
+    deleteBackdrop.addEventListener("click", (event) => {
+      if (event.target === deleteBackdrop) closeDeleteModal();
     });
 
     async function updateCounts() {
@@ -337,16 +232,108 @@ export const adminPanel = {
       charValue.textContent = allCharacters.length;
     }
 
+    function renderCharacters(query = "") {
+      const term = String(query || "").trim().toLowerCase();
+      const filtered = term.length >= 2
+        ? allCharacters.filter((character) => String(character?.name || "").toLowerCase().includes(term))
+        : allCharacters.slice();
+
+      if (!filtered.length) {
+        characterList.innerHTML = "";
+        characterHint.textContent = "Aucun resultat.";
+        return;
+      }
+
+      characterHint.textContent = `${filtered.length} personnage(s)`;
+      characterList.innerHTML = "";
+      filtered.slice(0, 8).forEach((character) => {
+        const row = document.createElement("div");
+        row.className = "panel-user-row panel-character-card";
+
+        const avatar = document.createElement("div");
+        avatar.className = "panel-character-avatar";
+        const avatarUrl = character?.profile_data?.avatar_url || "";
+        if (avatarUrl) {
+          const img = document.createElement("img");
+          img.src = avatarUrl;
+          img.alt = character.name || "Avatar";
+          avatar.appendChild(img);
+        } else {
+          avatar.textContent = (character.name || "?").charAt(0).toUpperCase();
+        }
+
+        const info = document.createElement("div");
+        info.className = "panel-character-info";
+        const nameEl = document.createElement("div");
+        nameEl.className = "panel-character-name";
+        nameEl.textContent = character.name || "Sans nom";
+        const metaEl = document.createElement("div");
+        metaEl.className = "panel-character-meta";
+        const shortId = character.user_id ? character.user_id.slice(0, 8) : "????";
+        metaEl.textContent = `${character.race || ''} ${character.class || ''}`.trim() || `Utilisateur ${shortId}`;
+        info.append(nameEl, metaEl);
+
+        const actions = document.createElement("div");
+        actions.className = "panel-character-actions";
+        const activateBtn = document.createElement("button");
+        activateBtn.type = "button";
+        activateBtn.className = "auth-button secondary";
+        activateBtn.textContent = "Activer";
+        activateBtn.addEventListener("click", async () => {
+          const res = await setActiveCharacter(character.id);
+          if (res && res.success) {
+            window.dispatchEvent(new CustomEvent("astoria:character-changed"));
+          }
+        });
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "auth-button secondary";
+        deleteBtn.textContent = "Supprimer";
+        deleteBtn.addEventListener("click", () => openDeleteModal(character));
+        actions.append(activateBtn, deleteBtn);
+
+        row.append(avatar, info, actions);
+        characterList.appendChild(row);
+      });
+    }
+
+    characterInput.addEventListener("input", () => {
+      window.clearTimeout(characterSearchTimer);
+      characterSearchTimer = window.setTimeout(() => {
+        renderCharacters(characterInput.value);
+      }, 200);
+    });
+
+    deleteConfirm?.addEventListener("click", async () => {
+      if (!pendingDelete || !supabaseRef) return;
+      try {
+        const { error } = await supabaseRef
+          .from("characters")
+          .delete()
+          .eq("id", pendingDelete.id);
+        if (error) {
+          console.error("Admin panel delete character error:", error);
+          return;
+        }
+        allCharacters = allCharacters.filter((c) => c.id != pendingDelete.id);
+        renderCharacters(characterInput.value);
+        await updateCounts();
+        closeDeleteModal();
+      } catch (error) {
+        console.error("Admin panel delete character error:", error);
+      }
+    });
+
     (async () => {
       try {
         await updateCounts();
+        renderCharacters(characterInput.value);
         status.textContent = "Recherchez un personnage pour basculer le contexte.";
       } catch (error) {
         console.error("Admin panel error:", error);
         status.textContent = "Unable to load admin data.";
       }
     })();
-
     const syncAdminState = () => {
       const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
       updateAdminContext(active);

@@ -520,7 +520,9 @@ async function loadDbItems() {
     }
 
     const mapped = (data || []).map(mapDbItem);
-    if (typeof window.astoriaCodex.setItems === 'function') {
+    if (typeof window.astoriaCodex.setDbItems === 'function') {
+        window.astoriaCodex.setDbItems(mapped);
+    } else if (typeof window.astoriaCodex.setItems === 'function') {
         window.astoriaCodex.setItems(mapped);
     } else {
         window.astoriaCodex.addItems(mapped);

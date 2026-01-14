@@ -4,6 +4,7 @@ window.astoriaIsAdmin = false;
 let allItems = (typeof inventoryData !== "undefined" && Array.isArray(inventoryData))
     ? inventoryData.slice()
     : [];
+const localItems = allItems.slice();
 const imageHelpers = window.astoriaImageHelpers || {};
 function preloadItems(items) {
     if (typeof imageHelpers.preloadMany !== "function") return;
@@ -133,26 +134,48 @@ function mapDbItem(row) {
     };
 }
 
+function mergeLocalItems(dbItems) {
+    if (!Array.isArray(dbItems)) return localItems.slice();
+    const merged = [];
+    const seenNames = new Set();
+    const addItem = (item) => {
+        if (!item) return;
+        const nameKey = normalizeName(item.name || item.nom || "");
+        if (nameKey && seenNames.has(nameKey)) return;
+        if (nameKey) seenNames.add(nameKey);
+        merged.push(item);
+    };
+    dbItems.forEach(addItem);
+    localItems.forEach(addItem);
+    return merged;
+}
+
 async function hydrateItemsFromDb() {
     try {
-        const itemsApi = await import("./api/items-service.js");
+        const itemsApi = await import(\"./api/items-service.js\");
         if (!itemsApi?.getAllItems) return;
         const rows = await itemsApi.getAllItems();
         if (!Array.isArray(rows) || rows.length === 0) return;
 
         const mapped = rows.map(mapDbItem);
-        allItems = mapped.slice();
-        currentData = allItems.slice();
-        rowCache.clear();
-        allItems.forEach((item, idx) => getOrCreateItemMeta(item, idx));
-        preloadItems(allItems);
+        const merged = mergeLocalItems(mapped);
+        replaceItems(merged);
     } catch (error) {
-        console.warn("Codex DB items load failed:", error);
+        console.warn(\"Codex DB items load failed:\", error);
     }
 }
 // Stable item keys (avoid rebuilding rows/images on each filter)
 const itemMeta = new WeakMap();
 const rowCache = new Map();
+
+function replaceItems(nextItems) {
+    allItems = Array.isArray(nextItems) ? nextItems.slice() : [];
+    currentData = allItems.slice();
+    rowCache.clear();
+    allItems.forEach((item, idx) => getOrCreateItemMeta(item, idx));
+    preloadItems(allItems);
+}
+
 
 function getOrCreateItemMeta(item, fallbackIndex) {
     if (!item || typeof item !== "object") {
@@ -1083,12 +1106,13 @@ function populateCategoryCounts() {
 
 window.astoriaCodex = {
     setItems(items) {
-        if (!Array.isArray(items)) return;
-        allItems = items.slice();
-        currentData = allItems.slice();
-        rowCache.clear();
-        allItems.forEach((item, idx) => getOrCreateItemMeta(item, idx));
-        preloadItems(allItems);
+        replaceItems(items);
+        applyFilters();
+        populateCategoryCounts();
+    },
+    setDbItems(items) {
+        const merged = mergeLocalItems(items);
+        replaceItems(merged);
         applyFilters();
         populateCategoryCounts();
     },
@@ -1117,6 +1141,7 @@ window.astoriaCodex = {
         const target = allItems.find((item) => item && item._dbId === dbId);
         if (!target) return null;
         Object.assign(target, updates || {});
+        rowCache.clear();
         applyFilters();
         populateCategoryCounts();
         return target;

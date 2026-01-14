@@ -2412,3 +2412,94 @@ button:hover .shortcut-icon {
 }
 
 /* (page-specific styles live in `css/*.css`) */
+
+.panel-character-card {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.panel-character-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(216, 27, 96, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #d81b60;
+    overflow: hidden;
+}
+
+.panel-character-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.panel-character-info {
+    display: grid;
+    gap: 2px;
+}
+
+.panel-character-name {
+    font-weight: 700;
+    color: #b0004d;
+}
+
+.panel-character-meta {
+    font-size: 0.85rem;
+    color: rgba(80, 55, 67, 0.8);
+}
+
+.panel-character-actions {
+    display: grid;
+    gap: 6px;
+}
+
+.panel-admin-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 5, 20, 0.35);
+    z-index: 999;
+}
+
+.panel-admin-modal.open {
+    display: flex;
+}
+
+.panel-admin-modal-card {
+    width: min(360px, 90vw);
+    background: #fff;
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    box-shadow: 0 24px 40px rgba(64, 22, 44, 0.3);
+}
+
+.panel-admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+}
+
+.panel-admin-modal-close {
+    border: none;
+    background: transparent;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #b0004d;
+}
+
+.panel-admin-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
