@@ -1259,9 +1259,10 @@
             }
 
             // Fallback local (au cas où le helper n'est pas disponible)
-            if (item && item.image) {
-                if (item.image.startsWith('http') || item.image.startsWith('data:')) {
-                    return item.image;
+            if (item) {
+                const raw = item.image || item.img || item?.images?.primary || item?.images?.url || '';
+                if (raw && (raw.startsWith('http') || raw.startsWith('data:'))) {
+                    return raw;
                 }
             }
 

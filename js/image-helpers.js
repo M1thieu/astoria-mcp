@@ -57,7 +57,10 @@
         const key = normalizeName(name);
         const override = overridesByKey[key];
         const gallery = galleriesByKey[key];
-    const rawImage = item && (item.image || item.img || "");
+    const rawImage =
+        (item && (item.image || item.img)) ||
+        (item && item.images && (item.images.primary || item.images.url)) ||
+        "";
     const normalizedRawImage =
         rawImage && rawImage.startsWith("assets/images/") && !rawImage.startsWith(basePath)
             ? basePath + rawImage.replace(/^assets\/images\//, "")
