@@ -82,7 +82,7 @@ const state = {
 
 const normalizeText = window.astoriaListHelpers?.normalizeText || ((value) => String(value || '')
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase());
 
 const SCROLL_TYPES = [
