@@ -55,6 +55,7 @@ let syncZoom = false;
 let imageMeta = null;
 const knownCategories = new Set();
 const ITEM_TOMBSTONES_KEY = "astoriaItemTombstones";
+let dbItemsByKey = new Map();
 
 function normalizeItemName(value) {
     return String(value || "")
@@ -63,6 +64,14 @@ function normalizeItemName(value) {
         .replace(/[^a-zA-Z0-9]+/g, "")
         .toLowerCase();
 }
+
+function getDbMatch(item) {
+    if (!item) return null;
+    const key = normalizeItemName(item.name || item.nom || '');
+    if (!key) return null;
+    return dbItemsByKey.get(key) || null;
+}
+
 
 function getItemTombstones() {
     try {
@@ -260,7 +269,8 @@ function setImagePreview(url) {
 }
 
 function openAdminModal(item) {
-    editingItem = item || null;
+    const dbMatch = getDbMatch(item);
+    editingItem = dbMatch || item || null;
     imageMeta = null;
     setError('');
     if (dom.note) dom.note.textContent = '';
@@ -268,7 +278,9 @@ function openAdminModal(item) {
     if (dom.modalTitle) {
         const isDbItem = editingItem && editingItem._dbId;
         dom.modalTitle.textContent = isDbItem ? 'Modifier un objet' : 'Ajouter un objet';
-        if (editingItem && !isDbItem && dom.note) {
+        if (item && dbMatch && dom.note) {
+            dom.note.textContent = "Objet deja en base: modification directe.";
+        } else if (editingItem && !isDbItem && dom.note) {
             dom.note.textContent = "Objet local: l'enregistrement creera une copie modifiable en base.";
         }
     }
@@ -607,36 +619,35 @@ async function loadDbItems() {
     console.log('[LOAD] Loaded', data?.length || 0, 'items from DB');
     console.log('[LOAD] Items:', data?.map(item => ({ id: item.id, name: item.name })));
 
-    // Check for duplicate names
+    // Check for duplicate names (normalized)
     const nameCounts = new Map();
     (data || []).forEach(item => {
-        const name = item.name;
-        if (!nameCounts.has(name)) {
-            nameCounts.set(name, []);
+        const key = normalizeItemName(item?.name || '');
+        if (!key) return;
+        if (!nameCounts.has(key)) {
+            nameCounts.set(key, []);
         }
-        nameCounts.get(name).push(item.id);
+        nameCounts.get(key).push(item);
     });
 
     const duplicates = Array.from(nameCounts.entries())
-        .filter(([name, ids]) => ids.length > 1);
+        .filter(([, items]) => items.length > 1);
     let idsToDelete = [];
 
     if (duplicates.length > 0) {
         console.warn('[LOAD] DUPLICATE ITEMS DETECTED:');
-        duplicates.forEach(([name, ids]) => {
-            console.warn(`  - "${name}": ${ids.length} copies with IDs:`, ids);
+        duplicates.forEach(([key, items]) => {
+            console.warn(`  - "${key}": ${items.length} copies`, items.map((row) => row.id));
         });
         console.warn('[LOAD] Delete duplicates manually in Supabase or use DELETE FROM items WHERE id IN (...ids)');
 
-        duplicates.forEach(([name, ids]) => {
-            const rows = (data || []).filter((item) => item.name === name);
-            rows.sort((a, b) => {
+        duplicates.forEach(([, rows]) => {
+            const sorted = rows.slice().sort((a, b) => {
                 const aTime = new Date(a.created_at || 0).getTime();
                 const bTime = new Date(b.created_at || 0).getTime();
                 return bTime - aTime;
             });
-            const keep = rows[0];
-            rows.slice(1).forEach((row) => {
+            sorted.slice(1).forEach((row) => {
                 if (row?.id) idsToDelete.push(row.id);
             });
         });
@@ -661,6 +672,11 @@ async function loadDbItems() {
         !idsToDelete?.includes(row.id)
     );
     const mapped = filtered.map(mapDbItem);
+    dbItemsByKey = new Map(
+        mapped
+            .map((item) => [normalizeItemName(item?.name || ''), item])
+            .filter(([key]) => key)
+    );
     collectCategories(mapped);
     renderCategoryOptions();
     if (typeof window.astoriaCodex.setDbItems === 'function') {
@@ -675,10 +691,11 @@ async function loadDbItems() {
 function updateEditButton(detail) {
     if (!dom.editBtn || !dom.modalActions) return;
     const item = detail?.item || null;
+    const dbMatch = getDbMatch(item);
     if (adminMode && item) {
         dom.modalActions.hidden = false;
         dom.editBtn.hidden = false;
-        dom.editBtn.textContent = item._dbId ? 'Modifier' : 'Importer pour modifier';
+        dom.editBtn.textContent = (item._dbId || dbMatch) ? 'Modifier' : 'Importer pour modifier';
         dom.editBtn.onclick = () => {
             if (typeof window.closeItemModal === 'function') {
                 window.closeItemModal();
