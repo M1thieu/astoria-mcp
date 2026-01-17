@@ -327,6 +327,28 @@
             { key: 'magie-astral', emoji: '🌌', label: 'Magie astral', matchers: ['magie astral', 'magie astrale'] },
             { key: 'elasticite', emoji: '🧶', label: '\u00c9lasticit\u00e9', matchers: ['elasticite', '\u00e9lasticit\u00e9'] }
         ];
+        const SCROLL_TYPES_META_KEY = 'astoria_scroll_types_meta';
+
+        function persistScrollTypeMeta() {
+            try {
+                const payload = SCROLL_TYPES.map((type) => ({
+                    key: type.key,
+                    label: type.label,
+                    emoji: type.emoji,
+                    matchers: Array.isArray(type.matchers) ? type.matchers : []
+                }));
+                const next = JSON.stringify(payload);
+                const current = localStorage.getItem(SCROLL_TYPES_META_KEY);
+                if (current !== next) {
+                    localStorage.setItem(SCROLL_TYPES_META_KEY, next);
+                }
+                window.astoriaScrollTypes = payload;
+            } catch (error) {
+                console.warn('Failed to persist scroll type metadata:', error);
+            }
+        }
+
+        persistScrollTypeMeta();
 
         // =================================================================
         // =================================================================

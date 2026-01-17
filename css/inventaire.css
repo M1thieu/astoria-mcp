@@ -704,7 +704,7 @@
     border-bottom: 1px solid var(--color-primary-light);
     min-height: 0;
     position: relative;
-    z-index: 1;
+    z-index: 10;
 }
 
 .scroll-panel-add.open {
@@ -733,6 +733,8 @@
     flex-direction: column;
     gap: var(--space-2);
     min-height: 0;
+    position: relative;
+    z-index: 20;
 }
 
 .scroll-suggestion-row {

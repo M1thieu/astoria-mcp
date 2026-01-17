@@ -117,6 +117,9 @@ const SCROLL_TYPES = [
 ];
 
 const SCROLL_TYPE_MAP = new Map(SCROLL_TYPES.map((type) => [type.key, type]));
+const SCROLL_TYPES_META_KEY = 'astoria_scroll_types_meta';
+let scrollTypeMetaList = null;
+let scrollTypeMetaMap = null;
 const FALLBACK_SCROLL_EMOJI = String.fromCodePoint(0x2728);
 
 function isScrollItem(item) {
@@ -136,10 +139,41 @@ function getScrollCategory(item) {
     return null;
 }
 
+function loadScrollTypeMeta() {
+    if (scrollTypeMetaList && scrollTypeMetaMap) return;
+    try {
+        const raw = localStorage.getItem(SCROLL_TYPES_META_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || !parsed.length) return;
+        scrollTypeMetaList = parsed
+            .filter((entry) => entry && entry.key)
+            .map((entry) => ({
+                key: String(entry.key),
+                label: entry.label ? String(entry.label) : String(entry.key),
+                emoji: entry.emoji ? String(entry.emoji) : FALLBACK_SCROLL_EMOJI,
+                matchers: Array.isArray(entry.matchers) ? entry.matchers : []
+            }));
+        scrollTypeMetaMap = new Map(scrollTypeMetaList.map((entry) => [entry.key, entry]));
+    } catch (error) {
+        console.warn('[HDV] Failed to load scroll type metadata:', error);
+    }
+}
+
+function getScrollTypeMetaList() {
+    loadScrollTypeMeta();
+    return scrollTypeMetaList || SCROLL_TYPES;
+}
+
+function getScrollTypeMeta(key) {
+    loadScrollTypeMeta();
+    return (scrollTypeMetaMap && scrollTypeMetaMap.get(key)) || SCROLL_TYPE_MAP.get(key) || null;
+}
+
 function getScrollTypeKey(entry) {
     if (!entry) return null;
     const haystack = normalizeText([entry.name, entry.description, entry.effect].filter(Boolean).join(' '));
-    for (const type of SCROLL_TYPES) {
+    for (const type of getScrollTypeMetaList()) {
         const matchers = Array.isArray(type.matchers) ? type.matchers : [type.key];
         if (matchers.some((matcher) => haystack.includes(normalizeText(matcher)))) {
             return type.key;
@@ -196,7 +230,7 @@ function getScrollTypeCounts(entry) {
 }
 
 function getScrollTypeLabel(typeKey) {
-    const entry = SCROLL_TYPE_MAP.get(typeKey);
+    const entry = getScrollTypeMeta(typeKey);
     if (!entry) {
         const label = String(typeKey || '').replace(/-/g, ' ').trim();
         if (!label) return '';
@@ -984,11 +1018,11 @@ function populateScrollTypeSelect(entry, selectedKey = '') {
         availableKeys = Object.keys(counts).filter((key) => (Number(counts[key]) || 0) > 0);
     }
     if (!availableKeys.length) {
-        availableKeys = SCROLL_TYPES.map((type) => type.key);
+        availableKeys = getScrollTypeMetaList().map((type) => type.key);
     }
 
     for (const key of availableKeys) {
-        const meta = SCROLL_TYPE_MAP.get(key);
+        const meta = getScrollTypeMeta(key);
         const opt = document.createElement('option');
         opt.value = key;
         opt.innerHTML = meta ? `${meta.emoji} ${meta.label}` : getScrollTypeLabel(key);
