@@ -350,6 +350,7 @@
         let selectedScrollTypeKey = null;
         let lastScrollItemId = null;
         let scrollTypeStore = {};
+        let inventoryMigrated = false;
 
         // DOM REFERENCES
         // =================================================================
@@ -883,6 +884,7 @@
             const character = authApi.getActiveCharacter?.();
             const payload = character?.profile_data?.inventory;
             const hasMigrated = payload?.migrated === true;
+            inventoryMigrated = hasMigrated;
 
             if (payload && payload.scrollTypes && typeof payload.scrollTypes === 'object') {
                 scrollTypeStore = payload.scrollTypes;
@@ -1440,6 +1442,43 @@
             return `${SCROLL_STORAGE_PREFIX}:${category}:${idPart}`;
         }
 
+        function clearScrollCountsForItem(item) {
+            const category = getScrollCategory(item);
+            if (!category || !item) return;
+            const itemKey = getScrollItemKey(item);
+            if (scrollTypeStore?.[category]) {
+                delete scrollTypeStore[category][itemKey];
+                if (Object.keys(scrollTypeStore[category]).length === 0) {
+                    delete scrollTypeStore[category];
+                }
+            }
+            const key = getScrollStorageKey(category, item, false);
+            const legacyKey = getScrollStorageKey(category, item, true);
+            try {
+                localStorage.removeItem(key);
+                if (legacyKey !== key) {
+                    localStorage.removeItem(legacyKey);
+                }
+            } catch {
+                // ignore storage cleanup failures
+            }
+        }
+
+        function resetScrollCountsAfterQtyChange(item) {
+            const category = getScrollCategory(item);
+            if (!category) return;
+            clearScrollCountsForItem(item);
+            const nextQty = Math.max(0, Math.floor(Number(item?.quantity) || 0));
+            const seededTypeKey = getScrollTypeKey(item);
+            if (seededTypeKey && nextQty > 0) {
+                const counts = getEmptyScrollCounts();
+                counts[seededTypeKey] = nextQty;
+                saveScrollCounts(category, item, counts);
+            } else {
+                persistInventory();
+            }
+        }
+
         function normalizeScrollCounts(rawCounts) {
             const counts = getEmptyScrollCounts();
             if (!rawCounts) return counts;
@@ -1551,10 +1590,12 @@
                 const fromProfile = loadScrollCountsFromProfile(category, item);
                 if (fromProfile.hasStored) return fromProfile;
 
-                const legacy = loadScrollCountsFromLocalStorage(category, item);
-                if (legacy.hasStored) {
-                    setScrollStoreEntry(category, item, legacy.counts);
-                    return legacy;
+                if (!inventoryMigrated) {
+                    const legacy = loadScrollCountsFromLocalStorage(category, item);
+                    if (legacy.hasStored) {
+                        setScrollStoreEntry(category, item, legacy.counts);
+                        return legacy;
+                    }
                 }
             }
 
@@ -2111,10 +2152,12 @@
 
             // If quantity reaches 0, remove item
             if (item.quantity <= 0) {
+                resetScrollCountsAfterQtyChange(item);
                 inventoryItems.splice(itemIndex, 1);
                 selectedItemIndex = null;
                 showDetailPlaceholder();
             } else {
+                resetScrollCountsAfterQtyChange(item);
                 // Refresh the detail view to update quantity display
                 showItemDetail(item);
             }
@@ -2190,6 +2233,7 @@
             // Update quantity or remove item
             if (qtyToDelete >= item.quantity) {
                 // Remove item entirely
+                resetScrollCountsAfterQtyChange(item);
                 inventoryItems.splice(itemIndex, 1);
                 selectedItemIndex = null;
                 showDetailPlaceholder();
@@ -2197,6 +2241,7 @@
             } else {
                 // Decrease quantity
                 item.quantity -= qtyToDelete;
+                resetScrollCountsAfterQtyChange(item);
                 showItemDetail(item);
                 console.log(`Deleted ${qtyToDelete} of ${item.name}. Remaining: ${item.quantity}`);
             }
@@ -2267,6 +2312,7 @@
             }
 
             // Remove from array
+            resetScrollCountsAfterQtyChange(inventoryItems[itemIndex]);
             inventoryItems.splice(itemIndex, 1);
 
             // Save to localStorage
