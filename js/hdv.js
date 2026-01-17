@@ -132,6 +132,17 @@ function getScrollCategory(item) {
     return null;
 }
 
+function getScrollTypeKey(entry) {
+    if (!entry) return null;
+    const haystack = normalizeText([entry.name, entry.description, entry.effect].filter(Boolean).join(' '));
+    for (const type of SCROLL_TYPES) {
+        if (haystack.includes(normalizeText(type.key))) {
+            return type.key;
+        }
+    }
+    return null;
+}
+
 function getScrollTypeCounts(entry) {
     const store =
         state.character?.profile_data?.inventory?.scrollTypes ||
@@ -154,6 +165,10 @@ function getScrollTypeCounts(entry) {
         if (bucket[key]?.counts) {
             return bucket[key].counts;
         }
+    }
+    const seededKey = getScrollTypeKey(entry);
+    if (seededKey && Number(entry?.quantity) > 0) {
+        return { [seededKey]: Math.max(0, Math.floor(Number(entry.quantity) || 0)) };
     }
     return null;
 }
