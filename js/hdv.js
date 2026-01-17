@@ -102,18 +102,20 @@ const normalizeText = window.astoriaListHelpers?.normalizeText || ((value) => St
     .toLowerCase());
 
 const SCROLL_TYPES = [
-    { key: 'feu', label: 'Feu', emoji: String.fromCodePoint(0x1F525) },
-    { key: 'eau', label: 'Eau', emoji: String.fromCodePoint(0x1F4A7) },
-    { key: 'glace', label: 'Glace', emoji: String.fromCodePoint(0x1F9CA) },
-    { key: 'vent', label: 'Vent', emoji: String.fromCodePoint(0x1F32C) },
-    { key: 'terre', label: 'Terre', emoji: String.fromCodePoint(0x1FAA8) },
-    { key: 'nature', label: 'Nature', emoji: String.fromCodePoint(0x1F331) },
-    { key: 'foudre', label: 'Foudre', emoji: String.fromCodePoint(0x26A1) },
-    { key: 'lumiere', label: 'Lumiere', emoji: String.fromCodePoint(0x1F31F) },
-    { key: 'tenebres', label: 'Tenebres', emoji: String.fromCodePoint(0x1F319) }
+    { key: 'feu', label: 'Feu', emoji: String.fromCodePoint(0x1F525), matchers: ['feu'] },
+    { key: 'eau', label: 'Eau', emoji: String.fromCodePoint(0x1F4A7), matchers: ['eau'] },
+    { key: 'glace', label: 'Glace', emoji: String.fromCodePoint(0x1F9CA), matchers: ['glace'] },
+    { key: 'cryo', label: 'Cryo', emoji: String.fromCodePoint(0x1F9CA), matchers: ['cryo'] },
+    { key: 'vent', label: 'Vent', emoji: String.fromCodePoint(0x1F32C), matchers: ['vent'] },
+    { key: 'terre', label: 'Terre', emoji: String.fromCodePoint(0x1FAA8), matchers: ['terre'] },
+    { key: 'nature', label: 'Nature', emoji: String.fromCodePoint(0x1F331), matchers: ['nature'] },
+    { key: 'foudre', label: 'Foudre', emoji: String.fromCodePoint(0x26A1), matchers: ['foudre'] },
+    { key: 'lumiere', label: 'Lumiere', emoji: String.fromCodePoint(0x1F31F), matchers: ['lumiere'] },
+    { key: 'tenebres', label: 'Tenebres', emoji: String.fromCodePoint(0x1F319), matchers: ['tenebres'] }
 ];
 
 const SCROLL_TYPE_MAP = new Map(SCROLL_TYPES.map((type) => [type.key, type]));
+const FALLBACK_SCROLL_EMOJI = String.fromCodePoint(0x2728);
 
 function isScrollItem(item) {
     if (!item || !item.name) return false;
@@ -136,11 +138,28 @@ function getScrollTypeKey(entry) {
     if (!entry) return null;
     const haystack = normalizeText([entry.name, entry.description, entry.effect].filter(Boolean).join(' '));
     for (const type of SCROLL_TYPES) {
-        if (haystack.includes(normalizeText(type.key))) {
+        const matchers = Array.isArray(type.matchers) ? type.matchers : [type.key];
+        if (matchers.some((matcher) => haystack.includes(normalizeText(matcher)))) {
             return type.key;
         }
     }
     return null;
+}
+
+function hasPositiveCounts(counts) {
+    if (!counts || typeof counts !== 'object') return false;
+    return Object.values(counts).some((value) => Number(value) > 0);
+}
+
+function getScrollTypeStoreFromLocal() {
+    try {
+        const raw = localStorage.getItem('astoria_active_character');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed?.profile_data?.inventory?.scrollTypes || null;
+    } catch {
+        return null;
+    }
 }
 
 function getScrollTypeCounts(entry) {
@@ -148,6 +167,7 @@ function getScrollTypeCounts(entry) {
         state.character?.profile_data?.inventory?.scrollTypes ||
         state.profile?.character?.profile_data?.inventory?.scrollTypes ||
         state.profile?.inventory?.scrollTypes ||
+        getScrollTypeStoreFromLocal() ||
         null;
     if (!store || typeof store !== 'object') return null;
     const category = getScrollCategory(entry);
@@ -162,7 +182,7 @@ function getScrollTypeCounts(entry) {
         keys.push(`name:${normalizeText(entry.name)}`);
     }
     for (const key of keys) {
-        if (bucket[key]?.counts) {
+        if (bucket[key]?.counts && hasPositiveCounts(bucket[key].counts)) {
             return bucket[key].counts;
         }
     }
@@ -175,7 +195,11 @@ function getScrollTypeCounts(entry) {
 
 function getScrollTypeLabel(typeKey) {
     const entry = SCROLL_TYPE_MAP.get(typeKey);
-    if (!entry) return '';
+    if (!entry) {
+        const label = String(typeKey || '').replace(/-/g, ' ').trim();
+        if (!label) return '';
+        return `${FALLBACK_SCROLL_EMOJI} ${label}`;
+    }
     return `${entry.emoji} ${entry.label}`;
 }
 
@@ -953,19 +977,24 @@ function populateScrollTypeSelect(entry, selectedKey = '') {
     dom.mine.scrollTypeSelect.appendChild(placeholder);
 
     const counts = entry ? getScrollTypeCounts(entry) : null;
-    const availableTypes = counts
-        ? SCROLL_TYPES.filter((type) => (Number(counts[type.key]) || 0) > 0)
-        : SCROLL_TYPES;
+    let availableKeys = [];
+    if (counts && typeof counts === 'object') {
+        availableKeys = Object.keys(counts).filter((key) => (Number(counts[key]) || 0) > 0);
+    }
+    if (!availableKeys.length) {
+        availableKeys = SCROLL_TYPES.map((type) => type.key);
+    }
 
-    for (const type of availableTypes) {
+    for (const key of availableKeys) {
+        const meta = SCROLL_TYPE_MAP.get(key);
         const opt = document.createElement('option');
-        opt.value = type.key;
-        opt.innerHTML = `${type.emoji} ${type.label}`;
+        opt.value = key;
+        opt.innerHTML = meta ? `${meta.emoji} ${meta.label}` : getScrollTypeLabel(key);
         dom.mine.scrollTypeSelect.appendChild(opt);
     }
 
-    const totalOptions = availableTypes.length + 1;
-    if (availableTypes.length > 6) {
+    const totalOptions = availableKeys.length + 1;
+    if (availableKeys.length > 6) {
         dom.mine.scrollTypeSelect.size = Math.min(10, totalOptions);
     } else {
         dom.mine.scrollTypeSelect.size = 1;
