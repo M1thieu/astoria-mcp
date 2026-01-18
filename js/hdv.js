@@ -4,6 +4,7 @@ import {
     refreshSessionUser,
     getUserCharacters,
     setActiveCharacter,
+    updateCharacter,
     getAllItems
 } from './auth.js';
 import {
@@ -139,6 +140,22 @@ function getScrollCategory(item) {
     return null;
 }
 
+function getScrollItemKey(entry) {
+    const sourceIndex = Number(entry?.sourceIndex);
+    if (Number.isFinite(sourceIndex) && sourceIndex >= 0) {
+        return `idx:${sourceIndex}`;
+    }
+    const name = entry?.name ? normalizeText(entry.name) : '';
+    if (name) {
+        return `name:${name}`;
+    }
+    const id = Number(entry?.id);
+    if (Number.isFinite(id)) {
+        return `id:${id}`;
+    }
+    return 'unknown';
+}
+
 function loadScrollTypeMeta() {
     if (scrollTypeMetaList && scrollTypeMetaMap) return;
     try {
@@ -227,6 +244,61 @@ function getScrollTypeCounts(entry) {
         return { [seededKey]: Math.max(0, Math.floor(Number(entry.quantity) || 0)) };
     }
     return null;
+}
+
+function buildScrollCountsForSale(entry, typeKey) {
+    if (!typeKey) return null;
+    const existing = getScrollTypeCounts(entry);
+    if (existing) return { ...existing };
+    const total = Math.max(0, Math.floor(Number(entry?.quantity) || 0));
+    if (total <= 0) return null;
+    return { [typeKey]: total };
+}
+
+async function applyScrollTypeSale(entry, typeKey, quantity) {
+    if (!entry || !typeKey || !Number.isFinite(quantity) || quantity <= 0) return;
+    const category = getScrollCategory(entry);
+    if (!category || !state.character?.id) return;
+
+    const profileData = { ...(state.character.profile_data || {}) };
+    const inventory = { ...(profileData.inventory || {}) };
+    const scrollTypes = { ...(inventory.scrollTypes || {}) };
+    const itemKey = getScrollItemKey(entry);
+    const bucket = { ...(scrollTypes[category] || {}) };
+    const currentEntry = bucket[itemKey] || {};
+    const counts = buildScrollCountsForSale(entry, typeKey) || { ...(currentEntry.counts || {}) };
+    const current = Number(counts[typeKey]) || 0;
+    const next = Math.max(0, current - Math.floor(quantity));
+    if (next > 0) {
+        counts[typeKey] = next;
+    } else {
+        delete counts[typeKey];
+    }
+
+    const hasAny = Object.values(counts).some((value) => Number(value) > 0);
+    if (hasAny) {
+        bucket[itemKey] = { counts, updatedAt: Date.now() };
+    } else {
+        delete bucket[itemKey];
+    }
+
+    if (Object.keys(bucket).length) {
+        scrollTypes[category] = bucket;
+    } else {
+        delete scrollTypes[category];
+    }
+
+    inventory.scrollTypes = scrollTypes;
+    profileData.inventory = inventory;
+
+    const res = await updateCharacter(state.character.id, { profile_data: profileData });
+    if (res?.success && res.character) {
+        state.character = res.character;
+        if (state.profile?.character?.id === res.character.id) {
+            state.profile.character = res.character;
+        }
+        broadcastInventorySync('scroll-types');
+    }
 }
 
 function getScrollTypeLabel(typeKey) {
@@ -1375,10 +1447,14 @@ function wireEvents() {
 
         const itemId = dom.mine.item.value;
         const entry = getInventoryEntry(itemId);
-        const available = entry ? Math.max(0, Number(entry.quantity) || 0) : 0;
+        let available = entry ? Math.max(0, Number(entry.quantity) || 0) : 0;
         const quantity = asInt(dom.mine.qty.value) ?? 1;
         const unitPrice = parsePriceInput(dom.mine.unitPrice.value);
         const scrollType = isScrollItem(entry) ? String(dom.mine.scrollTypeSelect?.value || '').trim() : '';
+        const scrollCounts = isScrollItem(entry) && scrollType ? buildScrollCountsForSale(entry, scrollType) : null;
+        if (scrollCounts) {
+            available = Math.max(0, Number(scrollCounts[scrollType]) || 0);
+        }
 
         if (!itemId) {
             setStatus(dom.mine.status, 'Selectionnez un objet.', 'error');
@@ -1410,6 +1486,9 @@ function wireEvents() {
         try {
             await createListing({ itemId, item: entry, quantity, unitPrice, scrollType });
             await applyInventoryDelta(itemId, -quantity);
+            if (scrollType && isScrollItem(entry)) {
+                await applyScrollTypeSale(entry, scrollType, quantity);
+            }
             populateSellSelect();
             setStatus(dom.mine.status, 'Offre creee.', 'success');
             await refreshSearch();
