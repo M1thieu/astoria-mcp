@@ -139,6 +139,12 @@
     box-shadow: var(--shadow-sm);
 }
 
+.hdv-filterbar .inventory-search {
+    flex: 1 1 240px;
+    min-width: 180px;
+    max-width: 320px;
+}
+
 .hdv-page .search-container input {
     width: 260px;
     transition: box-shadow var(--transition-medium), border-color var(--transition-fast);
@@ -517,6 +523,10 @@
 
     .hdv-filterbar {
         padding: var(--space-3);
+    }
+
+    .hdv-filterbar .inventory-search {
+        max-width: 100%;
     }
 }
 

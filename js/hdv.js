@@ -301,6 +301,39 @@ async function applyScrollTypeSale(entry, typeKey, quantity) {
     }
 }
 
+async function applyScrollTypeRestock(entry, typeKey, quantity) {
+    if (!entry || !typeKey || !Number.isFinite(quantity) || quantity <= 0) return false;
+    const category = getScrollCategory(entry);
+    if (!category || !state.character?.id) return false;
+
+    const profileData = { ...(state.character.profile_data || {}) };
+    const inventory = { ...(profileData.inventory || {}) };
+    const scrollTypes = { ...(inventory.scrollTypes || {}) };
+    const itemKey = getScrollItemKey(entry);
+    const bucket = { ...(scrollTypes[category] || {}) };
+    const currentEntry = bucket[itemKey] || {};
+    const counts = { ...(currentEntry.counts || {}) };
+    const current = Number(counts[typeKey]) || 0;
+    const next = current + Math.floor(quantity);
+
+    counts[typeKey] = next;
+    bucket[itemKey] = { counts, updatedAt: Date.now() };
+    scrollTypes[category] = bucket;
+    inventory.scrollTypes = scrollTypes;
+    profileData.inventory = inventory;
+
+    const res = await updateCharacter(state.character.id, { profile_data: profileData });
+    if (res?.success && res.character) {
+        state.character = res.character;
+        if (state.profile?.character?.id === res.character.id) {
+            state.profile.character = res.character;
+        }
+        broadcastInventorySync('scroll-types');
+        return true;
+    }
+    return false;
+}
+
 function getScrollTypeLabel(typeKey) {
     const entry = getScrollTypeMeta(typeKey);
     if (!entry) {
@@ -939,6 +972,15 @@ function renderListings(listings) {
             btn.textContent = 'Acheter';
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
+                const currentKaels = Number(state.profile?.kaels);
+                if (Number.isFinite(currentKaels) && currentKaels < total) {
+                    setStatus(
+                        dom.search.status,
+                        `Kaels insuffisants (${formatKaels(currentKaels)}/${formatKaels(total)}).`,
+                        'error'
+                    );
+                    return;
+                }
                 const ok = window.confirm(`Acheter "${item.name}" pour ${formatKaels(total)} kaels ?`);
                 if (!ok) return;
 
@@ -947,10 +989,17 @@ function renderListings(listings) {
                 try {
                     await buyListing(listing.id);
                     await refreshProfile();
-                    await applyInventoryDelta(listing.item_id, listing.quantity);
+                    const inventoryUpdated = await applyInventoryDelta(listing.item_id, listing.quantity);
+                    const scrollUpdated = listing.scroll_type && isScrollItem(item)
+                        ? await applyScrollTypeRestock(item, listing.scroll_type, listing.quantity)
+                        : true;
                     populateSellSelect();
                     await refreshSearch();
-                    setStatus(dom.search.status, 'Achat effectue.', 'success');
+                    if (!inventoryUpdated || !scrollUpdated) {
+                        setStatus(dom.search.status, 'Achat effectue, inventaire non mis a jour.', 'error');
+                    } else {
+                        setStatus(dom.search.status, 'Achat effectue.', 'success');
+                    }
                 } catch (err) {
                     console.error(err);
                     setStatus(dom.search.status, err?.message || "Erreur lors de l'achat.", 'error');
@@ -1206,10 +1255,17 @@ function renderMyListings(listings) {
                 btn.textContent = '...';
                 try {
                     await cancelListing(listing.id);
-                    await applyInventoryDelta(listing.item_id, listing.quantity);
+                    const inventoryUpdated = await applyInventoryDelta(listing.item_id, listing.quantity);
+                    const scrollUpdated = listing.scroll_type && isScrollItem(item)
+                        ? await applyScrollTypeRestock(item, listing.scroll_type, listing.quantity)
+                        : true;
                     populateSellSelect();
                     await refreshMine();
-                    setStatus(dom.mine.status, 'Offre retiree.', 'success');
+                    if (!inventoryUpdated || !scrollUpdated) {
+                        setStatus(dom.mine.status, 'Offre retiree, inventaire non mis a jour.', 'error');
+                    } else {
+                        setStatus(dom.mine.status, 'Offre retiree.', 'success');
+                    }
                 } catch (err) {
                     console.error(err);
                     setStatus(dom.mine.status, err?.message || 'Erreur lors du retrait.', 'error');
@@ -1450,10 +1506,15 @@ function wireEvents() {
         let available = entry ? Math.max(0, Number(entry.quantity) || 0) : 0;
         const quantity = asInt(dom.mine.qty.value) ?? 1;
         const unitPrice = parsePriceInput(dom.mine.unitPrice.value);
-        const scrollType = isScrollItem(entry) ? String(dom.mine.scrollTypeSelect?.value || '').trim() : '';
-        const scrollCounts = isScrollItem(entry) && scrollType ? buildScrollCountsForSale(entry, scrollType) : null;
-        if (scrollCounts) {
-            available = Math.max(0, Number(scrollCounts[scrollType]) || 0);
+        const isScroll = isScrollItem(entry);
+        const scrollType = isScroll ? String(dom.mine.scrollTypeSelect?.value || '').trim() : '';
+        const scrollCounts = isScroll
+            ? (scrollType ? buildScrollCountsForSale(entry, scrollType) : getScrollTypeCounts(entry))
+            : null;
+        if (isScroll && scrollType) {
+            available = scrollCounts && typeof scrollCounts === 'object'
+                ? Math.max(0, Number(scrollCounts[scrollType]) || 0)
+                : 0;
         }
 
         if (!itemId) {
@@ -1485,12 +1546,16 @@ function wireEvents() {
         setStatus(dom.mine.status, "Creation de l'offre...", 'info');
         try {
             await createListing({ itemId, item: entry, quantity, unitPrice, scrollType });
-            await applyInventoryDelta(itemId, -quantity);
+            const inventoryUpdated = await applyInventoryDelta(itemId, -quantity);
             if (scrollType && isScrollItem(entry)) {
                 await applyScrollTypeSale(entry, scrollType, quantity);
             }
             populateSellSelect();
-            setStatus(dom.mine.status, 'Offre creee.', 'success');
+            setStatus(
+                dom.mine.status,
+                inventoryUpdated ? 'Offre creee.' : 'Offre creee, inventaire non mis a jour.',
+                inventoryUpdated ? 'success' : 'error'
+            );
             await refreshSearch();
             await refreshMine();
         } catch (err) {

@@ -262,6 +262,7 @@ textarea {
     gap: var(--space-2);
     width: 44px;
     height: 44px;
+    max-width: 100%;
     padding: 4px;
     border-radius: var(--radius-xl);
     border: 2px solid var(--color-primary-light);
@@ -273,7 +274,7 @@ textarea {
 
 .inventory-search.is-open,
 .inventory-search:focus-within {
-    width: min(280px, 92vw);
+    width: min(280px, 100%);
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
 }
