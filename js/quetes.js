@@ -18,8 +18,6 @@ const state = {
         rank: "all",
         historyType: "all"
     },
-    page: 0,
-    perPage: 3,
     activeQuestId: null,
     activeImageIndex: 0,
     isAdmin: false,
@@ -57,6 +55,7 @@ const dom = {
     detailPrev: document.getElementById("questDetailPrev"),
     detailNext: document.getElementById("questDetailNext"),
     mediaImage: document.getElementById("questMediaImage"),
+    mediaFrame: document.querySelector(".quest-media-frame"),
     mediaDots: document.getElementById("questMediaDots"),
     mediaPrev: document.getElementById("questMediaPrev"),
     mediaNext: document.getElementById("questMediaNext"),
@@ -284,19 +283,10 @@ function getFilteredQuests() {
     });
 }
 
-function setPage(nextPage, total) {
-    const maxPage = Math.max(0, Math.ceil(total / state.perPage) - 1);
-    state.page = Math.min(Math.max(0, nextPage), maxPage);
-}
-
 function renderQuestList() {
     const filtered = getFilteredQuests();
-    setPage(state.page, filtered.length);
-    const start = state.page * state.perPage;
-    const slice = filtered.slice(start, start + state.perPage);
-
     dom.track.innerHTML = "";
-    slice.forEach((quest, index) => {
+    filtered.forEach((quest, index) => {
         const meta = getStatusMeta(quest.status);
         const card = document.createElement("article");
         card.className = "quest-card";
@@ -326,6 +316,9 @@ function renderQuestList() {
     dom.track.querySelectorAll(".quest-details-btn").forEach((btn) => {
         btn.addEventListener("click", () => openDetail(btn.dataset.id));
     });
+
+    dom.track.scrollTo({ left: 0, behavior: "auto" });
+    updateCarouselParallax();
 }
 
 function renderHistory() {
@@ -499,6 +492,207 @@ function navigateDetail(delta) {
     openDetail(filtered[nextIndex].id);
 }
 
+function getTrackGap() {
+    const styles = window.getComputedStyle(dom.track);
+    return Number.parseFloat(styles.columnGap || styles.gap || 0) || 0;
+}
+
+function getTrackStep() {
+    const card = dom.track.querySelector(".quest-card");
+    if (!card) return dom.track.clientWidth || 0;
+    const gap = getTrackGap();
+    return card.getBoundingClientRect().width + gap;
+}
+
+function updateCarouselParallax() {
+    const cards = Array.from(dom.track.querySelectorAll(".quest-card"));
+    if (!cards.length) return;
+    const trackRect = dom.track.getBoundingClientRect();
+    cards.forEach((card) => {
+        const img = card.querySelector("img");
+        if (!img) return;
+        const rect = card.getBoundingClientRect();
+        const center = rect.left + rect.width / 2;
+        const offset = (center - (trackRect.left + trackRect.width / 2)) / trackRect.width;
+        const translate = Math.max(-1, Math.min(1, offset)) * 16;
+        img.style.transform = `translateX(${translate}px) scale(1.02)`;
+    });
+}
+
+function getVisibleCount() {
+    const step = getTrackStep();
+    const gap = getTrackGap();
+    if (!step) return 1;
+    return Math.max(1, Math.floor((dom.track.clientWidth + gap) / step));
+}
+
+function scrollCarousel(direction) {
+    const step = getTrackStep();
+    const visible = getVisibleCount();
+    if (!step) return;
+    dom.track.scrollBy({ left: step * visible * direction, behavior: "smooth" });
+}
+
+function snapCarousel() {
+    const step = getTrackStep();
+    if (!step) return;
+    const index = Math.round(dom.track.scrollLeft / step);
+    dom.track.scrollTo({ left: index * step, behavior: "smooth" });
+}
+
+function bindCarouselDrag() {
+    let isDragging = false;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+    let skipClick = false;
+    let lastX = 0;
+    let lastTime = 0;
+    let velocity = 0;
+    let momentumId = null;
+
+    const stopMomentum = () => {
+        if (momentumId) cancelAnimationFrame(momentumId);
+        momentumId = null;
+    };
+
+    const startMomentum = () => {
+        stopMomentum();
+        let momentumVelocity = velocity;
+        let lastFrame = performance.now();
+
+        const step = (time) => {
+            const delta = time - lastFrame;
+            lastFrame = time;
+            momentumVelocity *= 0.92;
+            dom.track.scrollLeft -= momentumVelocity * delta;
+            updateCarouselParallax();
+            if (Math.abs(momentumVelocity) > 0.02) {
+                momentumId = requestAnimationFrame(step);
+            } else {
+                momentumId = null;
+                snapCarousel();
+            }
+        };
+
+        if (Math.abs(momentumVelocity) > 0.04) {
+            momentumId = requestAnimationFrame(step);
+        } else {
+            snapCarousel();
+        }
+    };
+
+    dom.track.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        isDragging = true;
+        moved = false;
+        skipClick = false;
+        startX = event.clientX;
+        startScroll = dom.track.scrollLeft;
+        lastX = event.clientX;
+        lastTime = performance.now();
+        velocity = 0;
+        stopMomentum();
+        dom.track.setPointerCapture(event.pointerId);
+        dom.track.classList.add("is-dragging");
+    });
+
+    dom.track.addEventListener("pointermove", (event) => {
+        if (!isDragging) return;
+        const delta = event.clientX - startX;
+        if (Math.abs(delta) > 6) moved = true;
+        dom.track.scrollLeft = startScroll - delta;
+        const now = performance.now();
+        const dt = now - lastTime;
+        if (dt > 0) {
+            velocity = (event.clientX - lastX) / dt;
+            lastX = event.clientX;
+            lastTime = now;
+        }
+        updateCarouselParallax();
+    });
+
+    function endDrag(event) {
+        if (!isDragging) return;
+        isDragging = false;
+        dom.track.releasePointerCapture(event.pointerId);
+        dom.track.classList.remove("is-dragging");
+        if (moved) {
+            skipClick = true;
+            startMomentum();
+            setTimeout(() => {
+                skipClick = false;
+            }, 0);
+        }
+    }
+
+    dom.track.addEventListener("pointerup", endDrag);
+    dom.track.addEventListener("pointercancel", endDrag);
+
+    dom.track.addEventListener("click", (event) => {
+        if (!skipClick) return;
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
+    dom.track.addEventListener("scroll", () => {
+        if (isDragging) return;
+        updateCarouselParallax();
+    }, { passive: true });
+}
+
+function bindMediaDrag() {
+    if (!dom.mediaFrame) return;
+    let isDragging = false;
+    let startX = 0;
+    let lastX = 0;
+    let lastTime = 0;
+    let velocity = 0;
+
+    dom.mediaFrame.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        isDragging = true;
+        startX = event.clientX;
+        lastX = event.clientX;
+        lastTime = performance.now();
+        velocity = 0;
+        dom.mediaFrame.setPointerCapture(event.pointerId);
+        dom.mediaFrame.classList.add("is-dragging");
+    });
+
+    dom.mediaFrame.addEventListener("pointermove", (event) => {
+        if (!isDragging) return;
+        const now = performance.now();
+        const dt = now - lastTime;
+        if (dt > 0) {
+            velocity = (event.clientX - lastX) / dt;
+            lastX = event.clientX;
+            lastTime = now;
+        }
+    });
+
+    function endDrag(event) {
+        if (!isDragging) return;
+        isDragging = false;
+        dom.mediaFrame.releasePointerCapture(event.pointerId);
+        dom.mediaFrame.classList.remove("is-dragging");
+        const delta = event.clientX - startX;
+        const quest = state.quests.find((item) => item.id === state.activeQuestId);
+        if (!quest) return;
+        const threshold = dom.mediaFrame.clientWidth * 0.15;
+        if (delta > threshold || velocity > 0.4) {
+            state.activeImageIndex = (state.activeImageIndex - 1 + quest.images.length) % quest.images.length;
+            renderMedia(quest);
+        } else if (delta < -threshold || velocity < -0.4) {
+            state.activeImageIndex = (state.activeImageIndex + 1) % quest.images.length;
+            renderMedia(quest);
+        }
+    }
+
+    dom.mediaFrame.addEventListener("pointerup", endDrag);
+    dom.mediaFrame.addEventListener("pointercancel", endDrag);
+}
+
 function openEditor(quest) {
     state.editor.questId = quest ? quest.id : null;
     state.editor.images = quest ? [...quest.images] : [];
@@ -644,21 +838,17 @@ function bindEvents() {
     });
     dom.typeFilter.addEventListener("change", () => {
         state.filters.type = dom.typeFilter.value;
-        state.page = 0;
         renderQuestList();
     });
     dom.rankFilter.addEventListener("change", () => {
         state.filters.rank = dom.rankFilter.value;
-        state.page = 0;
         renderQuestList();
     });
     dom.prevBtn.addEventListener("click", () => {
-        state.page -= 1;
-        renderQuestList();
+        scrollCarousel(-1);
     });
     dom.nextBtn.addEventListener("click", () => {
-        state.page += 1;
-        renderQuestList();
+        scrollCarousel(1);
     });
     dom.detailPrev.addEventListener("click", () => navigateDetail(-1));
     dom.detailNext.addEventListener("click", () => navigateDetail(1));
@@ -708,6 +898,8 @@ function bindEvents() {
     dom.imageFileInput.addEventListener("change", handleImageFile);
     dom.addRewardBtn.addEventListener("click", handleAddReward);
     bindEditorListEvents();
+    bindCarouselDrag();
+    bindMediaDrag();
 }
 
 async function init() {
