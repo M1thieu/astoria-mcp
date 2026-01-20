@@ -1,5 +1,6 @@
-import { getActiveCharacter, getCurrentUser, isAdmin, refreshSessionUser } from "./auth.js";
+import { getActiveCharacter, getAllItems, getCurrentUser, isAdmin, refreshSessionUser } from "./auth.js";
 import { initCharacterSummary } from "./ui/character-summary.js";
+import { getInventoryRows, setInventoryItem } from "./api/inventory-service.js";
 
 const QUEST_TYPES = ["Expédition", "Chasse", "Assistance", "Investigation"];
 const QUEST_RANKS = ["F", "E", "D", "C", "B", "A", "S", "S+", "SS", "SSS"];
@@ -12,6 +13,8 @@ const STATUS_META = {
 const state = {
     quests: [],
     history: [],
+    items: [],
+    inventoryCache: new Map(),
     filters: {
         search: "",
         type: "all",
@@ -100,6 +103,16 @@ function normalize(value) {
     return String(value || "").trim().toLowerCase();
 }
 
+function normalizeText(value) {
+    if (window.astoriaListHelpers?.normalizeText) {
+        return window.astoriaListHelpers.normalizeText(value);
+    }
+    return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+}
+
 function escapeHtml(value) {
     return String(value || "")
         .replace(/&/g, "&amp;")
@@ -112,7 +125,7 @@ function escapeHtml(value) {
 function buildParticipant(label, id) {
     const safeLabel = String(label || "Invite");
     const key = id ? `id:${id}` : `name:${normalize(safeLabel)}`;
-    return { key, label: safeLabel };
+    return { key, label: safeLabel, id: id || null };
 }
 
 function resolveParticipant() {
@@ -132,6 +145,136 @@ function resolveParticipant() {
 
 function getStatusMeta(status) {
     return STATUS_META[status] || STATUS_META.available;
+}
+
+function resolveParticipantId(participant) {
+    if (!participant) return null;
+    if (participant.id) return participant.id;
+    const key = String(participant.key || "");
+    if (key.startsWith("id:")) {
+        return key.slice(3);
+    }
+    return null;
+}
+
+async function loadItemCatalog() {
+    const base = (typeof inventoryData !== "undefined" && Array.isArray(inventoryData))
+        ? inventoryData
+        : (Array.isArray(window.inventoryData) ? window.inventoryData : []);
+    state.items = Array.isArray(base) ? base.map((item) => ({ ...item })) : [];
+
+    if (typeof getAllItems !== "function") return;
+    try {
+        const rows = await getAllItems();
+        if (!Array.isArray(rows) || rows.length === 0) return;
+        rows.forEach((row) => {
+            const name = String(row?.name || "").trim();
+            if (!name) return;
+            const existing = state.items.find((item) => normalizeText(item?.name) === normalizeText(name));
+            if (existing) {
+                existing.id = row.id ?? existing.id;
+                existing.images = row.images ?? existing.images;
+                return;
+            }
+            state.items.push({
+                id: row.id,
+                name,
+                category: row.category,
+                rarity: row.rarity,
+                description: row.description,
+                effect: row.effect,
+                buyPrice: row.price_po,
+                sellPrice: row.price_pa,
+                images: row.images
+            });
+        });
+    } catch (error) {
+        console.warn("[Quetes] Items load failed:", error);
+    }
+}
+
+function resolveItemByName(name) {
+    const key = normalizeText(name);
+    if (!key) return null;
+    const direct = state.items.find((item) => normalizeText(item?.name) === key);
+    return direct || null;
+}
+
+function resolveSourceIndex(item) {
+    if (!item) return null;
+    const direct = Number(item.sourceIndex);
+    if (Number.isFinite(direct) && direct >= 0) return direct;
+    const idx = state.items.findIndex((entry) => entry && entry.name === item.name);
+    return idx >= 0 ? idx : null;
+}
+
+async function getInventoryCache(characterId) {
+    if (state.inventoryCache.has(characterId)) {
+        return state.inventoryCache.get(characterId);
+    }
+    try {
+        const rows = await getInventoryRows(characterId);
+        state.inventoryCache.set(characterId, rows);
+        return rows;
+    } catch (error) {
+        console.warn("[Quetes] Inventory load failed:", error);
+        return null;
+    }
+}
+
+async function applyInventoryDelta(characterId, itemName, delta) {
+    const safeDelta = Math.trunc(Number(delta) || 0);
+    if (!characterId || !safeDelta) return false;
+    const rows = await getInventoryCache(characterId);
+    if (!Array.isArray(rows)) return false;
+
+    const item = resolveItemByName(itemName) || { name: itemName };
+    const sourceIndex = resolveSourceIndex(item);
+    const normalized = normalizeText(itemName);
+    const entry = rows.find((row) =>
+        normalizeText(row?.item_key) === normalized ||
+        normalizeText(row?.name) === normalized
+    ) || null;
+    const currentQty = entry ? Math.floor(Number(entry?.qty) || 0) : 0;
+    const nextQty = currentQty + safeDelta;
+    if (nextQty < 0) return false;
+
+    const itemKey = item?.name ? String(item.name) : String(itemName || "");
+    try {
+        const updated = await setInventoryItem(characterId, itemKey, sourceIndex, nextQty);
+        if (entry) {
+            entry.qty = nextQty;
+            entry.item_key = itemKey;
+            entry.item_index = Number.isFinite(Number(sourceIndex)) ? Number(sourceIndex) : entry.item_index;
+        } else if (updated) {
+            rows.push({
+                id: updated.id,
+                item_key: updated.item_key,
+                item_index: updated.item_index,
+                qty: updated.qty
+            });
+        }
+        return true;
+    } catch (error) {
+        console.warn("[Quetes] Inventory update failed:", error);
+        return false;
+    }
+}
+
+async function applyRewardsToParticipants(quest) {
+    if (!quest || !Array.isArray(quest.rewards) || quest.rewards.length === 0) return;
+    for (const participant of quest.participants) {
+        const characterId = resolveParticipantId(participant);
+        if (!characterId) continue;
+        for (const reward of quest.rewards) {
+            const rewardName = String(reward?.name || "").trim();
+            if (!rewardName) continue;
+            if (normalizeText(rewardName) === "kaels") {
+                continue;
+            }
+            await applyInventoryDelta(characterId, rewardName, reward.qty || 0);
+        }
+    }
 }
 
 function syncStatusDots(value) {
@@ -502,7 +645,7 @@ function toggleParticipation() {
     renderQuestList();
 }
 
-function validateQuest() {
+async function validateQuest() {
     if (!state.isAdmin) return;
     const questId = dom.editorModal.classList.contains("open") && state.editor.questId
         ? state.editor.questId
@@ -521,6 +664,8 @@ function validateQuest() {
         name: quest.name,
         gains: gains || "Aucun gain"
     });
+
+    await applyRewardsToParticipants(quest);
 
     quest.participants.forEach((participant) => {
         if (!quest.completedBy.includes(participant.key)) {
@@ -1092,6 +1237,7 @@ async function init() {
     state.isAdmin = Boolean(isAdmin?.());
     state.participant = resolveParticipant();
 
+    await loadItemCatalog();
     seedData();
     fillFilters();
     syncAdminUI();
