@@ -210,13 +210,14 @@ body.quest-board::after {
     border-radius: 26px;
     background: rgba(255, 255, 255, 0.9);
     border: 3px solid rgba(255, 106, 162, 0.35);
-    padding: 20px;
+    padding: 0;
     box-shadow: var(--quest-shadow);
     overflow: hidden;
     animation: questCardIn 0.6s ease both;
     animation-delay: var(--delay, 0ms);
     flex: 0 0 auto;
     scroll-snap-align: center;
+    perspective: 1200px;
 }
 
 .quest-card::before {
@@ -309,6 +310,7 @@ body.quest-board::after {
     margin-top: auto;
     display: flex;
     justify-content: center;
+    gap: 12px;
 }
 
 .quest-details-btn {
@@ -319,6 +321,62 @@ body.quest-board::after {
     padding: 8px 18px;
     font-weight: 700;
     cursor: pointer;
+}
+
+.quest-flip-btn {
+    border: none;
+    background: rgba(255, 106, 162, 0.12);
+    color: var(--quest-pink);
+    border-radius: 18px;
+    padding: 8px 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.quest-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+    min-height: 360px;
+}
+
+.quest-card.is-flipped .quest-card-inner {
+    transform: rotateY(180deg);
+}
+
+.quest-card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.quest-card-face--back {
+    transform: rotateY(180deg);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.quest-card-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    font-weight: 600;
+    color: var(--quest-ink);
+}
+
+.quest-card-summary h4 {
+    margin: 0 0 6px;
+    color: var(--quest-pink);
+}
+
+.quest-card-summary ul {
+    margin: 0;
+    padding-left: 18px;
 }
 
 .quest-history {
@@ -882,5 +940,9 @@ body.quest-board::after {
 
     .quest-editor-field--wide {
         grid-column: span 1;
+    }
+
+    .quest-card-summary {
+        grid-template-columns: 1fr;
     }
 }

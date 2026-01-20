@@ -302,21 +302,46 @@ function renderQuestList() {
         card.className = "quest-card";
         card.style.setProperty("--status-color", meta.color);
         card.style.setProperty("--delay", `${index * 120}ms`);
+        const rewards = quest.rewards.slice(0, 3).map((reward) => `<li>${escapeHtml(reward.name)} x${reward.qty}</li>`).join("");
+        const locations = quest.locations.slice(0, 3).map((loc) => `<li>${escapeHtml(loc)}</li>`).join("");
         card.innerHTML = `
-            <div class="quest-card-content">
-                <div class="quest-card-header">
-                    <h3 class="quest-card-title">${escapeHtml(quest.name)}</h3>
-                    <span class="quest-rank-badge">${escapeHtml(quest.rank)}</span>
+            <div class="quest-card-inner">
+                <div class="quest-card-face quest-card-face--front">
+                    <div class="quest-card-header">
+                        <h3 class="quest-card-title">${escapeHtml(quest.name)}</h3>
+                        <span class="quest-rank-badge">${escapeHtml(quest.rank)}</span>
+                    </div>
+                    <div class="quest-card-media">
+                        <img src="${escapeHtml(quest.images[0])}" alt="Illustration ${escapeHtml(quest.name)}" draggable="false">
+                    </div>
+                    <div class="quest-card-meta">
+                        <span class="quest-type-pill">${escapeHtml(quest.type)}</span>
+                        <span class="quest-status-pill">${escapeHtml(meta.label)}</span>
+                    </div>
+                    <div class="quest-card-actions">
+                        <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
+                        <button class="quest-flip-btn" type="button" data-flip="true">Apercu</button>
+                    </div>
                 </div>
-                <div class="quest-card-media">
-                    <img src="${escapeHtml(quest.images[0])}" alt="Illustration ${escapeHtml(quest.name)}" draggable="false">
-                </div>
-                <div class="quest-card-meta">
-                    <span class="quest-type-pill">${escapeHtml(quest.type)}</span>
-                    <span class="quest-status-pill">${escapeHtml(meta.label)}</span>
-                </div>
-                <div class="quest-card-actions">
-                    <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
+                <div class="quest-card-face quest-card-face--back">
+                    <div class="quest-card-header">
+                        <h3 class="quest-card-title">${escapeHtml(quest.name)}</h3>
+                        <span class="quest-rank-badge">${escapeHtml(quest.rank)}</span>
+                    </div>
+                    <div class="quest-card-summary">
+                        <div>
+                            <h4>Recompenses</h4>
+                            <ul>${rewards || "<li>A definir</li>"}</ul>
+                        </div>
+                        <div>
+                            <h4>Lieux</h4>
+                            <ul>${locations || "<li>A definir</li>"}</ul>
+                        </div>
+                    </div>
+                    <div class="quest-card-actions">
+                        <button class="quest-flip-btn" type="button" data-flip="false">Retour</button>
+                        <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -325,6 +350,15 @@ function renderQuestList() {
 
     dom.track.querySelectorAll(".quest-details-btn").forEach((btn) => {
         btn.addEventListener("click", () => openDetail(btn.dataset.id));
+    });
+    dom.track.querySelectorAll(".quest-flip-btn").forEach((btn) => {
+        btn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const card = btn.closest(".quest-card");
+            if (!card) return;
+            const shouldFlip = btn.dataset.flip === "true";
+            card.classList.toggle("is-flipped", shouldFlip);
+        });
     });
 
     updateCarouselMetrics();
@@ -539,15 +573,34 @@ function getVisibleCount() {
 
 function scrollCarousel(direction) {
     const visible = getVisibleCount();
-    const distance = state.carousel.step * visible * direction;
-    applyCarouselPosition(state.carousel.x + distance, true);
+    const snaps = state.carousel.snaps || [];
+    if (!snaps.length) return;
+    let closestIndex = 0;
+    let min = Math.abs(state.carousel.x - snaps[0]);
+    snaps.forEach((snap, idx) => {
+        const dist = Math.abs(state.carousel.x - snap);
+        if (dist < min) {
+            min = dist;
+            closestIndex = idx;
+        }
+    });
+    const nextIndex = Math.max(0, Math.min(snaps.length - 1, closestIndex + visible * direction));
+    applyCarouselPosition(snaps[nextIndex], true);
 }
 
 function snapCarousel() {
-    const step = state.carousel.step || getTrackStep();
-    if (!step) return;
-    const index = Math.round(state.carousel.x / step);
-    applyCarouselPosition(index * step, true);
+    const snaps = state.carousel.snaps || [];
+    if (!snaps.length) return;
+    let closest = snaps[0];
+    let min = Math.abs(state.carousel.x - closest);
+    for (const snap of snaps) {
+        const dist = Math.abs(state.carousel.x - snap);
+        if (dist < min) {
+            min = dist;
+            closest = snap;
+        }
+    }
+    applyCarouselPosition(closest, true);
 }
 
 function updateCarouselMetrics() {
@@ -565,12 +618,14 @@ function updateCarouselMetrics() {
 
     const step = cardWidth + gap;
     const trackWidth = cards.length ? (cards.length * step) - gap : viewportWidth;
+    const centerOffset = (viewportWidth - cardWidth) / 2;
     state.carousel.step = step;
-    state.carousel.maxX = 0;
-    state.carousel.minX = Math.min(0, viewportWidth - trackWidth);
+    state.carousel.maxX = centerOffset;
+    state.carousel.minX = Math.min(centerOffset, centerOffset - (trackWidth - cardWidth));
     if (!Number.isFinite(state.carousel.minX)) state.carousel.minX = 0;
     state.carousel.x = Math.max(state.carousel.minX, Math.min(state.carousel.maxX, state.carousel.x));
     dom.track.style.width = `${trackWidth}px`;
+    state.carousel.snaps = cards.map((_, idx) => centerOffset - idx * step);
 }
 
 function applyCarouselPosition(nextX, animate = false) {
