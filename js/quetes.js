@@ -539,6 +539,19 @@ function getVisibleCount() {
     return 3;
 }
 
+function getCarouselViewportWidth() {
+    const root = dom.track.parentElement;
+    if (!root) return dom.track.clientWidth || 0;
+    const styles = window.getComputedStyle(root);
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || 0) || 0;
+    const leftVisible = dom.prevBtn && window.getComputedStyle(dom.prevBtn).display !== "none";
+    const rightVisible = dom.nextBtn && window.getComputedStyle(dom.nextBtn).display !== "none";
+    const leftWidth = leftVisible ? dom.prevBtn.offsetWidth : 0;
+    const rightWidth = rightVisible ? dom.nextBtn.offsetWidth : 0;
+    const gapCount = leftVisible && rightVisible ? 2 : leftVisible || rightVisible ? 1 : 0;
+    return Math.max(0, root.clientWidth - leftWidth - rightWidth - gap * gapCount);
+}
+
 function scrollCarousel(direction) {
     const snaps = state.carousel.snaps || [];
     if (!snaps.length) return;
@@ -574,7 +587,7 @@ function updateCarouselMetrics() {
     const cards = Array.from(dom.track.querySelectorAll(".quest-card"));
     const gap = getTrackGap();
     const visible = getVisibleCount();
-    const viewportWidth = dom.track.parentElement.clientWidth;
+    const viewportWidth = getCarouselViewportWidth();
     const cardWidth = visible > 0
         ? Math.max(220, (viewportWidth - gap * (visible - 1)) / visible)
         : viewportWidth;
@@ -593,6 +606,13 @@ function updateCarouselMetrics() {
     state.carousel.x = Math.max(state.carousel.minX, Math.min(state.carousel.maxX, state.carousel.x));
     dom.track.style.width = `${trackWidth}px`;
     state.carousel.snaps = cards.map((_, idx) => centerOffset - idx * step);
+}
+
+function isEditableTarget(target) {
+    if (!target) return false;
+    if (target.isContentEditable) return true;
+    const tag = target.tagName ? target.tagName.toLowerCase() : "";
+    return tag === "input" || tag === "textarea" || tag === "select";
 }
 
 function applyCarouselPosition(nextX, animate = false) {
@@ -927,6 +947,17 @@ function bindEvents() {
     });
     dom.nextBtn.addEventListener("click", () => {
         scrollCarousel(1);
+    });
+    window.addEventListener("keydown", (event) => {
+        if (event.defaultPrevented) return;
+        if (isEditableTarget(event.target)) return;
+        if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            scrollCarousel(-1);
+        } else if (event.key === "ArrowRight") {
+            event.preventDefault();
+            scrollCarousel(1);
+        }
     });
     dom.detailPrev.addEventListener("click", () => navigateDetail(-1));
     dom.detailNext.addEventListener("click", () => navigateDetail(1));
