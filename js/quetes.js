@@ -532,10 +532,9 @@ function updateCarouselParallax() {
 }
 
 function getVisibleCount() {
-    const step = getTrackStep();
-    const gap = getTrackGap();
-    if (!step) return 1;
-    return Math.max(1, Math.floor((dom.track.parentElement.clientWidth + gap) / step));
+    if (window.innerWidth <= 720) return 1;
+    if (window.innerWidth <= 980) return 2;
+    return 3;
 }
 
 function scrollCarousel(direction) {
@@ -552,9 +551,20 @@ function snapCarousel() {
 }
 
 function updateCarouselMetrics() {
-    const step = getTrackStep();
-    const trackWidth = (dom.track.querySelectorAll(".quest-card").length * step) - getTrackGap();
+    const cards = Array.from(dom.track.querySelectorAll(".quest-card"));
+    const gap = getTrackGap();
+    const visible = getVisibleCount();
     const viewportWidth = dom.track.parentElement.clientWidth;
+    const cardWidth = visible > 0
+        ? Math.max(220, (viewportWidth - gap * (visible - 1)) / visible)
+        : viewportWidth;
+
+    cards.forEach((card) => {
+        card.style.width = `${cardWidth}px`;
+    });
+
+    const step = cardWidth + gap;
+    const trackWidth = cards.length ? (cards.length * step) - gap : viewportWidth;
     state.carousel.step = step;
     state.carousel.maxX = 0;
     state.carousel.minX = Math.min(0, viewportWidth - trackWidth);

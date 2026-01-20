@@ -215,7 +215,7 @@ body.quest-board::after {
     overflow: hidden;
     animation: questCardIn 0.6s ease both;
     animation-delay: var(--delay, 0ms);
-    flex: 0 0 calc((100% - 48px) / 3);
+    flex: 0 0 auto;
     scroll-snap-align: center;
 }
 
@@ -857,10 +857,6 @@ body.quest-board::after {
         gap: 20px;
     }
 
-    .quest-card {
-        flex-basis: calc((100% - 20px) / 2);
-    }
-
     .quest-history-body {
         grid-template-columns: 1fr;
     }
@@ -877,10 +873,6 @@ body.quest-board::after {
 
     .quest-track {
         gap: 16px;
-    }
-
-    .quest-card {
-        flex-basis: 100%;
     }
 
     .quest-editor-grid,
