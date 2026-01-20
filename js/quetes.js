@@ -328,7 +328,9 @@ function renderQuestList() {
     });
 
     updateCarouselMetrics();
-    applyCarouselPosition(0);
+    const snaps = state.carousel.snaps || [];
+    const initial = snaps.length > 1 ? snaps[1] : snaps[0] || 0;
+    applyCarouselPosition(initial);
     updateCarouselParallax();
 }
 
@@ -538,7 +540,6 @@ function getVisibleCount() {
 }
 
 function scrollCarousel(direction) {
-    const visible = getVisibleCount();
     const snaps = state.carousel.snaps || [];
     if (!snaps.length) return;
     let closestIndex = 0;
@@ -550,7 +551,7 @@ function scrollCarousel(direction) {
             closestIndex = idx;
         }
     });
-    const nextIndex = Math.max(0, Math.min(snaps.length - 1, closestIndex + visible * direction));
+    const nextIndex = Math.max(0, Math.min(snaps.length - 1, closestIndex + direction));
     applyCarouselPosition(snaps[nextIndex], true);
 }
 
