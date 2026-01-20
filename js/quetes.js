@@ -302,46 +302,21 @@ function renderQuestList() {
         card.className = "quest-card";
         card.style.setProperty("--status-color", meta.color);
         card.style.setProperty("--delay", `${index * 120}ms`);
-        const rewards = quest.rewards.slice(0, 3).map((reward) => `<li>${escapeHtml(reward.name)} x${reward.qty}</li>`).join("");
-        const locations = quest.locations.slice(0, 3).map((loc) => `<li>${escapeHtml(loc)}</li>`).join("");
         card.innerHTML = `
-            <div class="quest-card-inner">
-                <div class="quest-card-face quest-card-face--front">
-                    <div class="quest-card-header">
-                        <h3 class="quest-card-title">${escapeHtml(quest.name)}</h3>
-                        <span class="quest-rank-badge">${escapeHtml(quest.rank)}</span>
-                    </div>
-                    <div class="quest-card-media">
-                        <img src="${escapeHtml(quest.images[0])}" alt="Illustration ${escapeHtml(quest.name)}" draggable="false">
-                    </div>
-                    <div class="quest-card-meta">
-                        <span class="quest-type-pill">${escapeHtml(quest.type)}</span>
-                        <span class="quest-status-pill">${escapeHtml(meta.label)}</span>
-                    </div>
-                    <div class="quest-card-actions">
-                        <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
-                        <button class="quest-flip-btn" type="button" data-flip="true">Apercu</button>
-                    </div>
+            <div class="quest-card-content">
+                <div class="quest-card-header">
+                    <h3 class="quest-card-title">${escapeHtml(quest.name)}</h3>
+                    <span class="quest-rank-badge">${escapeHtml(quest.rank)}</span>
                 </div>
-                <div class="quest-card-face quest-card-face--back">
-                    <div class="quest-card-header">
-                        <h3 class="quest-card-title">${escapeHtml(quest.name)}</h3>
-                        <span class="quest-rank-badge">${escapeHtml(quest.rank)}</span>
-                    </div>
-                    <div class="quest-card-summary">
-                        <div>
-                            <h4>Recompenses</h4>
-                            <ul>${rewards || "<li>A definir</li>"}</ul>
-                        </div>
-                        <div>
-                            <h4>Lieux</h4>
-                            <ul>${locations || "<li>A definir</li>"}</ul>
-                        </div>
-                    </div>
-                    <div class="quest-card-actions">
-                        <button class="quest-flip-btn" type="button" data-flip="false">Retour</button>
-                        <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
-                    </div>
+                <div class="quest-card-media">
+                    <img src="${escapeHtml(quest.images[0])}" alt="Illustration ${escapeHtml(quest.name)}" draggable="false">
+                </div>
+                <div class="quest-card-meta">
+                    <span class="quest-type-pill">${escapeHtml(quest.type)}</span>
+                    <span class="quest-status-pill">${escapeHtml(meta.label)}</span>
+                </div>
+                <div class="quest-card-actions">
+                    <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
                 </div>
             </div>
         `;
@@ -350,15 +325,6 @@ function renderQuestList() {
 
     dom.track.querySelectorAll(".quest-details-btn").forEach((btn) => {
         btn.addEventListener("click", () => openDetail(btn.dataset.id));
-    });
-    dom.track.querySelectorAll(".quest-flip-btn").forEach((btn) => {
-        btn.addEventListener("click", (event) => {
-            event.stopPropagation();
-            const card = btn.closest(".quest-card");
-            if (!card) return;
-            const shouldFlip = btn.dataset.flip === "true";
-            card.classList.toggle("is-flipped", shouldFlip);
-        });
     });
 
     updateCarouselMetrics();
@@ -621,7 +587,7 @@ function updateCarouselMetrics() {
     const centerOffset = (viewportWidth - cardWidth) / 2;
     state.carousel.step = step;
     state.carousel.maxX = centerOffset;
-    state.carousel.minX = Math.min(centerOffset, centerOffset - (trackWidth - cardWidth));
+    state.carousel.minX = centerOffset - (step * (cards.length - 1));
     if (!Number.isFinite(state.carousel.minX)) state.carousel.minX = 0;
     state.carousel.x = Math.max(state.carousel.minX, Math.min(state.carousel.maxX, state.carousel.x));
     dom.track.style.width = `${trackWidth}px`;
