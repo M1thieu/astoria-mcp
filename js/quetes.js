@@ -46,7 +46,8 @@ const state = {
         instance: null,
         pendingFile: null,
         previewUrl: ""
-    }
+    },
+    isValidating: false
 };
 
 const dom = {
@@ -165,6 +166,19 @@ function getStatusMeta(status) {
     return STATUS_META[status] || STATUS_META.available;
 }
 
+function parseJsonArray(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+}
+
 function loadStoredState() {
     try {
         const questsRaw = localStorage.getItem(QUEST_STORAGE_KEY);
@@ -189,11 +203,27 @@ function loadStoredState() {
 
 function persistState() {
     try {
+        state.history = dedupeHistory(state.history);
         localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(state.quests));
         localStorage.setItem(QUEST_HISTORY_STORAGE_KEY, JSON.stringify(state.history));
     } catch (error) {
         console.warn("[Quetes] Failed to persist quests:", error);
     }
+}
+
+function dedupeHistory(list) {
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    const output = [];
+    list.forEach((entry) => {
+        const signature = entry?.id
+            ? `id:${entry.id}`
+            : `sig:${entry?.date}|${entry?.type}|${entry?.rank}|${entry?.name}|${entry?.gains}`;
+        if (seen.has(signature)) return;
+        seen.add(signature);
+        output.push(entry);
+    });
+    return output;
 }
 
 function mapQuestRow(row) {
@@ -205,12 +235,12 @@ function mapQuestRow(row) {
         status: row.status,
         repeatable: Boolean(row.repeatable),
         description: row.description || "",
-        locations: Array.isArray(row.locations) ? row.locations : [],
-        rewards: Array.isArray(row.rewards) ? row.rewards : [],
-        images: Array.isArray(row.images) ? row.images : [],
-        participants: Array.isArray(row.participants) ? row.participants : [],
+        locations: parseJsonArray(row.locations),
+        rewards: parseJsonArray(row.rewards),
+        images: parseJsonArray(row.images),
+        participants: parseJsonArray(row.participants),
         maxParticipants: Number(row.max_participants) || 1,
-        completedBy: Array.isArray(row.completed_by) ? row.completed_by : []
+        completedBy: parseJsonArray(row.completed_by)
     };
 }
 
@@ -252,7 +282,7 @@ async function loadHistoryFromDb() {
             .order("date", { ascending: false });
         if (error) throw error;
         if (Array.isArray(data) && data.length) {
-            state.history = data.map(mapHistoryRow);
+            state.history = dedupeHistory(data.map(mapHistoryRow));
             return true;
         }
     } catch (error) {
@@ -304,7 +334,7 @@ async function insertHistoryToDb(entry) {
         };
         const { error } = await supabase
             .from(QUEST_HISTORY_TABLE)
-            .insert([payload]);
+            .upsert([payload], { onConflict: "id" });
         if (error) throw error;
         entry.synced = true;
     } catch (error) {
@@ -921,11 +951,16 @@ function toggleParticipation() {
 
 async function validateQuest() {
     if (!state.isAdmin) return;
+    if (state.isValidating) return;
+    state.isValidating = true;
     const questId = dom.editorModal.classList.contains("open") && state.editor.questId
         ? state.editor.questId
         : state.activeQuestId;
     const quest = state.quests.find((item) => item.id === questId);
-    if (!quest) return;
+    if (!quest) {
+        state.isValidating = false;
+        return;
+    }
 
     const date = new Date().toLocaleString("fr-FR");
     const gains = quest.rewards.map((reward) => `${reward.name} x${reward.qty}`).join(", ");
@@ -956,6 +991,7 @@ async function validateQuest() {
     persistState();
     await upsertQuestToDb(quest);
     await insertHistoryToDb(state.history[0]);
+    state.isValidating = false;
 }
 
 function navigateDetail(delta) {
@@ -1275,12 +1311,16 @@ function renderEditorLists() {
         </div>
     `).join("");
 
-    dom.rewardsList.innerHTML = state.editor.rewards.map((reward, idx) => `
-        <div class="quest-editor-item">
+    dom.rewardsList.innerHTML = state.editor.rewards.map((reward, idx) => {
+        const item = resolveItemByName(reward.name);
+        const tooltip = item?.description ? ` data-tooltip="${escapeHtml(item.description)}"` : "";
+        return `
+        <div class="quest-editor-item"${tooltip}>
             <span>${escapeHtml(reward.name)} x${reward.qty}</span>
             <button type="button" data-remove-reward="${idx}">Retirer</button>
         </div>
-    `).join("");
+        `;
+    }).join("");
 
     if (dom.imagePreview) {
         const previewSrc = state.editor.images[0];
@@ -1620,6 +1660,7 @@ async function init() {
     await loadItemCatalog();
     populateRewardSelect();
     seedData();
+    state.history = dedupeHistory(state.history);
     fillFilters();
     syncAdminUI();
     bindEvents();
