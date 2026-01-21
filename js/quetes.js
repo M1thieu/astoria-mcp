@@ -1,4 +1,4 @@
-import { getActiveCharacter, getAllItems, getCurrentUser, isAdmin, refreshSessionUser } from "./auth.js";
+import { getActiveCharacter, getAllItems, getCurrentUser, getSupabaseClient, isAdmin, refreshSessionUser } from "./auth.js";
 import { initCharacterSummary } from "./ui/character-summary.js";
 import { getInventoryRows, setInventoryItem } from "./api/inventory-service.js";
 
@@ -12,6 +12,8 @@ const STATUS_META = {
 
 const QUEST_STORAGE_KEY = "astoria_quests_state";
 const QUEST_HISTORY_STORAGE_KEY = "astoria_quests_history";
+const QUESTS_TABLE = "quests";
+const QUEST_HISTORY_TABLE = "quest_history";
 
 const state = {
     quests: [],
@@ -191,6 +193,155 @@ function persistState() {
         localStorage.setItem(QUEST_HISTORY_STORAGE_KEY, JSON.stringify(state.history));
     } catch (error) {
         console.warn("[Quetes] Failed to persist quests:", error);
+    }
+}
+
+function mapQuestRow(row) {
+    return {
+        id: row.id,
+        name: row.name,
+        type: row.type,
+        rank: row.rank,
+        status: row.status,
+        repeatable: Boolean(row.repeatable),
+        description: row.description || "",
+        locations: Array.isArray(row.locations) ? row.locations : [],
+        rewards: Array.isArray(row.rewards) ? row.rewards : [],
+        images: Array.isArray(row.images) ? row.images : [],
+        participants: Array.isArray(row.participants) ? row.participants : [],
+        maxParticipants: Number(row.max_participants) || 1,
+        completedBy: Array.isArray(row.completed_by) ? row.completed_by : []
+    };
+}
+
+function mapHistoryRow(row) {
+    return {
+        id: row.id,
+        date: row.date,
+        type: row.type,
+        rank: row.rank,
+        name: row.name,
+        gains: row.gains
+    };
+}
+
+async function loadQuestsFromDb() {
+    try {
+        const supabase = await getSupabaseClient();
+        const { data, error } = await supabase
+            .from(QUESTS_TABLE)
+            .select("*")
+            .order("created_at", { ascending: true });
+        if (error) throw error;
+        if (Array.isArray(data) && data.length) {
+            state.quests = data.map(mapQuestRow);
+            return true;
+        }
+    } catch (error) {
+        console.warn("[Quetes] Failed to load quests from DB:", error);
+    }
+    return false;
+}
+
+async function loadHistoryFromDb() {
+    try {
+        const supabase = await getSupabaseClient();
+        const { data, error } = await supabase
+            .from(QUEST_HISTORY_TABLE)
+            .select("*")
+            .order("date", { ascending: false });
+        if (error) throw error;
+        if (Array.isArray(data) && data.length) {
+            state.history = data.map(mapHistoryRow);
+            return true;
+        }
+    } catch (error) {
+        console.warn("[Quetes] Failed to load history from DB:", error);
+    }
+    return false;
+}
+
+async function upsertQuestToDb(quest) {
+    if (!quest) return;
+    try {
+        const supabase = await getSupabaseClient();
+        const payload = {
+            id: quest.id,
+            name: quest.name,
+            type: quest.type,
+            rank: quest.rank,
+            status: quest.status,
+            repeatable: quest.repeatable,
+            description: quest.description,
+            locations: quest.locations,
+            rewards: quest.rewards,
+            images: quest.images,
+            participants: quest.participants,
+            max_participants: quest.maxParticipants,
+            completed_by: quest.completedBy
+        };
+        const { error } = await supabase
+            .from(QUESTS_TABLE)
+            .upsert([payload], { onConflict: "id" });
+        if (error) throw error;
+    } catch (error) {
+        console.warn("[Quetes] Failed to upsert quest:", error);
+    }
+}
+
+async function insertHistoryToDb(entry) {
+    if (!entry) return;
+    if (entry.synced) return;
+    try {
+        const supabase = await getSupabaseClient();
+        const payload = {
+            id: entry.id,
+            date: entry.date,
+            type: entry.type,
+            rank: entry.rank,
+            name: entry.name,
+            gains: entry.gains
+        };
+        const { error } = await supabase
+            .from(QUEST_HISTORY_TABLE)
+            .insert([payload]);
+        if (error) throw error;
+        entry.synced = true;
+    } catch (error) {
+        console.warn("[Quetes] Failed to insert history:", error);
+    }
+}
+
+async function syncLocalItemsToDb() {
+    if (!state.isAdmin) return;
+    const localItems = (typeof inventoryData !== "undefined" && Array.isArray(inventoryData))
+        ? inventoryData
+        : (Array.isArray(window.inventoryData) ? window.inventoryData : []);
+    if (!localItems.length) return;
+
+    try {
+        const supabase = await getSupabaseClient();
+        const dbItems = await getAllItems();
+        const dbNames = new Set(dbItems.map((item) => normalizeText(item?.name)));
+
+        const payload = localItems
+            .filter((item) => item?.name)
+            .filter((item) => !dbNames.has(normalizeText(item.name)))
+            .map((item) => ({
+                name: item.name,
+                description: item.description || "",
+                effect: item.effect || "",
+                category: String(item.category || "").toLowerCase(),
+                price_po: item.sellPrice || null,
+                price_pa: item.buyPrice || null,
+                images: item.image ? { primary: item.image } : null
+            }));
+
+        if (!payload.length) return;
+        const { error } = await supabase.from("items").insert(payload);
+        if (error) throw error;
+    } catch (error) {
+        console.warn("[Quetes] Local items sync failed:", error);
     }
 }
 
@@ -573,8 +724,9 @@ function renderQuestList() {
     dom.track.innerHTML = "";
     filtered.forEach((quest, index) => {
         const meta = getStatusMeta(quest.status);
+        const joined = isParticipant(quest);
         const card = document.createElement("article");
-        card.className = "quest-card";
+        card.className = `quest-card${joined ? " is-joined" : ""}`;
         card.style.setProperty("--status-color", meta.color);
         card.style.setProperty("--delay", `${index * 120}ms`);
         card.innerHTML = `
@@ -592,6 +744,9 @@ function renderQuestList() {
                 </div>
                 <div class="quest-card-actions">
                     <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
+                </div>
+                <div class="quest-card-participation">
+                    ${joined ? "Vous participez" : "Non inscrit"}
                 </div>
             </div>
         `;
@@ -746,6 +901,7 @@ function toggleParticipation() {
     renderDetail(quest);
     renderQuestList();
     persistState();
+    upsertQuestToDb(quest);
 }
 
 async function validateQuest() {
@@ -783,6 +939,8 @@ async function validateQuest() {
     renderQuestList();
     renderHistory();
     persistState();
+    await upsertQuestToDb(quest);
+    await insertHistoryToDb(state.history[0]);
 }
 
 function navigateDetail(delta) {
@@ -1123,7 +1281,7 @@ function renderEditorLists() {
     }
 }
 
-function handleEditorSubmit(event) {
+async function handleEditorSubmit(event) {
     event.preventDefault();
     const name = dom.nameInput.value.trim();
     if (!name) return;
@@ -1159,6 +1317,7 @@ function handleEditorSubmit(event) {
     renderQuestList();
     closeModal(dom.editorModal);
     persistState();
+    await upsertQuestToDb(questData);
 }
 
 function handleAddImage() {
@@ -1438,7 +1597,11 @@ async function init() {
     state.isAdmin = Boolean(isAdmin?.());
     state.participant = resolveParticipant();
 
-    loadStoredState();
+    const dbLoaded = await loadQuestsFromDb();
+    const historyLoaded = await loadHistoryFromDb();
+    if (!dbLoaded || !historyLoaded) {
+        loadStoredState();
+    }
     await loadItemCatalog();
     populateRewardSelect();
     seedData();
@@ -1447,6 +1610,7 @@ async function init() {
     bindEvents();
     renderQuestList();
     renderHistory();
+    syncLocalItemsToDb();
 }
 
 init();

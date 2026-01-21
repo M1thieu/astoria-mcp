@@ -422,6 +422,17 @@ body.quest-board {
     max-width: 180px;
 }
 
+.quest-card-participation {
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(61, 42, 87, 0.75);
+}
+
+.quest-card.is-joined .quest-card-participation {
+    color: var(--quest-pink);
+}
+
 
 .quest-history {
     background: rgba(255, 255, 255, 0.78);
