@@ -338,7 +338,16 @@ async function syncLocalItemsToDb() {
             }));
 
         if (!payload.length) return;
-        const { error } = await supabase.from("items").insert(payload);
+        let { error } = await supabase.from("items").insert(payload);
+        if (error) {
+            const fallback = payload.map(({ name, description, effect, category }) => ({
+                name,
+                description,
+                effect,
+                category
+            }));
+            ({ error } = await supabase.from("items").insert(fallback));
+        }
         if (error) throw error;
     } catch (error) {
         console.warn("[Quetes] Local items sync failed:", error);
@@ -720,6 +729,7 @@ function getFilteredQuests() {
 }
 
 function renderQuestList() {
+    state.participant = resolveParticipant();
     const filtered = getFilteredQuests();
     dom.track.innerHTML = "";
     filtered.forEach((quest, index) => {
@@ -840,6 +850,8 @@ function renderMedia(quest) {
     if (!images.length) {
         dom.mediaImage.removeAttribute("src");
         dom.mediaDots.innerHTML = "";
+        dom.mediaPrev.hidden = true;
+        dom.mediaNext.hidden = true;
         return;
     }
     const index = Math.max(0, Math.min(state.activeImageIndex, images.length - 1));
@@ -850,6 +862,9 @@ function renderMedia(quest) {
         const active = idx === index ? "active" : "";
         return `<span class="quest-media-dot ${active}"></span>`;
     }).join("");
+    const showControls = images.length > 1;
+    dom.mediaPrev.hidden = !showControls;
+    dom.mediaNext.hidden = !showControls;
 }
 
 function buildJoinNote(quest) {
