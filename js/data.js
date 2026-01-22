@@ -198,6 +198,62 @@ const inventoryData = [
 ];
 
 (function () {
+    const SCROLL_TYPES_META_KEY = "astoria_scroll_types_meta";
+    const DEFAULT_SCROLL_TYPES = [
+        { key: "feu", label: "Feu", emoji: String.fromCodePoint(0x1F525), matchers: ["feu"] },
+        { key: "eau", label: "Eau", emoji: String.fromCodePoint(0x1F4A7), matchers: ["eau"] },
+        { key: "glace", label: "Glace", emoji: String.fromCodePoint(0x1F9CA), matchers: ["glace"] },
+        { key: "cryo", label: "Cryo", emoji: String.fromCodePoint(0x1F9CA), matchers: ["cryo"] },
+        { key: "vent", label: "Vent", emoji: String.fromCodePoint(0x1F32C), matchers: ["vent"] },
+        { key: "terre", label: "Terre", emoji: String.fromCodePoint(0x1FAA8), matchers: ["terre"] },
+        { key: "roche", label: "Roche", emoji: String.fromCodePoint(0x1FAA8), matchers: ["roche"] },
+        { key: "nature", label: "Nature", emoji: String.fromCodePoint(0x1F331), matchers: ["nature"] },
+        { key: "osmose", label: "Osmose", emoji: String.fromCodePoint(0x1F9EC), matchers: ["osmose"] },
+        { key: "foudre", label: "Foudre", emoji: String.fromCodePoint(0x26A1), matchers: ["foudre"] },
+        { key: "lumiere", label: "Lumiere", emoji: String.fromCodePoint(0x1F31F), matchers: ["lumiere"] },
+        { key: "tenebres", label: "Tenebres", emoji: String.fromCodePoint(0x1F319), matchers: ["tenebres"] }
+    ];
+
+    const normalizeText = window.astoriaItemTags?.normalizeText || ((value) => String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase());
+
+    const loadStoredScrollTypes = () => {
+        try {
+            const raw = localStorage.getItem(SCROLL_TYPES_META_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed) || !parsed.length) return null;
+            return parsed
+                .filter((entry) => entry && entry.key)
+                .map((entry) => ({
+                    key: String(entry.key),
+                    label: entry.label ? String(entry.label) : String(entry.key),
+                    emoji: entry.emoji ? String(entry.emoji) : "",
+                    matchers: Array.isArray(entry.matchers) ? entry.matchers : []
+                }));
+        } catch {
+            return null;
+        }
+    };
+
+    const stored = loadStoredScrollTypes();
+    const existing = Array.isArray(window.astoriaScrollTypes) && window.astoriaScrollTypes.length
+        ? window.astoriaScrollTypes
+        : null;
+    const list = (stored && stored.length) ? stored : (existing || DEFAULT_SCROLL_TYPES);
+
+    window.astoriaScrollTypes = list;
+
+    const scrollTypeMap = new Map(list.map((entry) => [normalizeText(entry.key), entry]));
+    window.astoriaGetScrollTypeMeta = (key) => {
+        if (!key) return null;
+        return scrollTypeMap.get(normalizeText(key)) || null;
+    };
+})();
+
+(function () {
     if (window.astoriaItemTags) return;
 
     const normalizeText = window.astoriaListHelpers?.normalizeText || ((value) => String(value || "")

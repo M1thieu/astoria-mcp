@@ -102,7 +102,7 @@ const normalizeText = window.astoriaListHelpers?.normalizeText || ((value) => St
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase());
 
-const SCROLL_TYPES = [
+const DEFAULT_SCROLL_TYPES = [
     { key: 'feu', label: 'Feu', emoji: String.fromCodePoint(0x1F525), matchers: ['feu'] },
     { key: 'eau', label: 'Eau', emoji: String.fromCodePoint(0x1F4A7), matchers: ['eau'] },
     { key: 'glace', label: 'Glace', emoji: String.fromCodePoint(0x1F9CA), matchers: ['glace'] },
@@ -116,6 +116,11 @@ const SCROLL_TYPES = [
     { key: 'lumiere', label: 'Lumiere', emoji: String.fromCodePoint(0x1F31F), matchers: ['lumiere'] },
     { key: 'tenebres', label: 'Tenebres', emoji: String.fromCodePoint(0x1F319), matchers: ['tenebres'] }
 ];
+
+const SCROLL_TYPES = Array.isArray(window.astoriaScrollTypes) && window.astoriaScrollTypes.length
+    ? DEFAULT_SCROLL_TYPES.map((entry) =>
+        window.astoriaScrollTypes.find((type) => type.key === entry.key) || entry)
+    : DEFAULT_SCROLL_TYPES;
 
 const SCROLL_TYPE_MAP = new Map(SCROLL_TYPES.map((type) => [type.key, type]));
 const SCROLL_TYPES_META_KEY = 'astoria_scroll_types_meta';

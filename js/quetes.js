@@ -16,6 +16,21 @@ const QUEST_HISTORY_STORAGE_KEY = "astoria_quests_history";
 const QUESTS_TABLE = "quests";
 const QUEST_HISTORY_TABLE = "quest_history";
 const REWARD_ELEMENTS = ["Feu", "Eau", "Vent", "Terre", "Glace", "Foudre", "Lumiere", "Ombre"];
+const REWARD_ELEMENT_MAP = {
+    feu: "feu",
+    eau: "eau",
+    vent: "vent",
+    terre: "terre",
+    roche: "roche",
+    glace: "glace",
+    cryo: "glace",
+    foudre: "foudre",
+    nature: "nature",
+    osmose: "osmose",
+    lumiere: "lumiere",
+    ombre: "tenebres",
+    tenebres: "tenebres"
+};
 
 const state = {
     quests: [],
@@ -202,6 +217,40 @@ function formatRewardLabel(reward) {
     const name = String(reward.name || "");
     const element = reward.element ? ` (${reward.element})` : "";
     return `${name}${element}`;
+}
+
+function getScrollTypeKeyFromElement(element) {
+    const normalized = normalizeText(element || "");
+    return REWARD_ELEMENT_MAP[normalized] || "";
+}
+
+function buildScrollItemKey(item) {
+    const sourceIndex = resolveSourceIndex(item);
+    if (Number.isFinite(sourceIndex) && sourceIndex >= 0) {
+        return `idx:${sourceIndex}`;
+    }
+    const name = item?.name ? normalizeText(item.name) : "";
+    if (name) {
+        return `name:${name}`;
+    }
+    return "";
+}
+
+function buildScrollRewardEntry(reward) {
+    if (!reward || !reward.name) return null;
+    const helper = window.astoriaItemTags;
+    if (helper?.isScrollItem && !helper.isScrollItem(reward)) return null;
+    if (!helper?.isScrollItem && !shouldRandomizeElement(reward.name)) return null;
+    const item = resolveItemByName(reward.name) || { name: reward.name };
+    const category = helper?.getScrollCategory ? helper.getScrollCategory(item) : null;
+    if (!category) return null;
+    const typeKey = getScrollTypeKeyFromElement(reward.element);
+    if (!typeKey) return null;
+    const qty = Math.max(0, Math.floor(Number(reward.qty) || 0));
+    if (!qty) return null;
+    const itemKey = buildScrollItemKey(item);
+    if (!itemKey) return null;
+    return { category, itemKey, typeKey, qty };
 }
 
 function buildParticipant(label, id) {
@@ -767,12 +816,53 @@ async function applyKaelsDelta(characterId, delta) {
     return Boolean(result?.success);
 }
 
+async function applyScrollTypeRewards(characterId, entries) {
+    if (!characterId || !Array.isArray(entries) || entries.length === 0) return false;
+    let profileData = null;
+    const active = getActiveCharacter?.();
+    if (active && active.id === characterId && active.profile_data) {
+        profileData = active.profile_data;
+    }
+    if (!profileData) {
+        const row = await getCharacterById(characterId);
+        profileData = row?.profile_data || null;
+    }
+
+    const nextProfile = profileData && typeof profileData === "object" ? { ...profileData } : {};
+    const inventory = { ...(nextProfile.inventory || {}) };
+    const scrollTypes = { ...(inventory.scrollTypes || {}) };
+    let updated = false;
+
+    entries.forEach((entry) => {
+        if (!entry || !entry.category || !entry.itemKey || !entry.typeKey || !entry.qty) return;
+        const bucket = { ...(scrollTypes[entry.category] || {}) };
+        const currentEntry = bucket[entry.itemKey] || {};
+        const counts = { ...(currentEntry.counts || {}) };
+        const current = Number(counts[entry.typeKey]) || 0;
+        counts[entry.typeKey] = current + entry.qty;
+        bucket[entry.itemKey] = { counts, updatedAt: Date.now() };
+        scrollTypes[entry.category] = bucket;
+        updated = true;
+    });
+
+    if (!updated) return false;
+    inventory.scrollTypes = scrollTypes;
+    nextProfile.inventory = inventory;
+
+    const result = await updateCharacter(characterId, { profile_data: nextProfile });
+    if (result?.success && active && active.id === characterId) {
+        document.dispatchEvent(new CustomEvent("astoria:character-updated", { detail: { profile_data: nextProfile } }));
+    }
+    return Boolean(result?.success);
+}
+
 async function applyRewardsToParticipants(quest) {
     if (!quest || !Array.isArray(quest.rewards) || quest.rewards.length === 0) return;
     quest.rewards.forEach((reward) => ensureRewardElement(reward));
     for (const participant of quest.participants) {
         const characterId = resolveParticipantId(participant);
         if (!characterId) continue;
+        const scrollEntries = [];
         for (const reward of quest.rewards) {
             const rewardName = String(reward?.name || "").trim();
             if (!rewardName) continue;
@@ -780,7 +870,14 @@ async function applyRewardsToParticipants(quest) {
                 await applyKaelsDelta(characterId, reward.qty || 0);
                 continue;
             }
-            await applyInventoryDelta(characterId, rewardName, reward.qty || 0);
+            const updated = await applyInventoryDelta(characterId, rewardName, reward.qty || 0);
+            if (updated) {
+                const entry = buildScrollRewardEntry(reward);
+                if (entry) scrollEntries.push(entry);
+            }
+        }
+        if (scrollEntries.length) {
+            await applyScrollTypeRewards(characterId, scrollEntries);
         }
     }
 }

@@ -254,7 +254,7 @@
         const INVENTORY_IMAGE_HELPERS = window.astoriaImageHelpers || {};
         const PLACEHOLDER_IMAGE = INVENTORY_IMAGE_HELPERS.smallPlaceholder;
 
-        const SCROLL_TYPES = [
+        const DEFAULT_SCROLL_TYPES = [
             { key: 'feu', emoji: '🔥', label: 'Feu', matchers: ['feu'] },
             { key: 'eau', emoji: '💧', label: 'Eau', matchers: ['eau'] },
             { key: 'vent', emoji: '🌪️', label: 'Vent', matchers: ['vent'] },
@@ -327,6 +327,14 @@
             { key: 'magie-astral', emoji: '🌌', label: 'Magie astral', matchers: ['magie astral', 'magie astrale'] },
             { key: 'elasticite', emoji: '🧶', label: '\u00c9lasticit\u00e9', matchers: ['elasticite', '\u00e9lasticit\u00e9'] }
         ];
+
+        const SCROLL_TYPES = Array.isArray(window.astoriaScrollTypes) && window.astoriaScrollTypes.length
+            ? window.astoriaScrollTypes
+            : DEFAULT_SCROLL_TYPES;
+
+        if (!Array.isArray(window.astoriaScrollTypes) || window.astoriaScrollTypes.length < DEFAULT_SCROLL_TYPES.length) {
+            window.astoriaScrollTypes = DEFAULT_SCROLL_TYPES;
+        }
         const SCROLL_TYPES_META_KEY = 'astoria_scroll_types_meta';
 
         function persistScrollTypeMeta() {
