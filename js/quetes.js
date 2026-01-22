@@ -189,6 +189,20 @@ function buildRewardMeta(item) {
     return meta;
 }
 
+function getScrollTypesList() {
+    const list = Array.isArray(window.astoriaScrollTypes) ? window.astoriaScrollTypes : [];
+    if (list.length) {
+        return list.map((entry) => ({
+            key: String(entry?.key || entry?.label || "").trim(),
+            label: String(entry?.label || entry?.key || "").trim()
+        })).filter((entry) => entry.key || entry.label);
+    }
+    return REWARD_ELEMENTS.map((label) => ({
+        key: normalizeText(label),
+        label
+    }));
+}
+
 function shouldRandomizeElement(itemOrName) {
     const helper = window.astoriaItemTags;
     if (helper?.isScrollItem) {
@@ -199,15 +213,27 @@ function shouldRandomizeElement(itemOrName) {
 }
 
 function pickRewardElement() {
-    const max = REWARD_ELEMENTS.length;
-    if (!max) return "";
-    return REWARD_ELEMENTS[Math.floor(Math.random() * max)];
+    const list = getScrollTypesList();
+    if (!list.length) return { key: "", label: "" };
+    const picked = list[Math.floor(Math.random() * list.length)] || {};
+    return {
+        key: String(picked.key || "").trim(),
+        label: String(picked.label || picked.key || "").trim()
+    };
 }
 
 function ensureRewardElement(reward) {
     if (!reward) return reward;
-    if (!reward.element && shouldRandomizeElement(reward.name)) {
-        reward.element = pickRewardElement();
+    if (shouldRandomizeElement(reward.name)) {
+        if (!reward.element) {
+            const picked = pickRewardElement();
+            reward.element = picked.label || reward.element;
+            if (picked.key) reward.elementKey = picked.key;
+        }
+        if (reward.element && !reward.elementKey) {
+            const fallbackKey = getScrollTypeKeyForReward(reward);
+            if (fallbackKey) reward.elementKey = fallbackKey;
+        }
     }
     return reward;
 }
@@ -219,9 +245,17 @@ function formatRewardLabel(reward) {
     return `${name}${element}`;
 }
 
-function getScrollTypeKeyFromElement(element) {
-    const normalized = normalizeText(element || "");
-    return REWARD_ELEMENT_MAP[normalized] || "";
+function getScrollTypeKeyForReward(reward) {
+    if (!reward) return "";
+    if (reward.elementKey) return String(reward.elementKey);
+    const element = normalizeText(reward.element || "");
+    if (!element) return "";
+    const list = getScrollTypesList();
+    const match = list.find((entry) =>
+        normalizeText(entry.key) === element || normalizeText(entry.label) === element
+    );
+    if (match && match.key) return match.key;
+    return REWARD_ELEMENT_MAP[element] || "";
 }
 
 function buildScrollItemKey(item) {
@@ -244,7 +278,7 @@ function buildScrollRewardEntry(reward) {
     const item = resolveItemByName(reward.name) || { name: reward.name };
     const category = helper?.getScrollCategory ? helper.getScrollCategory(item) : null;
     if (!category) return null;
-    const typeKey = getScrollTypeKeyFromElement(reward.element);
+    const typeKey = getScrollTypeKeyForReward(reward);
     if (!typeKey) return null;
     const qty = Math.max(0, Math.floor(Number(reward.qty) || 0));
     if (!qty) return null;
@@ -428,6 +462,20 @@ async function upsertQuestToDb(quest) {
         if (error) throw error;
     } catch (error) {
         console.warn("[Quetes] Failed to upsert quest:", error);
+    }
+}
+
+async function deleteQuestFromDb(questId) {
+    if (!questId) return;
+    try {
+        const supabase = await getSupabaseClient();
+        const { error } = await supabase
+            .from(QUESTS_TABLE)
+            .delete()
+            .eq("id", questId);
+        if (error) throw error;
+    } catch (error) {
+        console.warn("[Quetes] Failed to delete quest:", error);
     }
 }
 
@@ -1088,6 +1136,9 @@ function renderQuestList() {
         card.className = `quest-card${joined ? " is-joined" : ""}`;
         card.style.setProperty("--status-color", meta.color);
         card.style.setProperty("--delay", `${index * 120}ms`);
+        const adminAction = state.isAdmin
+            ? `<button class="quest-delete-btn" type="button" data-id="${escapeHtml(quest.id)}" aria-label="Supprimer la qu\u00EAte">&#128465;</button>`
+            : "";
         card.innerHTML = `
             <div class="quest-card-content">
                 <div class="quest-card-header">
@@ -1103,6 +1154,7 @@ function renderQuestList() {
                 </div>
                 <div class="quest-card-actions">
                     <button class="quest-details-btn" type="button" data-id="${escapeHtml(quest.id)}">Details</button>
+                    ${adminAction}
                 </div>
                 <div class="quest-card-participation">
                     ${joined ? "Vous participez" : "Non inscrit"}
@@ -1114,6 +1166,29 @@ function renderQuestList() {
 
     dom.track.querySelectorAll(".quest-details-btn").forEach((btn) => {
         btn.addEventListener("click", () => openDetail(btn.dataset.id));
+    });
+    dom.track.querySelectorAll(".quest-delete-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            if (!state.isAdmin) return;
+            const questId = btn.dataset.id;
+            const quest = state.quests.find((item) => item.id === questId);
+            if (!quest) return;
+            if (!window.confirm(`Supprimer la qu\u00EAte "${quest.name}" ?`)) return;
+            state.quests = state.quests.filter((item) => item.id !== questId);
+            if (state.activeQuestId === questId) {
+                closeModal(dom.detailModal);
+                state.activeQuestId = null;
+            }
+            if (state.editor.questId === questId) {
+                closeModal(dom.editorModal);
+                state.editor.questId = null;
+                state.editor.images = [];
+                state.editor.rewards = [];
+            }
+            renderQuestList();
+            persistState();
+            await deleteQuestFromDb(questId);
+        });
     });
 
     updateCarouselMetrics();
@@ -1175,9 +1250,13 @@ function renderDetail(quest) {
 
     dom.detailLocations.innerHTML = quest.locations.map((loc) => `<li>${escapeHtml(loc)}</li>`).join("");
     quest.rewards.forEach((reward) => ensureRewardElement(reward));
-    dom.detailRewards.innerHTML = quest.rewards
-        .map((reward) => `<li>${escapeHtml(formatRewardLabel(reward))} x${reward.qty}</li>`)
-        .join("");
+    if (quest.rewards.length) {
+        dom.detailRewards.innerHTML = quest.rewards
+            .map((reward) => `<li>${escapeHtml(formatRewardLabel(reward))} x${reward.qty}</li>`)
+            .join("");
+    } else {
+        dom.detailRewards.innerHTML = "<li>Aucune recompense</li>";
+    }
     dom.detailDescription.textContent = quest.description;
 
     renderParticipants(quest);
@@ -1684,7 +1763,7 @@ async function handleEditorSubmit(event) {
         repeatable: dom.repeatableInput.checked,
         description: dom.descInput.value.trim() || "Description a definir.",
         locations,
-        rewards: state.editor.rewards.length ? state.editor.rewards : [{ name: "Kaels", qty: 50 }],
+        rewards: state.editor.rewards.length ? state.editor.rewards : [],
         images: state.editor.images.length ? state.editor.images : ["assets/images/objets/Clef_Manndorf.png"],
         participants: [],
         maxParticipants: Math.min(5, Math.max(1, Number(dom.maxParticipantsInput.value) || 1)),
