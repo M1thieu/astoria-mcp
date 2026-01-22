@@ -1438,7 +1438,10 @@ function getVisibleCount() {
 
 function getCarouselViewportWidth() {
     if (!dom.viewport) return dom.track.clientWidth || 0;
-    return dom.viewport.clientWidth || 0;
+    const styles = window.getComputedStyle(dom.viewport);
+    const padLeft = Number.parseFloat(styles.paddingLeft) || 0;
+    const padRight = Number.parseFloat(styles.paddingRight) || 0;
+    return Math.max(0, (dom.viewport.clientWidth || 0) - padLeft - padRight);
 }
 
 function scrollCarousel(direction, stepOverride) {
@@ -1972,10 +1975,10 @@ function bindEvents() {
         });
     });
     dom.prevBtn.addEventListener("click", () => {
-        scrollCarousel(-1, getVisibleCount());
+        scrollCarousel(-1, 1);
     });
     dom.nextBtn.addEventListener("click", () => {
-        scrollCarousel(1, getVisibleCount());
+        scrollCarousel(1, 1);
     });
     window.addEventListener("keydown", (event) => {
         if (event.defaultPrevented) return;
@@ -1984,10 +1987,10 @@ function bindEvents() {
         if (!isCarouselFocused()) return;
         if (event.key === "ArrowLeft") {
             event.preventDefault();
-            scrollCarousel(-1, getVisibleCount());
+            scrollCarousel(-1, 1);
         } else if (event.key === "ArrowRight") {
             event.preventDefault();
-            scrollCarousel(1, getVisibleCount());
+            scrollCarousel(1, 1);
         }
     });
     dom.detailPrev.addEventListener("click", () => navigateDetail(-1));

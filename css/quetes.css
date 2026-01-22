@@ -254,7 +254,7 @@ body.quest-board {
 
 .quest-carousel-viewport {
     overflow: hidden;
-    padding: 10px 10px 20px;
+    padding: 18px 26px 24px;
     position: relative;
     min-height: 320px;
 }
@@ -308,10 +308,10 @@ body.quest-board {
 .quest-card::before {
     content: "";
     position: absolute;
-    inset: -18px;
+    inset: -12px;
     border-radius: 26px;
     background: var(--status-color, rgba(106, 167, 255, 0.4));
-    filter: blur(26px);
+    filter: blur(22px);
     opacity: 0.4;
     z-index: -1;
     pointer-events: none;
