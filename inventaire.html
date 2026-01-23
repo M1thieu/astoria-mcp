@@ -1434,6 +1434,10 @@
                 if (typeof raw === 'string' && raw.trim()) {
                     return raw;
                 }
+                const name = String(item.name || '').trim().toLowerCase();
+                if (name === 'lucky soul') {
+                    return 'assets/nokorah/lucky-soul.svg';
+                }
             }
 
             // No match found, use placeholder

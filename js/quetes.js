@@ -2090,7 +2090,12 @@ function handleAddReward() {
     const name = dom.rewardSelect?.value || "";
     const qty = Math.max(1, Number(dom.rewardQtyInput.value) || 1);
     if (!name) return;
-    state.editor.rewards.push({ name, qty });
+    const existing = state.editor.rewards.find((reward) => normalizeText(reward.name) === normalizeText(name));
+    if (existing) {
+        existing.qty = Math.max(1, Number(existing.qty) || 0) + qty;
+    } else {
+        state.editor.rewards.push({ name, qty });
+    }
     if (dom.rewardSelect) {
         dom.rewardSelect.value = "";
         setRewardTriggerLabel("");

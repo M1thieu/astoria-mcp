@@ -357,13 +357,20 @@ function loadCompetencesSnapshot() {
 async function loadSkills() {
     const { competences, categories } = loadCompetencesSnapshot();
     const fromCompetences = buildSkillListFromCompetences(competences, categories);
-    if (fromCompetences && fromCompetences.length) {
-        return fromCompetences;
+    const baseList = Array.isArray(categories) && categories.length
+        ? flattenSkills(categories)
+        : [];
+    if (!fromCompetences || !fromCompetences.length) {
+        return baseList;
     }
-    if (Array.isArray(categories) && categories.length) {
-        return flattenSkills(categories);
-    }
-    return [];
+    const merged = new Map();
+    baseList.forEach((skill) => {
+        merged.set(skill.id, skill);
+    });
+    fromCompetences.forEach((skill) => {
+        if (!merged.has(skill.id)) merged.set(skill.id, skill);
+    });
+    return Array.from(merged.values());
 }
 
 function getMaxTotalPoints(rarity, upgradeLevel) {
