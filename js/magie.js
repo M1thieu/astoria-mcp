@@ -25,6 +25,7 @@
     const adminSection = document.getElementById("magic-admin");
     const pageTabs = document.getElementById("magicPageTabs");
     const addPageBtn = document.getElementById("magicAddPageBtn");
+    const affinityDisplay = document.getElementById("magicAffinityDisplay");
     const formFields = Array.from(
         document.querySelectorAll(".magic-content input[id], .magic-content textarea[id], .magic-content select[id]")
     );
@@ -68,6 +69,51 @@
         }
     ];
 
+    const FALLBACK_SCROLL_EMOJI = String.fromCodePoint(0x2728);
+    const FALLBACK_MAGIC_AFFINITIES = [
+        { key: "feu", label: "Feu", emoji: String.fromCodePoint(0x1F525) },
+        { key: "eau", label: "Eau", emoji: String.fromCodePoint(0x1F4A7) },
+        { key: "vent", label: "Vent", emoji: String.fromCodePoint(0x1F32C) },
+        { key: "terre", label: "Terre", emoji: String.fromCodePoint(0x1FAA8) },
+        { key: "nature", label: "Nature", emoji: String.fromCodePoint(0x1F331) },
+        { key: "tenebres", label: "Ténèbres", emoji: String.fromCodePoint(0x1F319) }
+    ];
+
+    const MAGIC_ASCENSION_COSTS = {
+        primary: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+        secondary: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+        hidden: [15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
+        none: [25, 30, 35, 40, 45, 50, 55, 60, 65, 70]
+    };
+
+    const normalizeText = window.astoriaListHelpers?.normalizeText || ((value) => String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase());
+
+    function getMagicAffinities() {
+        const base = Array.isArray(window.astoriaScrollTypes) && window.astoriaScrollTypes.length
+            ? window.astoriaScrollTypes
+            : FALLBACK_MAGIC_AFFINITIES;
+        return base.map((entry) => ({
+            key: String(entry.key || "").trim(),
+            label: entry.label ? String(entry.label) : String(entry.key || ""),
+            emoji: entry.emoji ? String(entry.emoji) : FALLBACK_SCROLL_EMOJI
+        })).filter((entry) => entry.key);
+    }
+
+    function getAffinityLabel(key) {
+        const entry = getMagicAffinities().find((item) => item.key === key);
+        if (!entry) return key || "Non assignée";
+        return `${entry.emoji} ${entry.label}`;
+    }
+
+    function updateAffinityDisplay(fields) {
+        if (!affinityDisplay) return;
+        const key = fields?.magicAffinityKey;
+        affinityDisplay.textContent = key ? getAffinityLabel(key) : "Non assignée";
+    }
+
     const createDefaultPage = () => ({
         fields: readFormFields(),
         capacities: defaultCapacities.map((cap) => ({
@@ -78,6 +124,247 @@
 
     function buildStorageKey(key) {
         return key === "default" ? STORAGE_KEY_BASE : `${STORAGE_KEY_BASE}-${key}`;
+    }
+
+    function getMagicProgressKey() {
+        return currentCharacterKey ? `magic-progress-${currentCharacterKey}` : "magic-progress-default";
+    }
+
+    function loadMagicProgress() {
+        const profileProgress = currentCharacter?.profile_data?.magic_progress;
+        if (profileProgress && typeof profileProgress === "object") {
+            return {
+                affinities: { ...(profileProgress.affinities || {}) },
+                enabledAffinities: Array.isArray(profileProgress.enabledAffinities)
+                    ? [...profileProgress.enabledAffinities]
+                    : []
+            };
+        }
+        try {
+            const raw = localStorage.getItem(getMagicProgressKey());
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === "object") {
+                    return {
+                        affinities: { ...(parsed.affinities || {}) },
+                        enabledAffinities: Array.isArray(parsed.enabledAffinities)
+                            ? [...parsed.enabledAffinities]
+                            : []
+                    };
+                }
+            }
+        } catch {}
+        return { affinities: {}, enabledAffinities: [] };
+    }
+
+    function persistMagicProgress(progress, { persistProfile = false } = {}) {
+        if (!progress) return;
+        try {
+            localStorage.setItem(getMagicProgressKey(), JSON.stringify(progress));
+        } catch {}
+        if (!persistProfile || !currentCharacter?.id || !authApi?.updateCharacter) return;
+        const profileData = { ...(currentCharacter.profile_data || {}) };
+        profileData.magic_progress = progress;
+        authApi.updateCharacter(currentCharacter.id, { profile_data: profileData }).catch(() => {});
+        currentCharacter = { ...currentCharacter, profile_data: profileData };
+        try {
+            localStorage.setItem("astoria_active_character", JSON.stringify(currentCharacter));
+        } catch {}
+    }
+
+    function isPageHidden(page) {
+        if (!page) return true;
+        if (page.hidden) return true;
+        if (page.fields?.magicHidden) return true;
+        return false;
+    }
+
+    function ensureActivePageVisible() {
+        if (!pages.length) return;
+        if (!isPageHidden(pages[activePageIndex])) return;
+        const nextIndex = pages.findIndex((page) => !isPageHidden(page));
+        if (nextIndex >= 0) {
+            activePageIndex = nextIndex;
+        }
+    }
+
+    function syncPagesWithProgress() {
+        const progress = loadMagicProgress();
+        const enabled = Array.isArray(progress.enabledAffinities) ? progress.enabledAffinities : [];
+        const affinities = getMagicAffinities();
+        const existingMap = new Map();
+        pages.forEach((page, index) => {
+            let key = page?.fields?.magicAffinityKey;
+            if (!key && page?.fields?.magicName) {
+                const normalizedName = normalizeText(page.fields.magicName);
+                const match = affinities.find((entry) => normalizeText(entry.label) === normalizedName);
+                if (match) {
+                    key = match.key;
+                    page.fields.magicAffinityKey = key;
+                }
+            }
+            if (key) {
+                existingMap.set(key, index);
+            }
+        });
+
+        enabled.forEach((key) => {
+            const entry = progress.affinities[key] || {};
+            if (!entry.unlocked) return;
+            if (!existingMap.has(key)) {
+                const affinityLabel = getAffinityLabel(key);
+                const newPage = createDefaultPage();
+                newPage.fields = { ...(newPage.fields || {}) };
+                newPage.fields.magicAffinityKey = key;
+                newPage.fields.magicName = affinityLabel;
+                newPage.fields.magicSpecialization = "sorcellerie";
+                pages.push(newPage);
+                existingMap.set(key, pages.length - 1);
+            }
+        });
+
+        pages.forEach((page) => {
+            const key = page?.fields?.magicAffinityKey;
+            if (!key) {
+                page.hidden = false;
+                return;
+            }
+            const entry = progress.affinities[key] || {};
+            const enabledKey = enabled.includes(key);
+            page.hidden = !(enabledKey && entry.unlocked);
+        });
+
+        ensureActivePageVisible();
+        saveToStorage();
+    }
+
+    function getAscensionCost(type, level) {
+        const list = MAGIC_ASCENSION_COSTS[type] || MAGIC_ASCENSION_COSTS.none;
+        return list[level - 1] ?? null;
+    }
+
+    function getScrollBaseItem(category) {
+        const items = Array.isArray(window.inventoryData) ? window.inventoryData : [];
+        const targets = category === "eveil"
+            ? ["Parchemin d'Éveil", "Parchemin d'Eveil"]
+            : ["Parchemin d'Ascension"];
+        const normalizedTargets = targets.map((name) => normalizeText(name));
+        const index = items.findIndex((item) => normalizedTargets.includes(normalizeText(item?.name)));
+        if (index < 0) return null;
+        return { ...items[index], sourceIndex: index };
+    }
+
+    function getScrollItemKey(item) {
+        if (!item) return "unknown";
+        const sourceIndex = Number(item?.sourceIndex);
+        if (Number.isFinite(sourceIndex)) {
+            return `idx:${sourceIndex}`;
+        }
+        const name = item?.name ? normalizeText(item.name) : "";
+        if (name) return `name:${name}`;
+        const id = Number(item?.id);
+        if (Number.isFinite(id)) return `id:${id}`;
+        return "unknown";
+    }
+
+    async function applyScrollCost({ category, affinityKey, cost }) {
+        if (!currentCharacter?.id || !affinityKey || !Number.isFinite(cost)) {
+            return { ok: false, reason: "missing-data" };
+        }
+        const baseItem = getScrollBaseItem(category);
+        if (!baseItem) return { ok: false, reason: "missing-scroll-item" };
+
+        const profileData = { ...(currentCharacter.profile_data || {}) };
+        const inventory = { ...(profileData.inventory || {}) };
+        const scrollTypes = { ...(inventory.scrollTypes || {}) };
+        const bucket = { ...(scrollTypes[category] || {}) };
+        const itemKey = getScrollItemKey(baseItem);
+        const entry = bucket[itemKey] || {};
+        const counts = { ...(entry.counts || {}) };
+        const current = Number(counts[affinityKey]) || 0;
+        if (current < cost) {
+            return { ok: false, reason: "insufficient", current };
+        }
+        const next = Math.max(0, current - cost);
+        if (next > 0) {
+            counts[affinityKey] = next;
+        } else {
+            delete counts[affinityKey];
+        }
+        if (Object.keys(counts).length) {
+            bucket[itemKey] = { counts, updatedAt: Date.now() };
+        } else {
+            delete bucket[itemKey];
+        }
+        if (Object.keys(bucket).length) {
+            scrollTypes[category] = bucket;
+        } else {
+            delete scrollTypes[category];
+        }
+        inventory.scrollTypes = scrollTypes;
+        profileData.inventory = inventory;
+
+        if (authApi?.updateCharacter) {
+            await authApi.updateCharacter(currentCharacter.id, { profile_data: profileData }).catch(() => {});
+        }
+        currentCharacter = { ...currentCharacter, profile_data: profileData };
+        try {
+            localStorage.setItem("astoria_active_character", JSON.stringify(currentCharacter));
+        } catch {}
+
+        try {
+            const inventoryApi = await import("./api/inventory-service.js");
+            const rows = await inventoryApi.getInventoryRows(currentCharacter.id);
+            const sourceIndex = Number(baseItem.sourceIndex);
+            const targetRow = rows.find((row) =>
+                Number(row?.item_index) === sourceIndex ||
+                normalizeText(row?.item_key) === normalizeText(baseItem.name)
+            );
+            if (targetRow) {
+                const nextQty = Math.max(0, Math.floor(Number(targetRow.qty) || 0) - cost);
+                await inventoryApi.setInventoryItem(currentCharacter.id, targetRow.item_key, targetRow.item_index, nextQty);
+            }
+        } catch {}
+
+        return { ok: true };
+    }
+
+    async function consumeAscensionForTechnique(page) {
+        const affinityKey = page?.fields?.magicAffinityKey;
+        if (!affinityKey) return true;
+        const progress = loadMagicProgress();
+        const entry = progress.affinities[affinityKey];
+        if (!entry || !entry.unlocked) {
+            alert("Cette magie n'est pas débloquée.");
+            return false;
+        }
+        const affinityType = entry.affinityType || "none";
+        const techniquesCount = Number(entry.techniquesCount) || 0;
+        const ascensionLevel = Number(entry.ascensionLevel) || 0;
+
+        if (techniquesCount < ascensionLevel) {
+            entry.techniquesCount = techniquesCount + 1;
+            progress.affinities[affinityKey] = entry;
+            persistMagicProgress(progress, { persistProfile: true });
+            return true;
+        }
+
+        const nextLevel = ascensionLevel + 1;
+        const cost = getAscensionCost(affinityType, nextLevel);
+        if (!cost) {
+            alert("Ascension maximale atteinte pour cette affinité.");
+            return false;
+        }
+        const result = await applyScrollCost({ category: "ascension", affinityKey, cost });
+        if (!result.ok) {
+            alert("Parchemins d'ascension insuffisants.");
+            return false;
+        }
+        entry.ascensionLevel = nextLevel;
+        entry.techniquesCount = techniquesCount + 1;
+        progress.affinities[affinityKey] = entry;
+        persistMagicProgress(progress, { persistProfile: true });
+        return true;
     }
 
     async function initSummary() {
@@ -134,6 +421,7 @@
                 field.value = values[field.id];
             }
         });
+        updateAffinityDisplay(values);
     }
 
     function buildPayload() {
@@ -241,6 +529,7 @@
         pageTabs.innerHTML = "";
 
         pages.forEach((page, index) => {
+            if (isPageHidden(page)) return;
             const tab = document.createElement("button");
             tab.type = "button";
             tab.className = "magic-page-tab" + (index === activePageIndex ? " magic-page-tab--active" : "");
@@ -264,12 +553,14 @@
     function renderPagesOverview() {
         if (!pagesOverview) return;
         pagesOverview.innerHTML = "";
-        if (!pages.length) {
+        const visiblePages = pages.filter((page) => !isPageHidden(page));
+        if (!visiblePages.length) {
             pagesOverview.textContent = "Aucune magie disponible.";
             return;
         }
 
         pages.forEach((page, index) => {
+            if (isPageHidden(page)) return;
             const fields = page?.fields || {};
             const name = String(fields.magicName || "").trim() || `Magie ${index + 1}`;
             const specValue = String(fields.magicSpecialization || "").trim();
@@ -289,6 +580,7 @@
 
     function setActivePage(index) {
         if (index < 0 || index >= pages.length) return;
+        if (isPageHidden(pages[index])) return;
         saveCurrentPage();
         activePageIndex = index;
         applyFormFields(pages[activePageIndex].fields || {});
@@ -500,13 +792,15 @@
     }
 
     if (capSaveBtn) {
-        capSaveBtn.addEventListener("click", () => {
+        capSaveBtn.addEventListener("click", async () => {
             const newCap = buildCapacityFromForm();
             if (!newCap) {
-                alert("Ajoutez un nom pour la capacite.");
+                alert("Ajoutez un nom pour la capacité.");
                 return;
             }
             if (!pages[activePageIndex]) return;
+            const ok = await consumeAscensionForTechnique(pages[activePageIndex]);
+            if (!ok) return;
             pages[activePageIndex].capacities = pages[activePageIndex].capacities || [];
             pages[activePageIndex].capacities.push(newCap);
             renderCapacities(capacityFilter ? capacityFilter.value : "");
@@ -549,11 +843,14 @@
             activePageIndex = 0;
         }
 
+        syncPagesWithProgress();
+
         if (sanitizeCapacityText()) {
             saveToStorage();
         }
 
         normalizeActiveSection();
+        ensureActivePageVisible();
         applyFormFields(pages[activePageIndex].fields || {});
         setActiveSection(activeSection);
         renderCapacities(capacityFilter ? capacityFilter.value : "");
@@ -561,5 +858,14 @@
         renderPagesOverview();
         saveToStorage();
         markSaved();
+
+        window.addEventListener("storage", (event) => {
+            if (!event.key || event.key !== getMagicProgressKey()) return;
+            syncPagesWithProgress();
+            ensureActivePageVisible();
+            applyFormFields(pages[activePageIndex]?.fields || {});
+            renderPageTabs();
+            renderPagesOverview();
+        });
     })();
 })();

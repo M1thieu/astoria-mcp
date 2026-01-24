@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/magie.css">
     <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/data.js"></script>
     <style type="text/tailwindcss">
         @layer base {
             html { @apply scroll-smooth; }
@@ -105,6 +106,11 @@
                                     <div class="magic-form-row">
                                         <label class="magic-label" for="magicName">Nom de la magie</label>
                                         <input id="magicName" class="magic-input tw-input" type="text" placeholder="Ex : Lame de Résonance Astrale">
+                                    </div>
+                                    <input id="magicAffinityKey" type="hidden">
+                                    <div class="magic-form-row">
+                                        <label class="magic-label">Affinité</label>
+                                        <div class="magic-affinity-pill" id="magicAffinityDisplay">Non assignée</div>
                                     </div>
                                     <div class="magic-form-row magic-form-row--split">
                                         <div class="magic-form-field">

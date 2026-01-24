@@ -316,6 +316,19 @@
     color: var(--color-gray-700);
 }
 
+.magic-affinity-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(216, 27, 96, 0.2);
+    color: rgba(216, 27, 96, 0.9);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
 .magic-overview-hint {
     margin: var(--space-2) 0 0;
     font-size: var(--text-xs);
