@@ -215,6 +215,17 @@
             }
         }
     </style>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer base {
+            html { @apply scroll-smooth; }
+            body { @apply antialiased; }
+            a, button, [role="button"] { @apply transition-colors duration-200 ease-out; }
+            input, select, textarea { @apply transition-shadow duration-200 ease-out; }
+            a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
+        }
+    </style>
 </head>
 <body>
     <div class="auth-container">
@@ -544,3 +555,5 @@
     </script>
 </body>
 </html>
+
+

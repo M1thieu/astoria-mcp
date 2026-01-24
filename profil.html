@@ -1,4 +1,4 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -130,6 +130,17 @@
             display: block;
         }
     </style>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer base {
+            html { @apply scroll-smooth; }
+            body { @apply antialiased; }
+            a, button, [role="button"] { @apply transition-colors duration-200 ease-out; }
+            input, select, textarea { @apply transition-shadow duration-200 ease-out; }
+            a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
+        }
+    </style>
 </head>
 <body>
     <!-- Auth Controls (always visible) -->
@@ -137,30 +148,30 @@
 
     <main class="profile-page" aria-labelledby="profileTitle" id="profileContent">
         <header class="profile-header">
-            <a href="index.html" class="magic-back-link" title="Retour √† l'accueil">‚Üê Retour</a>
+            <a href="index.html" class="magic-back-link" title="Retour ‡ l'accueil">? Retour</a>
             <div class="profile-header-main">
                 <div class="profile-title-block">
                     <h1 class="profile-title" id="profileTitle">Mon look</h1>
                 </div>
-                <div class="character-summary" aria-label="R√©sum√© du personnage">
+                <div class="character-summary" aria-label="RÈsumÈ du personnage">
                     <div class="character-avatar-wrapper">
                         <div class="character-avatar character-avatar--clickable" role="button" tabindex="0" aria-haspopup="true" aria-label="Changer de personnage">
                             <img class="character-avatar-img" id="characterSummaryAvatar" alt="Avatar" hidden>
                             <div class="character-avatar-circle" id="characterSummaryInitial" hidden></div>
                         </div>
-                        <div class="character-dropdown" hidden aria-label="S√©lectionner un personnage"></div>
+                        <div class="character-dropdown" hidden aria-label="SÈlectionner un personnage"></div>
                     </div>
                     <div class="character-summary-text">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <a class="character-name" id="characterSummaryName" href="profil.html">Nom du personnage</a>
-                            <button type="button" id="shareProfileBtn" class="share-profile-btn" title="Partager le profil" hidden style="background: none; border: none; cursor: pointer; font-size: 1.2em; opacity: 0.7; transition: opacity 0.2s;">üì§</button>
+                            <button type="button" id="shareProfileBtn" class="share-profile-btn" title="Partager le profil" hidden style="background: none; border: none; cursor: pointer; font-size: 1.2em; opacity: 0.7; transition: opacity 0.2s;">??</button>
                         </div>
                         <span class="character-tagline" id="characterSummaryTagline">Classe / Role / Surnom</span>
                         <div class="character-summary-meta">
                             <span class="stats-badge" id="characterKaelsBadge" hidden>0 kaels</span>
                             <div class="character-souls" id="characterSouls" hidden>
-                                <span class="soul-count" title="&Acirc;mes consommation"><span class="soul-icon">üî•</span><span id="soulConsoValue">0</span></span>
-                                <span class="soul-count" title="&Acirc;mes progression"><span class="soul-icon">‚≠ê</span><span id="soulProgValue">0</span></span>
+                                <span class="soul-count" title="&Acirc;mes consommation"><span class="soul-icon">??</span><span id="soulConsoValue">0</span></span>
+                                <span class="soul-count" title="&Acirc;mes progression"><span class="soul-icon">?</span><span id="soulProgValue">0</span></span>
                             </div>
                         </div>
                     </div>
@@ -174,9 +185,9 @@
                 <section class="profile-panel">
                     <h2 class="profile-panel-title">Mon look</h2>
                     <div class="profile-look-card">
-                        <div class="profile-summary-card profile-summary-card--compact" aria-label="R√©sum√© du joueur">
+                        <div class="profile-summary-card profile-summary-card--compact" aria-label="RÈsumÈ du joueur">
                             <div class="profile-summary-header">
-                                <span class="profile-summary-title">R√©sum√©</span>
+                                <span class="profile-summary-title">RÈsumÈ</span>
                             </div>
                             <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
                                 <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
@@ -184,11 +195,11 @@
                             </button>
                             <div class="profile-summary-infos">
                                 <a class="profile-username" id="characterName" href="profil.html">Nom du personnage</a>
-                                <span class="profile-role" id="characterRole">R√¥le / Classe</span>
+                                <span class="profile-role" id="characterRole">RÙle / Classe</span>
                                 <div class="profile-summary-stats">
                                     <span class="profile-stat">Style : <strong id="statStyle">0</strong></span>
                                     <span class="profile-stat">Dico : <strong id="statDico">0</strong></span>
-                                    <span class="profile-stat">Popularit√© : <strong id="statPopularity">0</strong></span>
+                                    <span class="profile-stat">PopularitÈ : <strong id="statPopularity">0</strong></span>
                                 </div>
                             </div>
                         </div>
@@ -200,7 +211,7 @@
                             <span class="profile-tags-title">Tags</span>
                             <button type="button" class="profile-tags-toggle" id="tagToggle" aria-expanded="false" aria-haspopup="true">+</button>
                         </div>
-                        <div class="profile-tags-selected" id="selectedTags" aria-label="Tags s√©lectionn√©s"></div>
+                        <div class="profile-tags-selected" id="selectedTags" aria-label="Tags sÈlectionnÈs"></div>
                         <div class="profile-tags-dropdown" id="tagDropdown" hidden></div>
                     </div>
                 </section>
@@ -253,7 +264,7 @@
                                                 <option value="right">Droite</option>
                                                 <option value="justify">Justifie</option>
                                             </select>
-                                            <button type="button" class="profile-toolbar-button" data-action="list-bullet" aria-label="Liste a puces">‚Ä¢</button>
+                                            <button type="button" class="profile-toolbar-button" data-action="list-bullet" aria-label="Liste a puces">ï</button>
                                             <button type="button" class="profile-toolbar-button" data-action="list-ordered" aria-label="Liste numerotee">1.</button>
                                         </div>
                                         <div class="profile-toolbar-group">
@@ -310,10 +321,10 @@
                                         <input type="color" class="profile-custom-input profile-custom-color" id="presentationAccentInput" value="#e91e63">
                                         <label class="profile-custom-label" for="presentationLayoutSelect">Disposition</label>
                                         <select class="profile-custom-input" id="presentationLayoutSelect">
-                                            <option value="center">Centr√©</option>
+                                            <option value="center">CentrÈ</option>
                                             <option value="split">Image + texte</option>
                                         </select>
-                                        <button type="button" class="profile-custom-reset" id="presentationHeroReset">R√©initialiser l'en-t√™te</button>
+                                        <button type="button" class="profile-custom-reset" id="presentationHeroReset">RÈinitialiser l'en-tÍte</button>
                                     </div>
                                 </aside>
                             </div>
@@ -326,7 +337,7 @@
 
     <div class="profile-modal-backdrop" id="createCharacterBackdrop" aria-hidden="true">
         <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
-            <div class="profile-modal-title" id="createCharacterTitle">Cr√©er un personnage</div>
+            <div class="profile-modal-title" id="createCharacterTitle">CrÈer un personnage</div>
             <div class="profile-modal-error" id="createCharacterError" role="alert"></div>
 
             <form id="createCharacterForm">
@@ -345,7 +356,7 @@
 
                 <div class="profile-modal-actions">
                     <button type="button" class="profile-modal-button secondary" id="createCharacterCancel">Annuler</button>
-                    <button type="submit" class="profile-modal-button" id="createCharacterSubmit">Cr√©er</button>
+                    <button type="submit" class="profile-modal-button" id="createCharacterSubmit">CrÈer</button>
                 </div>
             </form>
         </div>
@@ -355,7 +366,7 @@
         <div class="profile-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="avatarCropperTitle">
             <div class="profile-cropper-header">
                 <h2 class="profile-cropper-title" id="avatarCropperTitle">Ajuster l'avatar</h2>
-                <button type="button" class="profile-cropper-close" id="avatarCropperClose" aria-label="Fermer">√ó</button>
+                <button type="button" class="profile-cropper-close" id="avatarCropperClose" aria-label="Fermer">◊</button>
             </div>
             <div class="profile-cropper-body">
                 <div class="profile-cropper-stage">
@@ -1617,7 +1628,7 @@
             profileContent.innerHTML = `
                 <div class="profile-not-logged-in">
                     <h2>Connexion requise</h2>
-                    <p>Vous devez vous connecter pour acc√©der √† votre profil et g√©rer vos personnages.</p>
+                    <p>Vous devez vous connecter pour accÈder ‡ votre profil et gÈrer vos personnages.</p>
                     <a href="login.html" class="auth-button">Se connecter</a>
                 </div>
             `;
@@ -1921,8 +1932,8 @@
             // Add placeholder option
             const placeholderOption = document.createElement('option');
             placeholderOption.value = '';
-            placeholderOption.textContent = 'S√©lectionner un personnage...';
-            // Keep the placeholder selectable so we can reset after "Cr√©er un personnage"
+            placeholderOption.textContent = 'SÈlectionner un personnage...';
+            // Keep the placeholder selectable so we can reset after "CrÈer un personnage"
             placeholderOption.selected = !currentCharacter;
             selectorHTML.appendChild(placeholderOption);
 
@@ -1941,7 +1952,7 @@
             if (userCharacters.length < 5) {
                 const createOption = document.createElement('option');
                 createOption.value = '__create__';
-                createOption.textContent = '+ Cr√©er un personnage';
+                createOption.textContent = '+ CrÈer un personnage';
                 selectorHTML.appendChild(createOption);
             }
 
@@ -1972,10 +1983,10 @@
             document.getElementById('characterInitial').textContent = '?';
             const nameEl = document.getElementById('characterName');
             if (nameEl) {
-                nameEl.textContent = 'Aucun personnage s√©lectionn√©';
+                nameEl.textContent = 'Aucun personnage sÈlectionnÈ';
                 nameEl.setAttribute('href', 'profil.html');
             }
-            document.getElementById('characterRole').textContent = 'S√©lectionnez un personnage ci-dessus';
+            document.getElementById('characterRole').textContent = 'SÈlectionnez un personnage ci-dessus';
             updateAvatarUI('');
             setPresentationState([], null);
             renderPresentationView();
@@ -2046,7 +2057,7 @@
 
                 if (uploadError) {
                     console.error(uploadError);
-                    alert('Upload impossible. V√©rifiez le bucket avatars.');
+                    alert('Upload impossible. VÈrifiez le bucket avatars.');
                     return;
                 }
 
@@ -2315,12 +2326,12 @@
             }
 
             createSubmit.disabled = true;
-            createSubmit.textContent = 'Cr√©ation...';
+            createSubmit.textContent = 'CrÈation...';
 
             try {
                 const res = await createCharacter(currentUser.id, { name, race, class: charClass });
                 if (!res.success) {
-                    showCreateError(res.error || 'Impossible de cr√©er le personnage.');
+                    showCreateError(res.error || 'Impossible de crÈer le personnage.');
                     return;
                 }
 
@@ -2341,10 +2352,10 @@
                 rerenderOpenPanelIfAny();
             } catch (err) {
                 console.error(err);
-                showCreateError('Impossible de cr√©er le personnage.');
+                showCreateError('Impossible de crÈer le personnage.');
             } finally {
                 createSubmit.disabled = false;
-                createSubmit.textContent = 'Cr√©er';
+                createSubmit.textContent = 'CrÈer';
             }
         });
 
@@ -2374,6 +2385,8 @@
     <script src="js/sidebar.js"></script>
 </body>
 </html>
+
+
 
 
 

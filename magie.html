@@ -1,20 +1,31 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fiche Magie | Sp√©cification</title>
+    <title>Fiche Magie | SpÈcification</title>
     <link rel="icon" type="image/x-icon" href="assets/images/ALICE_ACADEMIA.ico">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/magie.css">
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer base {
+            html { @apply scroll-smooth; }
+            body { @apply antialiased; }
+            a, button, [role="button"] { @apply transition-colors duration-200 ease-out; }
+            input, select, textarea { @apply transition-shadow duration-200 ease-out; }
+            a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
+        }
+    </style>
 </head>
 <body data-admin="false">
     <main class="magic-page" aria-labelledby="magicPageTitle">
         <header class="magic-header">
-            <a href="index.html" class="magic-back-link" title="Retour √† l'accueil">‚Üê Retour</a>
+            <a href="index.html" class="magic-back-link" title="Retour ‡ l'accueil">? Retour</a>
             <div class="magic-header-main">
                 <div class="magic-title-block">
-                    <h1 class="magic-title" id="magicPageTitle">Fiche Magie | Sp√©cification</h1>
+                    <h1 class="magic-title" id="magicPageTitle">Fiche Magie | SpÈcification</h1>
                 </div>
                 <div class="character-summary" aria-label="Resume du personnage">
                     <div class="character-avatar-wrapper">
@@ -22,7 +33,7 @@
                             <img class="character-avatar-img" id="characterSummaryAvatar" alt="Avatar" hidden>
                             <div class="character-avatar-circle" id="characterSummaryInitial" hidden></div>
                         </div>
-                        <div class="character-dropdown" hidden aria-label="S√©lectionner un personnage"></div>
+                        <div class="character-dropdown" hidden aria-label="SÈlectionner un personnage"></div>
                     </div>
                     <div class="character-summary-text">
                         <a class="character-name" id="characterSummaryName" href="profil.html">Nom du personnage</a>
@@ -32,7 +43,7 @@
             </div>
         </header>
 
-        <section class="magic-layout" aria-label="Fiche magie d√©taill√©e">
+        <section class="magic-layout" aria-label="Fiche magie dÈtaillÈe">
             <div class="magic-sheet">
                 <div class="magic-page-tabs" id="magicPageTabs" role="tablist" aria-label="Pages de fiche magie">
                     <button type="button" class="magic-page-tab magic-page-tab--add" id="magicAddPageBtn" aria-label="Ajouter une page">+</button>
@@ -42,13 +53,13 @@
                 <section class="magic-content" aria-live="polite">
                     <div class="magic-top-nav" aria-label="Sections de la fiche" role="navigation">
                         <button class="magic-nav-btn magic-nav-btn--active" data-target="magic-summary">
-                            R√©sum√© &amp; sp√©cialisation
+                            RÈsumÈ &amp; spÈcialisation
                         </button>
                         <button class="magic-nav-btn" data-target="magic-parameters">
-                            Param√®tres de fonctionnement
+                            ParamËtres de fonctionnement
                         </button>
                         <button class="magic-nav-btn" data-target="magic-capacities">
-                            Capacit√©s &amp; sorts
+                            CapacitÈs &amp; sorts
                         </button>
                         <button class="magic-nav-btn" data-target="magic-progression">
                             Progression &amp; limitations
@@ -64,21 +75,21 @@
                     </div>
 
                     <div class="magic-content-body">
-                        <!-- 1. R√©sum√© & sp√©cialisation -->
-                        <section id="magic-summary" class="magic-section magic-section--active" aria-label="R√©sum√© & sp√©cialisation">
-                            <h2 class="magic-section-title">R√©sum√© &amp; sp√©cialisation</h2>
+                        <!-- 1. RÈsumÈ & spÈcialisation -->
+                        <section id="magic-summary" class="magic-section magic-section--active" aria-label="RÈsumÈ & spÈcialisation">
+                            <h2 class="magic-section-title">RÈsumÈ &amp; spÈcialisation</h2>
                             <div class="magic-cards-grid magic-cards-grid--two">
                                 <article class="magic-card">
                                     <h3 class="magic-card-title">Magie principale</h3>
                                     <div class="magic-form-row">
                                         <label class="magic-label" for="magicName">Nom de la magie</label>
-                                        <input id="magicName" class="magic-input" type="text" placeholder="Ex : Lame de R√©sonance Astrale">
+                                        <input id="magicName" class="magic-input" type="text" placeholder="Ex : Lame de RÈsonance Astrale">
                                     </div>
                                     <div class="magic-form-row magic-form-row--split">
                                         <div class="magic-form-field">
-                                            <label class="magic-label" for="magicSpecialization">Sp√©cialisation</label>
+                                            <label class="magic-label" for="magicSpecialization">SpÈcialisation</label>
                                             <select id="magicSpecialization" class="magic-input">
-                                                <option value="">S√©lectionner...</option>
+                                                <option value="">SÈlectionner...</option>
                                                 <option value="meister">Meister Arme</option>
                                                 <option value="sorcellerie">Sorcellerie</option>
                                                 <option value="alice">Alice (Alice Academy)</option>
@@ -86,20 +97,20 @@
                                         </div>
                                         <div class="magic-form-field">
                                             <label class="magic-label" for="magicSubtypes">Sous-type(s)</label>
-                                            <input id="magicSubtypes" class="magic-input" type="text" placeholder="Ex : √©l√©mentaire, mental, soutien...">
+                                            <input id="magicSubtypes" class="magic-input" type="text" placeholder="Ex : ÈlÈmentaire, mental, soutien...">
                                         </div>
                                     </div>
                                 </article>
 
                                 <article class="magic-card">
-                                    <h3 class="magic-card-title">R√©sum√© narratif &amp; technique</h3>
+                                    <h3 class="magic-card-title">RÈsumÈ narratif &amp; technique</h3>
                                     <div class="magic-form-row">
-                                        <label class="magic-label" for="magicSummaryRp">R√©sum√© RP</label>
-                                        <textarea id="magicSummaryRp" class="magic-input magic-input--textarea" rows="3" placeholder="En 2-3 lignes, d√©crivez comment la magie se manifeste en jeu."></textarea>
+                                        <label class="magic-label" for="magicSummaryRp">RÈsumÈ RP</label>
+                                        <textarea id="magicSummaryRp" class="magic-input magic-input--textarea" rows="3" placeholder="En 2-3 lignes, dÈcrivez comment la magie se manifeste en jeu."></textarea>
                                     </div>
                                     <div class="magic-form-row">
-                                        <label class="magic-label" for="magicSummaryTech">R√©sum√© technique</label>
-                                        <textarea id="magicSummaryTech" class="magic-input magic-input--textarea" rows="3" placeholder="Port√©e globale, nature, style d'utilisation, contraintes g√©n√©rales..."></textarea>
+                                        <label class="magic-label" for="magicSummaryTech">RÈsumÈ technique</label>
+                                        <textarea id="magicSummaryTech" class="magic-input magic-input--textarea" rows="3" placeholder="PortÈe globale, nature, style d'utilisation, contraintes gÈnÈrales..."></textarea>
                                     </div>
                                 </article>
                                 <article class="magic-card">
@@ -110,37 +121,37 @@
                             </div>
                         </section>
 
-                        <!-- 2. Param√®tres de fonctionnement -->
-                        <section id="magic-parameters" class="magic-section" aria-label="Param√®tres de fonctionnement de la magie">
-                            <h2 class="magic-section-title">Param√®tres de fonctionnement</h2>
+                        <!-- 2. ParamËtres de fonctionnement -->
+                        <section id="magic-parameters" class="magic-section" aria-label="ParamËtres de fonctionnement de la magie">
+                            <h2 class="magic-section-title">ParamËtres de fonctionnement</h2>
                             <div class="magic-cards-grid magic-cards-grid--three">
                                 <article class="magic-card">
-                                    <h3 class="magic-card-title">Origine &amp; port√©e</h3>
+                                    <h3 class="magic-card-title">Origine &amp; portÈe</h3>
                                     <div class="magic-form-row">
                                         <label class="magic-label" for="magicSource">Source de magie</label>
-                                        <input id="magicSource" class="magic-input" type="text" placeholder="Mana, pacte, √©motions, artefact...">
+                                        <input id="magicSource" class="magic-input" type="text" placeholder="Mana, pacte, Èmotions, artefact...">
                                     </div>
                                     <div class="magic-form-row">
-                                        <label class="magic-label" for="magicRange">Port√©e</label>
+                                        <label class="magic-label" for="magicRange">PortÈe</label>
                                         <select id="magicRange" class="magic-input">
-                                            <option value="">S√©lectionner...</option>
-                                            <option value="melee">Corps-√†-corps</option>
-                                            <option value="short">Courte port√©e</option>
-                                            <option value="medium">Port√©e moyenne</option>
-                                            <option value="long">Longue port√©e</option>
+                                            <option value="">SÈlectionner...</option>
+                                            <option value="melee">Corps-‡-corps</option>
+                                            <option value="short">Courte portÈe</option>
+                                            <option value="medium">PortÈe moyenne</option>
+                                            <option value="long">Longue portÈe</option>
                                         </select>
                                     </div>
                                 </article>
 
                                 <article class="magic-card">
-                                    <h3 class="magic-card-title">Effet &amp; co√ªt</h3>
+                                    <h3 class="magic-card-title">Effet &amp; co˚t</h3>
                                     <div class="magic-form-row">
                                         <label class="magic-label" for="magicEffectType">Type d'effet principal</label>
-                                        <input id="magicEffectType" class="magic-input" type="text" placeholder="D√©g√¢ts, soin, contr√¥le, utilitaire...">
+                                        <input id="magicEffectType" class="magic-input" type="text" placeholder="DÈg‚ts, soin, contrÙle, utilitaire...">
                                     </div>
                                     <div class="magic-form-row">
-                                        <label class="magic-label" for="magicGlobalCost">Co√ªt global</label>
-                                        <textarea id="magicGlobalCost" class="magic-input magic-input--textarea" rows="2" placeholder="Fatigue, mana, nombre d'utilisations par sc√®ne, etc."></textarea>
+                                        <label class="magic-label" for="magicGlobalCost">Co˚t global</label>
+                                        <textarea id="magicGlobalCost" class="magic-input magic-input--textarea" rows="2" placeholder="Fatigue, mana, nombre d'utilisations par scËne, etc."></textarea>
                                     </div>
                                 </article>
 
@@ -148,35 +159,35 @@
                                     <h3 class="magic-card-title">Conditions &amp; faiblesses</h3>
                                     <div class="magic-form-row">
                                         <label class="magic-label" for="magicActivation">Conditions d'activation</label>
-                                        <textarea id="magicActivation" class="magic-input magic-input--textarea" rows="2" placeholder="Contact, incantation, geste, √©motion, pacte..."></textarea>
+                                        <textarea id="magicActivation" class="magic-input magic-input--textarea" rows="2" placeholder="Contact, incantation, geste, Èmotion, pacte..."></textarea>
                                     </div>
                                     <div class="magic-form-row">
-                                        <label class="magic-label" for="magicWeaknesses">Faiblesses g√©n√©rales</label>
-                                        <textarea id="magicWeaknesses" class="magic-input magic-input--textarea" rows="2" placeholder="Contres, limitations, situations de d√©savantage."></textarea>
+                                        <label class="magic-label" for="magicWeaknesses">Faiblesses gÈnÈrales</label>
+                                        <textarea id="magicWeaknesses" class="magic-input magic-input--textarea" rows="2" placeholder="Contres, limitations, situations de dÈsavantage."></textarea>
                                     </div>
                                 </article>
                             </div>
                         </section>
 
-                        <!-- 3. Capacit√©s / sorts -->
-                        <section id="magic-capacities" class="magic-section" aria-label="Capacit√©s et sorts">
+                        <!-- 3. CapacitÈs / sorts -->
+                        <section id="magic-capacities" class="magic-section" aria-label="CapacitÈs et sorts">
                             <div class="magic-section-header">
                                 <div>
-                                    <h2 class="magic-section-title">Capacit√©s &amp; sorts</h2>
+                                    <h2 class="magic-section-title">CapacitÈs &amp; sorts</h2>
                                     <p class="magic-section-help">
-                                        Listez ici chaque technique : nom, type, rang, effet RP et technique, co√ªt, limites.
+                                        Listez ici chaque technique : nom, type, rang, effet RP et technique, co˚t, limites.
                                     </p>
                                 </div>
                                 <div class="magic-section-actions">
-                                    <select id="magicCapacityFilter" class="magic-input magic-input--sm" aria-label="Filtrer les capacit√©s">
-                                        <option value="">Toutes les cat√©gories</option>
+                                    <select id="magicCapacityFilter" class="magic-input magic-input--sm" aria-label="Filtrer les capacitÈs">
+                                        <option value="">Toutes les catÈgories</option>
                                         <option value="offensif">Offensif</option>
-                                        <option value="defensif">D√©fensif</option>
+                                        <option value="defensif">DÈfensif</option>
                                         <option value="soutien">Soutien</option>
                                         <option value="utilitaire">Utilitaire</option>
                                     </select>
                                     <button type="button" class="magic-btn magic-btn-primary" id="magicAddCapacityBtn">
-                                        + Ajouter une capacit√©
+                                        + Ajouter une capacitÈ
                                     </button>
                                 </div>
                             </div>
@@ -230,8 +241,8 @@
                                 </div>
                             </div>
 
-                            <ul class="magic-capacity-list" id="magicCapacityList" aria-label="Liste des capacit√©s">
-                                <!-- Capacit√©s exemple : purement placeholders -->
+                            <ul class="magic-capacity-list" id="magicCapacityList" aria-label="Liste des capacitÈs">
+                                <!-- CapacitÈs exemple : purement placeholders -->
                             </ul>
                         </section>
 
@@ -244,34 +255,34 @@
                                     <h3 class="magic-card-title">Cadre global</h3>
                                     <div class="magic-form-row magic-form-row--split">
                                         <div class="magic-form-field">
-                                            <label class="magic-label" for="magicMaxSlots">Nombre maximum de capacit√©s</label>
+                                            <label class="magic-label" for="magicMaxSlots">Nombre maximum de capacitÈs</label>
                                             <input id="magicMaxSlots" class="magic-input" type="number" min="0" max="99" value="8">
                                         </div>
                                         <div class="magic-form-field">
-                                            <label class="magic-label" for="magicStartingSlots">Capacit√©s d√©bloqu√©es au d√©part</label>
+                                            <label class="magic-label" for="magicStartingSlots">CapacitÈs dÈbloquÈes au dÈpart</label>
                                             <input id="magicStartingSlots" class="magic-input" type="number" min="0" max="99" value="4">
                                         </div>
                                     </div>
                                     <div class="magic-form-row">
-                                        <label class="magic-label" for="magicUnlockConditions">Conditions de d√©blocage</label>
-                                        <textarea id="magicUnlockConditions" class="magic-input magic-input--textarea" rows="3" placeholder="Par exemple : progression RP, validation MJ, paliers de niveau, qu√™tes, etc."></textarea>
+                                        <label class="magic-label" for="magicUnlockConditions">Conditions de dÈblocage</label>
+                                        <textarea id="magicUnlockConditions" class="magic-input magic-input--textarea" rows="3" placeholder="Par exemple : progression RP, validation MJ, paliers de niveau, quÍtes, etc."></textarea>
                                     </div>
                                 </article>
 
                                 <article class="magic-card">
-                                    <h3 class="magic-card-title">Capacit√©s futures</h3>
-                                    <div class="magic-future-slots" aria-label="Emplacements de capacit√©s futures">
+                                    <h3 class="magic-card-title">CapacitÈs futures</h3>
+                                    <div class="magic-future-slots" aria-label="Emplacements de capacitÈs futures">
                                         <div class="magic-future-slot magic-future-slot--filled">
-                                            <span class="magic-future-label">Capacit√© actuelle</span>
-                                            <span class="magic-future-note">Peut √©voluer vers une version majeure / signature.</span>
+                                            <span class="magic-future-label">CapacitÈ actuelle</span>
+                                            <span class="magic-future-note">Peut Èvoluer vers une version majeure / signature.</span>
                                         </div>
                                         <div class="magic-future-slot magic-future-slot--locked">
-                                            <span class="magic-future-label">Slot verrouill√©</span>
-                                            <span class="magic-future-note">√Ä d√©bloquer plus tard (XP, arc narratif...).</span>
+                                            <span class="magic-future-label">Slot verrouillÈ</span>
+                                            <span class="magic-future-note">¿ dÈbloquer plus tard (XP, arc narratif...).</span>
                                         </div>
                                         <div class="magic-future-slot magic-future-slot--locked">
-                                            <span class="magic-future-label">Slot verrouill√©</span>
-                                            <span class="magic-future-note">R√©serv√© aux √©volutions de haut niveau.</span>
+                                            <span class="magic-future-label">Slot verrouillÈ</span>
+                                            <span class="magic-future-note">RÈservÈ aux Èvolutions de haut niveau.</span>
                                         </div>
                                     </div>
                                 </article>
@@ -297,15 +308,15 @@
                                         <select id="magicSheetStatus" class="magic-input">
                                             <option value="draft">Brouillon</option>
                                             <option value="pending">En attente de validation</option>
-                                            <option value="approved">Valid√©e</option>
-                                            <option value="changes">√Ä corriger</option>
+                                            <option value="approved">ValidÈe</option>
+                                            <option value="changes">¿ corriger</option>
                                         </select>
                                     </div>
                                     <div class="magic-admin-status-badges">
                                         <span class="magic-status-pill magic-status-pill--draft">Brouillon</span>
                                         <span class="magic-status-pill magic-status-pill--pending">En attente</span>
-                                        <span class="magic-status-pill magic-status-pill--approved">Valid√©e</span>
-                                        <span class="magic-status-pill magic-status-pill--changes">√Ä corriger</span>
+                                        <span class="magic-status-pill magic-status-pill--approved">ValidÈe</span>
+                                        <span class="magic-status-pill magic-status-pill--changes">¿ corriger</span>
                                     </div>
                                 </article>
 
@@ -318,7 +329,7 @@
                                     </div>
                                     <div class="magic-form-row">
                                         <label class="magic-label" for="magicAdminNotes">Note interne</label>
-                                        <textarea id="magicAdminNotes" class="magic-input magic-input--textarea" rows="3" placeholder="Commentaires MJ / staff, remarques d'√©quilibrage, suivi des modifications."></textarea>
+                                        <textarea id="magicAdminNotes" class="magic-input magic-input--textarea" rows="3" placeholder="Commentaires MJ / staff, remarques d'Èquilibrage, suivi des modifications."></textarea>
                                     </div>
                                 </article>
                             </div>
@@ -334,3 +345,5 @@
     <script src="js/sidebar.js"></script>
 </body>
 </html>
+
+

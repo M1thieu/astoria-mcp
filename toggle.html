@@ -6,7 +6,18 @@
     <title>Astoria Theme Toggle</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/theme-toggle.css">
-  </head>
+      <script src="js/tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer base {
+            html { @apply scroll-smooth; }
+            body { @apply antialiased; }
+            a, button, [role="button"] { @apply transition-colors duration-200 ease-out; }
+            input, select, textarea { @apply transition-shadow duration-200 ease-out; }
+            a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
+        }
+    </style>
+</head>
   <body>
     <main class="theme-toggle-demo">
       <h1>Theme toggle</h1>
@@ -23,3 +34,5 @@
     <script src="js/theme-toggle.js"></script>
   </body>
 </html>
+
+
