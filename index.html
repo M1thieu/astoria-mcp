@@ -28,17 +28,24 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @layer components {
+                @layer components {
             .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
             .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
             .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
             .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+            .tw-panel { @apply rounded-2xl bg-white/80 backdrop-blur-md border border-white/70 shadow-soft; }
+            .tw-card { @apply rounded-2xl bg-white/90 border border-astoria-200/60 shadow-soft; }
+            .tw-card-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-1; }
+            .tw-btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold shadow-soft bg-gradient-to-br from-astoria-400 to-astoria-600 text-white; }
+            .tw-btn-ghost { @apply rounded-full border border-astoria-200/70 bg-white/80 text-astoria-600; }
+            .tw-input { @apply rounded-xl border border-astoria-200/60 bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-astoria-400/40; }
+            .tw-pill { @apply inline-flex items-center gap-1 rounded-full bg-white/70 border border-astoria-200/60 px-3 py-1 text-xs font-semibold text-astoria-600; }
         }
 </style>
 </head>
 <body class="min-h-screen">
     <main class="character-select-page fade-in" aria-labelledby="characterSelectTitle">
-        <header class="character-select-header">
+        <header class="character-select-header tw-panel">
             <div>
                 <h1 class="character-select-title" id="characterSelectTitle">S&#233;lectionner un personnage</h1>
             </div>
@@ -64,33 +71,33 @@
             </div>
             <div class="character-select-actions">
                 <span class="character-select-user" id="currentUserName"></span>
-                <span class="character-select-badge" id="currentUserRole"></span>
-                <button type="button" class="character-select-logout tw-press" id="logoutButton">D&#233;connexion</button>
+                <span class="character-select-badge tw-pill" id="currentUserRole"></span>
+                <button type="button" class="character-select-logout tw-press tw-btn-ghost" id="logoutButton">D&#233;connexion</button>
             </div>
         </header>
         <section class="character-select-grid" id="characterGrid" role="list"></section>
         <p class="character-select-status" id="characterSelectStatus" role="status" aria-live="polite"></p>
     </main>
     <div class="select-modal-backdrop" id="createCharacterBackdrop" aria-hidden="true">
-        <div class="select-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
+        <div class="select-modal tw-surface tw-panel" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
             <div class="select-modal-title" id="createCharacterTitle">Cr&#233;er un personnage</div>
             <div class="select-modal-error" id="createCharacterError" role="alert"></div>
             <form id="createCharacterForm">
                 <div class="select-modal-group">
                     <label class="select-modal-label" for="characterNameInput">Nom</label>
-                    <input class="select-modal-input" id="characterNameInput" name="name" required autocomplete="off">
+                    <input class="select-modal-input tw-input" id="characterNameInput" name="name" required autocomplete="off">
                 </div>
                 <div class="select-modal-group">
                     <label class="select-modal-label" for="characterRaceInput">Race (optionnel)</label>
-                    <input class="select-modal-input" id="characterRaceInput" name="race" autocomplete="off">
+                    <input class="select-modal-input tw-input" id="characterRaceInput" name="race" autocomplete="off">
                 </div>
                 <div class="select-modal-group">
                     <label class="select-modal-label" for="characterClassInput">Classe (optionnel)</label>
-                    <input class="select-modal-input" id="characterClassInput" name="class" autocomplete="off">
+                    <input class="select-modal-input tw-input" id="characterClassInput" name="class" autocomplete="off">
                 </div>
                 <div class="select-modal-actions">
-                    <button type="button" class="select-modal-button secondary tw-press" id="createCharacterCancel">Annuler</button>
-                    <button type="submit" class="select-modal-button tw-press" id="createCharacterSubmit">Cr&#233;er</button>
+                    <button type="button" class="select-modal-button secondary tw-press tw-btn-ghost" id="createCharacterCancel">Annuler</button>
+                    <button type="submit" class="select-modal-button tw-press tw-btn" id="createCharacterSubmit">Cr&#233;er</button>
                 </div>
             </form>
         </div>

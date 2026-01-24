@@ -102,7 +102,7 @@ function createCharacterCard(character, slotIndex) {
     const isEmpty = !character;
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = `character-card${isEmpty ? ' is-empty' : ''}`;
+    card.className = `character-card${isEmpty ? ' is-empty' : ''} tw-card tw-card-hover`;
     card.dataset.action = isEmpty ? 'create' : 'select';
     card.dataset.slot = String(slotIndex + 1);
 

@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="css/profil.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
-<style>
+<style type="text/tailwindcss">
         .profile-not-logged-in {
             text-align: center;
             padding: 4rem 2rem;
@@ -124,11 +124,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @layer components {
+                @layer components {
             .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
             .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
             .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
             .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+            .tw-panel { @apply rounded-2xl bg-white/80 backdrop-blur-md border border-white/70 shadow-soft; }
+            .tw-card { @apply rounded-2xl bg-white/90 border border-astoria-200/60 shadow-soft; }
+            .tw-card-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-1; }
+            .tw-btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold shadow-soft bg-gradient-to-br from-astoria-400 to-astoria-600 text-white; }
+            .tw-btn-ghost { @apply rounded-full border border-astoria-200/70 bg-white/80 text-astoria-600; }
+            .tw-input { @apply rounded-xl border border-astoria-200/60 bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-astoria-400/40; }
+            .tw-pill { @apply inline-flex items-center gap-1 rounded-full bg-white/70 border border-astoria-200/60 px-3 py-1 text-xs font-semibold text-astoria-600; }
         }
 </style>
     <script src="js/tailwind-config.js"></script>
@@ -147,8 +154,8 @@
     <!-- Auth Controls (always visible) -->
     <div class="auth-controls" id="authControls"></div>
     <main class="profile-page fade-in" aria-labelledby="profileTitle" id="profileContent">
-        <header class="profile-header">
-            <a href="index.html" class="magic-back-link" title="Retour à l'accueil">? Retour</a>
+        <header class="profile-header tw-panel">
+            <a href="index.html" class="magic-back-link" title="Retour à l'accueil">&#8592; Retour</a>
             <div class="profile-header-main">
                 <div class="profile-title-block">
                     <h1 class="profile-title" id="profileTitle">Mon look</h1>
@@ -181,10 +188,10 @@
         <section class="profile-layout">
             <!-- Colonne gauche : look, liens rapides -->
             <aside class="profile-sidebar" aria-label="Navigation du profil">
-                <section class="profile-panel tw-surface">
+                <section class="profile-panel tw-surface tw-panel">
                     <h2 class="profile-panel-title">Mon look</h2>
-                    <div class="profile-look-card tw-surface tw-hover">
-                        <div class="profile-summary-card profile-summary-card--compact tw-surface tw-hover" aria-label="Résumé du joueur">
+                    <div class="profile-look-card tw-surface tw-panel tw-hover">
+                        <div class="profile-summary-card profile-summary-card--compact tw-surface tw-panel tw-hover" aria-label="Résumé du joueur">
                             <div class="profile-summary-header">
                                 <span class="profile-summary-title">Résumé</span>
                             </div>
@@ -207,7 +214,7 @@
                     <div class="profile-tags" id="profileTags" aria-label="Tags de profil">
                         <div class="profile-tags-header">
                             <span class="profile-tags-title">Tags</span>
-                            <button type="button" class="profile-tags-toggle tw-press" id="tagToggle" aria-expanded="false" aria-haspopup="true">+</button>
+                            <button type="button" class="profile-tags-toggle tw-press tw-btn-ghost" id="tagToggle" aria-expanded="false" aria-haspopup="true">+</button>
                         </div>
                         <div class="profile-tags-selected" id="selectedTags" aria-label="Tags sélectionnés"></div>
                         <div class="profile-tags-dropdown" id="tagDropdown" hidden></div>
@@ -217,17 +224,17 @@
             </aside>
             <!-- Colonne droite : contenu principal -->
             <section class="profile-main" aria-label="Contenu du profil">
-                <section class="profile-section profile-section--presentation">
+                <section class="profile-section profile-section--presentation tw-panel">
                     <header class="profile-section-header">
                         <div class="profile-section-title-wrap">
                             <h2 class="profile-section-title">Presentation</h2>
                         </div>
                         <div class="profile-section-actions">
-                            <button type="button" class="profile-edit-btn tw-press" id="presentationEditBtn" hidden>Modifier</button>
+                            <button type="button" class="profile-edit-btn tw-press tw-btn-ghost" id="presentationEditBtn" hidden>Modifier</button>
                         </div>
                     </header>
-                    <div class="profile-presentation-shell">
-                        <div class="profile-presentation-view" id="presentationView">
+                    <div class="profile-presentation-shell tw-panel">
+                        <div class="profile-presentation-view tw-panel" id="presentationView">
                             <div class="profile-presentation-hero" id="presentationHero" hidden>
                                 <div class="profile-presentation-hero-media" id="presentationHeroMedia" hidden>
                                     <img id="presentationHeroImage" alt="">
@@ -242,26 +249,26 @@
                             </p>
                             <div class="profile-presentation-content" id="presentationContent" hidden></div>
                         </div>
-                        <div class="profile-presentation-editor" id="presentationEditor" hidden>
+                        <div class="profile-presentation-editor tw-panel" id="presentationEditor" hidden>
                             <div class="profile-editor-layout">
                                 <div class="profile-editor-main">
                                     <div class="profile-editor-toolbar" id="presentationToolbar" role="toolbar" aria-label="Barre d'outils">
                                         <div class="profile-toolbar-group">
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="bold" aria-label="Gras"><strong>B</strong></button>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="italic" aria-label="Italique"><em>I</em></button>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="underline" aria-label="Souligne"><span class="profile-toolbar-underline">U</span></button>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="strike" aria-label="Barre"><span class="profile-toolbar-strike">S</span></button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="bold" aria-label="Gras"><strong>B</strong></button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="italic" aria-label="Italique"><em>I</em></button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="underline" aria-label="Souligne"><span class="profile-toolbar-underline">U</span></button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="strike" aria-label="Barre"><span class="profile-toolbar-strike">S</span></button>
                                         </div>
                                         <div class="profile-toolbar-group">
-                                            <select class="profile-toolbar-select" data-action="align" aria-label="Alignement">
+                                            <select class="profile-toolbar-select tw-input" data-action="align" aria-label="Alignement">
                                                 <option value="">Alignement</option>
                                                 <option value="left">Gauche</option>
                                                 <option value="center">Centre</option>
                                                 <option value="right">Droite</option>
                                                 <option value="justify">Justifie</option>
                                             </select>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="list-bullet" aria-label="Liste a puces">•</button>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="list-ordered" aria-label="Liste numerotee">1.</button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="list-bullet" aria-label="Liste a puces">•</button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="list-ordered" aria-label="Liste numerotee">1.</button>
                                         </div>
                                         <div class="profile-toolbar-group">
                                             <label class="profile-toolbar-color">
@@ -274,19 +281,19 @@
                                             </label>
                                         </div>
                                         <div class="profile-toolbar-group">
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="image" aria-label="Inserer une image">IMG</button>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="link" aria-label="Inserer un lien">Lien</button>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="emoji" aria-label="Inserer un emoji">:-)</button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="image" aria-label="Inserer une image">IMG</button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="link" aria-label="Inserer un lien">Lien</button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="emoji" aria-label="Inserer un emoji">:-)</button>
                                         </div>
                                         <div class="profile-toolbar-group">
-                                            <select class="profile-toolbar-select" data-action="header" aria-label="Styles de texte">
+                                            <select class="profile-toolbar-select tw-input" data-action="header" aria-label="Styles de texte">
                                                 <option value="">Paragraphe</option>
                                                 <option value="1">Titre 1</option>
                                                 <option value="2">Titre 2</option>
                                                 <option value="3">Titre 3</option>
                                                 <option value="blockquote">Citation</option>
                                             </select>
-                                            <button type="button" class="profile-toolbar-button tw-press" data-action="html" aria-label="Basculer HTML source">&lt;&gt;</button>
+                                            <button type="button" class="profile-toolbar-button tw-press tw-btn-ghost" data-action="html" aria-label="Basculer HTML source">&lt;&gt;</button>
                                         </div>
                                     </div>
                                     <div class="profile-editor-surface">
@@ -337,19 +344,19 @@
             <form id="createCharacterForm">
                 <div style="margin-bottom:0.75rem;">
                     <label class="profile-modal-label" for="characterNameInput">Nom</label>
-                    <input class="profile-modal-input" id="characterNameInput" name="name" required autocomplete="off">
+                    <input class="profile-modal-input tw-input" id="characterNameInput" name="name" required autocomplete="off">
                 </div>
                 <div style="margin-bottom:0.75rem;">
                     <label class="profile-modal-label" for="characterRaceInput">Race (optionnel)</label>
-                    <input class="profile-modal-input" id="characterRaceInput" name="race" autocomplete="off">
+                    <input class="profile-modal-input tw-input" id="characterRaceInput" name="race" autocomplete="off">
                 </div>
                 <div>
                     <label class="profile-modal-label" for="characterClassInput">Classe (optionnel)</label>
-                    <input class="profile-modal-input" id="characterClassInput" name="class" autocomplete="off">
+                    <input class="profile-modal-input tw-input" id="characterClassInput" name="class" autocomplete="off">
                 </div>
                 <div class="profile-modal-actions">
-                    <button type="button" class="profile-modal-button secondary tw-press" id="createCharacterCancel">Annuler</button>
-                    <button type="submit" class="profile-modal-button tw-press" id="createCharacterSubmit">Créer</button>
+                    <button type="button" class="profile-modal-button secondary tw-btn-ghost tw-press" id="createCharacterCancel">Annuler</button>
+                    <button type="submit" class="profile-modal-button tw-press tw-btn" id="createCharacterSubmit">Créer</button>
                 </div>
             </form>
         </div>
@@ -371,8 +378,8 @@
                 </div>
             </div>
             <div class="profile-cropper-actions">
-                <button type="button" class="profile-modal-button secondary tw-press" id="avatarCropperCancel">Annuler</button>
-                <button type="button" class="profile-modal-button tw-press" id="avatarCropperConfirm">Enregistrer</button>
+                <button type="button" class="profile-modal-button secondary tw-btn-ghost tw-press" id="avatarCropperCancel">Annuler</button>
+                <button type="button" class="profile-modal-button tw-press tw-btn" id="avatarCropperConfirm">Enregistrer</button>
             </div>
         </div>
     </div>
@@ -383,28 +390,28 @@
             <div class="profile-modal-form tw-surface">
                 <div class="profile-modal-field tw-surface">
                     <label class="profile-modal-label" for="imageUrlInput">URL de l'image</label>
-                    <input class="profile-modal-input" id="imageUrlInput" placeholder="https://exemple.com/image.jpg" autocomplete="off">
+                    <input class="profile-modal-input tw-input" id="imageUrlInput" placeholder="https://exemple.com/image.jpg" autocomplete="off">
                 </div>
                 <div class="profile-modal-field tw-surface">
                     <label class="profile-modal-label" for="imageAltInput">Texte alternatif (alt)</label>
-                    <input class="profile-modal-input" id="imageAltInput" placeholder="Description de l'image" autocomplete="off">
+                    <input class="profile-modal-input tw-input" id="imageAltInput" placeholder="Description de l'image" autocomplete="off">
                 </div>
                 <div class="profile-modal-grid tw-surface">
                     <div>
                         <label class="profile-modal-label" for="imageWidthInput">Largeur</label>
-                        <input class="profile-modal-input" id="imageWidthInput" placeholder="300px">
+                        <input class="profile-modal-input tw-input" id="imageWidthInput" placeholder="300px">
                     </div>
                     <div>
                         <label class="profile-modal-label" for="imageHeightInput">Hauteur</label>
-                        <input class="profile-modal-input" id="imageHeightInput" placeholder="200px">
+                        <input class="profile-modal-input tw-input" id="imageHeightInput" placeholder="200px">
                     </div>
                 </div>
                 <div class="profile-image-preview" id="imagePreview">
                     <span class="profile-image-preview-text">Apercu</span>
                 </div>
                 <div class="profile-modal-actions">
-                    <button type="button" class="profile-modal-button secondary tw-press" id="imageInsertCancel">Annuler</button>
-                    <button type="button" class="profile-modal-button tw-press" id="imageInsertConfirm">Inserer</button>
+                    <button type="button" class="profile-modal-button secondary tw-btn-ghost tw-press" id="imageInsertCancel">Annuler</button>
+                    <button type="button" class="profile-modal-button tw-press tw-btn" id="imageInsertConfirm">Inserer</button>
                 </div>
             </div>
         </div>

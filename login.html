@@ -6,7 +6,7 @@
     <title>Connexion - Astoria</title>
     <link rel="icon" type="image/x-icon" href="assets/images/ALICE_ACADEMIA.ico">
     <link rel="stylesheet" href="css/style.css">
-    <style>
+    <style type="text/tailwindcss">
         .auth-container {
             min-height: 100vh;
             display: flex;
@@ -199,11 +199,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @layer components {
+                @layer components {
             .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
             .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
             .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
             .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+            .tw-panel { @apply rounded-2xl bg-white/80 backdrop-blur-md border border-white/70 shadow-soft; }
+            .tw-card { @apply rounded-2xl bg-white/90 border border-astoria-200/60 shadow-soft; }
+            .tw-card-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-1; }
+            .tw-btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold shadow-soft bg-gradient-to-br from-astoria-400 to-astoria-600 text-white; }
+            .tw-btn-ghost { @apply rounded-full border border-astoria-200/70 bg-white/80 text-astoria-600; }
+            .tw-input { @apply rounded-xl border border-astoria-200/60 bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-astoria-400/40; }
+            .tw-pill { @apply inline-flex items-center gap-1 rounded-full bg-white/70 border border-astoria-200/60 px-3 py-1 text-xs font-semibold text-astoria-600; }
         }
 </style>
     <script src="js/tailwind-config.js"></script>
@@ -220,63 +227,63 @@
 </head>
 <body class="min-h-screen">
     <div class="auth-container">
-        <div class="auth-card tw-surface tw-hover">
+        <div class="auth-card tw-panel tw-surface tw-hover">
             <h1 class="auth-title">Astoria</h1>
             <p class="auth-subtitle" id="authSubtitle">Connectez-vous</p>
             <div class="auth-tabs" role="tablist" aria-label="Connexion ou inscription">
-                <button type="button" class="auth-tab active tw-press" id="tabLogin" role="tab" aria-selected="true">Connexion</button>
-                <button type="button" class="auth-tab tw-press" id="tabRegister" role="tab" aria-selected="false">Inscription</button>
+                <button type="button" class="auth-tab tw-btn-ghost active tw-press" id="tabLogin" role="tab" aria-selected="true">Connexion</button>
+                <button type="button" class="auth-tab tw-btn-ghost tw-press" id="tabRegister" role="tab" aria-selected="false">Inscription</button>
             </div>
             <div id="errorMessage" class="error-message" role="alert"></div>
             <div id="sessionNotice" class="session-notice" hidden>
                 <div id="sessionNoticeText"></div>
                 <div class="session-notice-actions">
-                    <button type="button" class="session-notice-btn tw-press" id="sessionContinue">Continuer</button>
-                    <button type="button" class="session-notice-btn secondary tw-press" id="sessionLogout">Se déconnecter</button>
+                    <button type="button" class="session-notice-btn tw-btn tw-press" id="sessionContinue">Continuer</button>
+                    <button type="button" class="session-notice-btn secondary tw-btn-ghost tw-press" id="sessionLogout">Se déconnecter</button>
                 </div>
             </div>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="loginUsername" class="form-label">Nom d'utilisateur</label>
-                    <input type="text" id="loginUsername" class="form-input" required autocomplete="username" placeholder="Votre pseudo">
+                    <input type="text" id="loginUsername" class="form-input tw-input" required autocomplete="username" placeholder="Votre pseudo">
                 </div>
                 <div class="form-group">
                     <label for="loginPassword" class="form-label">Mot de passe</label>
-                    <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password" placeholder="Votre mot de passe">
+                    <input type="password" id="loginPassword" class="form-input tw-input" required autocomplete="current-password" placeholder="Votre mot de passe">
                 </div>
-                <button type="button" class="auth-link tw-press" id="forgotPasswordLink">Mot de passe oublié ?</button>
-                <button type="submit" class="auth-button tw-press" id="loginButton">Se connecter</button>
+                <button type="button" class="auth-link tw-btn-ghost tw-press" id="forgotPasswordLink">Mot de passe oublié ?</button>
+                <button type="submit" class="auth-button tw-btn tw-press" id="loginButton">Se connecter</button>
             </form>
             <form id="resetForm" style="display:none;">
                 <div class="form-group">
                     <label for="resetUsername" class="form-label">Nom d'utilisateur</label>
-                    <input type="text" id="resetUsername" class="form-input" required autocomplete="username" placeholder="Votre pseudo">
+                    <input type="text" id="resetUsername" class="form-input tw-input" required autocomplete="username" placeholder="Votre pseudo">
                 </div>
                 <div class="form-group">
                     <label for="resetPassword" class="form-label">Nouveau mot de passe</label>
-                    <input type="password" id="resetPassword" class="form-input" required autocomplete="new-password" placeholder="Nouveau mot de passe">
+                    <input type="password" id="resetPassword" class="form-input tw-input" required autocomplete="new-password" placeholder="Nouveau mot de passe">
                 </div>
                 <div class="form-group">
                     <label for="resetPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
-                    <input type="password" id="resetPasswordConfirm" class="form-input" required autocomplete="new-password" placeholder="Confirmer le mot de passe">
+                    <input type="password" id="resetPasswordConfirm" class="form-input tw-input" required autocomplete="new-password" placeholder="Confirmer le mot de passe">
                 </div>
-                <button type="submit" class="auth-button tw-press" id="resetButton">Reinitialiser le mot de passe</button>
-                <button type="button" class="auth-link tw-press" id="backToLoginLink">Retour a la connexion</button>
+                <button type="submit" class="auth-button tw-btn tw-press" id="resetButton">Reinitialiser le mot de passe</button>
+                <button type="button" class="auth-link tw-btn-ghost tw-press" id="backToLoginLink">Retour a la connexion</button>
             </form>
             <form id="registerForm" style="display:none;">
                 <div class="form-group">
                     <label for="registerUsername" class="form-label">Nom d'utilisateur</label>
-                    <input type="text" id="registerUsername" class="form-input" required autocomplete="username" placeholder="Choisir un pseudo">
+                    <input type="text" id="registerUsername" class="form-input tw-input" required autocomplete="username" placeholder="Choisir un pseudo">
                 </div>
                 <div class="form-group">
                     <label for="registerPassword" class="form-label">Mot de passe</label>
-                    <input type="password" id="registerPassword" class="form-input" required autocomplete="new-password" placeholder="Choisir un mot de passe">
+                    <input type="password" id="registerPassword" class="form-input tw-input" required autocomplete="new-password" placeholder="Choisir un mot de passe">
                 </div>
                 <div class="form-group">
                     <label for="registerPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
-                    <input type="password" id="registerPasswordConfirm" class="form-input" required autocomplete="new-password" placeholder="Répéter le mot de passe">
+                    <input type="password" id="registerPasswordConfirm" class="form-input tw-input" required autocomplete="new-password" placeholder="Répéter le mot de passe">
                 </div>
-                <button type="submit" class="auth-button tw-press" id="registerButton">Créer le compte</button>
+                <button type="submit" class="auth-button tw-btn tw-press" id="registerButton">Créer le compte</button>
             </form>
             <div class="auth-footer">Astoria - Prototype (Supabase)</div>
         </div>
