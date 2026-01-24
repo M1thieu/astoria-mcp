@@ -15,20 +15,27 @@
             input, select, textarea { @apply transition-shadow duration-200 ease-out; }
             a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
         }
-    </style>
+    
+        @layer utilities {
+            .fade-in {
+                @apply opacity-0 translate-y-2;
+                animation: fadeIn 0.6s ease forwards;
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
 </head>
-<body>
-  <main class="hamburger-demo">
+<body class="min-h-screen">
+  <main class="hamburger-demo fade-in">
     <button class="hamburger-icon hamburger-icon--1" data-hamburger type="button" aria-label="Toggle navigation" aria-expanded="false">
       <span></span>
       <span></span>
       <span></span>
     </button>
   </main>
-
   <script src="js/ui/hamburger.js"></script>
   <script src="js/sidebar.js"></script>
 </body>
 </html>
-
-

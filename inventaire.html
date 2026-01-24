@@ -17,22 +17,32 @@
             input, select, textarea { @apply transition-shadow duration-200 ease-out; }
             a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
         }
-    </style>
+    
+        @layer utilities {
+            .fade-in {
+                @apply opacity-0 translate-y-2;
+                animation: fadeIn 0.6s ease forwards;
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
 </head>
-<body>
+<body class="min-h-screen">
             <!-- Main inventory wrapper -->
-    <main class="inventory-wrapper" aria-labelledby="inventoryTitle">
+    <main class="inventory-wrapper fade-in" aria-labelledby="inventoryTitle">
                 <!-- Header with title and back button -->
         <div class="inventory-header">
-            <a href="codex.html" class="back-link" title="Retour à la liste">&#x2190;</a>
+            <a href="codex.html" class="back-link" title="Retour Ã  la liste">&#x2190;</a>
             <h1 class="inventory-title" id="inventoryTitle">Inventaire</h1>
-            <div class="character-summary" aria-label="Résumé du personnage">
+            <div class="character-summary" aria-label="RÃ©sumÃ© du personnage">
                 <div class="character-avatar-wrapper">
                     <div class="character-avatar character-avatar--clickable" role="button" tabindex="0" aria-haspopup="true" aria-label="Changer de personnage">
                         <img class="character-avatar-img" id="characterSummaryAvatar" alt="Avatar" hidden>
                         <div class="character-avatar-circle" id="characterSummaryInitial" hidden></div>
                     </div>
-                    <div class="character-dropdown" hidden aria-label="Sélectionner un personnage"></div>
+                    <div class="character-dropdown" hidden aria-label="SÃ©lectionner un personnage"></div>
                 </div>
                 <div class="character-summary-text">
                     <a class="character-name" id="characterSummaryName" href="profil.html">Nom du personnage</a>
@@ -74,7 +84,6 @@
                     <span class="category-label">Agricole</span>
                 </button>
             </nav>
-
             <div class="inventory-search" id="inventorySearch">
                 <button type="button" class="inventory-search-toggle" id="inventorySearchToggle" aria-label="Rechercher" aria-expanded="false">
                     <span class="inventory-search-icon">&#x1F50D;</span>
@@ -90,7 +99,6 @@
                 <div class="recent-searches-dropdown inventory-search-history" id="inventorySearchHistory"></div>
             </div>
         </div>
-
         <!-- Main content area: grid + details -->
         <div class="inventory-content">
             <!-- Items grid (left side) -->
@@ -101,19 +109,17 @@
                 <div class="empty-inventory is-hidden" id="emptyState">
                     <div class="empty-state-icon">&#x1F4E6;</div>
                     <div class="empty-state-title">Aucun objet</div>
-                    <div class="empty-state-message">Votre inventaire est vide dans cette catégorie</div>
+                    <div class="empty-state-message">Votre inventaire est vide dans cette catÃ©gorie</div>
                 </div>
             </div>
-
             <!-- Item detail panel (right side) -->
                         <div class="inventory-detail" id="itemDetail">
                 <div class="detail-placeholder">
                     <div class="placeholder-icon">&#x1F446;</div>
-                    <p>Sélectionnez un objet pour voir ses détails</p>
+                    <p>SÃ©lectionnez un objet pour voir ses dÃ©tails</p>
                 </div>
                 <!-- Details will be rendered here when item is selected -->
             </div>
-
             <!-- Scroll types panel (right-most side) -->
             <aside class="scroll-types-panel" id="scrollTypesPanel" aria-hidden="true">
                 <div class="scroll-panel-header">
@@ -133,7 +139,6 @@
             </aside>
         </div>
     </main>
-
     <!-- Add item panel (slide-in from right) -->
     <div class="add-panel" id="addPanel">
         <div class="add-panel-inner">
@@ -141,42 +146,38 @@
                 <h2>Ajouter un objet</h2>
                 <button class="panel-close-btn" id="closeAddPanel">&times;</button>
             </div>
-
             <div class="add-panel-body">
                 <!-- Item selector (from existing database) -->
                 <div class="form-group">
                     <label for="itemSelect">Objet *</label>
                     <select id="itemSelect" required>
-                        <option value="">-- Sélectionner un objet --</option>
+                        <option value="">-- SÃ©lectionner un objet --</option>
                         <!-- Options populated by JS from inventoryData -->
                     </select>
                 </div>
-
                                 <!-- Category selector -->
                 <div class="form-group">
-                    <label for="categorySelect">Catégorie *</label>
+                    <label for="categorySelect">CatÃ©gorie *</label>
                     <select id="categorySelect" required>
-                        <option value="all">&#x1F4E6; Toutes catégories</option>
+                        <option value="all">&#x1F4E6; Toutes catÃ©gories</option>
                         <option value="equipement">&#x2694;&#xFE0F; &Eacute;quipement</option>
                         <option value="consommable">&#x1F9EA; Consommable</option>
                         <option value="agricole">&#x1F33E; Agricole</option>
                     </select>
                 </div>
-
                 <!-- Quantity selector -->
                 <div class="form-group">
-                    <label for="quantityInput">Quantité *</label>
+                    <label for="quantityInput">QuantitÃ© *</label>
                     <div class="quantity-control">
                         <button type="button" class="qty-btn" id="qtyMinus">-</button>
                         <input type="number" id="quantityInput" min="1" value="1">
                         <button type="button" class="qty-btn" id="qtyPlus">+</button>
                     </div>
                 </div>
-
                 <!-- Item preview (shows selected item details) -->
                 <div id="itemPreview" class="item-preview">
                     <div class="form-group">
-                        <label>Aperçu</label>
+                        <label>AperÃ§u</label>
                         <div class="item-preview-card">
                             <img id="previewImage" class="item-preview-image" src="" alt="" decoding="async">
                             <div>
@@ -187,14 +188,12 @@
                     </div>
                 </div>
             </div>
-
             <div class="add-panel-footer">
                 <button type="button" class="btn-secondary" id="cancelAdd">Annuler</button>
                 <button type="button" class="btn-primary" id="confirmAdd">Ajouter</button>
             </div>
         </div>
     </div>
-
     <!-- Delete confirmation modal -->
     <div class="delete-modal-overlay" id="deleteModal">
         <div class="delete-modal">
@@ -202,9 +201,9 @@
                 <h3>Supprimer l'objet</h3>
             </div>
             <div class="delete-modal-body">
-                <p>Combien d'unités de <span class="delete-modal-item-name" id="deleteItemName"></span> voulez-vous supprimer ?</p>
+                <p>Combien d'unitÃ©s de <span class="delete-modal-item-name" id="deleteItemName"></span> voulez-vous supprimer ?</p>
                 <div class="form-group">
-                    <label for="deleteQuantityInput">Quantité à supprimer</label>
+                    <label for="deleteQuantityInput">QuantitÃ© Ã  supprimer</label>
                     <div class="quantity-control">
                         <button type="button" class="qty-btn" id="deleteQtyMinus">-</button>
                         <input type="number" id="deleteQuantityInput" min="1" value="1">
@@ -218,7 +217,6 @@
             </div>
         </div>
     </div>
-
     <!-- Load shared data -->
     <script src="js/image-helpers.js"></script>
     <script src="js/data.js"></script>
@@ -233,7 +231,6 @@
             await initCharacterSummary({ enableDropdown: true, showKaels: true });
         });
     </script>
-
     <!-- Inventory-specific JS -->
     <script>
         (function () {
@@ -254,17 +251,15 @@
          * - Connect to global item management system
          * ========================================================================
          */
-
         // =================================================================
         // CONFIGURATION
         // =================================================================
         /**
          * IMAGE CONFIGURATION & PLACEHOLDER
-         * Délégués au helper global image-helpers.js
+         * DÃ©lÃ©guÃ©s au helper global image-helpers.js
          */
         const INVENTORY_IMAGE_HELPERS = window.astoriaImageHelpers || {};
         const PLACEHOLDER_IMAGE = INVENTORY_IMAGE_HELPERS.smallPlaceholder;
-
         const DEFAULT_SCROLL_TYPES = [
             { key: 'feu', emoji: '??', label: 'Feu', matchers: ['feu'] },
             { key: 'eau', emoji: '??', label: 'Eau', matchers: ['eau'] },
@@ -272,37 +267,37 @@
             { key: 'terre', emoji: '??', label: 'Terre', matchers: ['terre'] },
             { key: 'nature', emoji: '??', label: 'Nature', matchers: ['nature'] },
             { key: 'roche', emoji: '??', label: 'Roche', matchers: ['roche'] },
-            { key: 'metaux', emoji: '??', label: 'Métaux', matchers: ['metaux', 'métaux'] },
+            { key: 'metaux', emoji: '??', label: 'MÃ©taux', matchers: ['metaux', 'mÃ©taux'] },
             { key: 'cryo', emoji: '??', label: 'Cryo (glace)', matchers: ['cryo', 'glace'] },
             { key: 'foudre', emoji: '?', label: 'Foudre', matchers: ['foudre'] },
-            { key: 'lumiere', emoji: '??', label: 'Lumière', matchers: ['lumiere', 'lumière'] },
-            { key: 'tenebres', emoji: '??', label: 'Ténèbres', matchers: ['tenebres', 'ténèbres'] },
+            { key: 'lumiere', emoji: '??', label: 'LumiÃ¨re', matchers: ['lumiere', 'lumiÃ¨re'] },
+            { key: 'tenebres', emoji: '??', label: 'TÃ©nÃ¨bres', matchers: ['tenebres', 'tÃ©nÃ¨bres'] },
             { key: 'bois', emoji: '??', label: 'Bois', matchers: ['bois'] },
             { key: 'boue', emoji: '??', label: 'Boue', matchers: ['boue'] },
             { key: 'lave', emoji: '??', label: 'Lave', matchers: ['lave'] },
             { key: 'acide', emoji: '??', label: 'Acide', matchers: ['acide'] },
             { key: 'cristal', emoji: '??', label: 'Cristal', matchers: ['cristal'] },
-            { key: 'gravite', emoji: '??', label: 'Gravité', matchers: ['gravite', 'gravité'] },
+            { key: 'gravite', emoji: '??', label: 'GravitÃ©', matchers: ['gravite', 'gravitÃ©'] },
             { key: 'osmose', emoji: '??', label: 'Osmose', matchers: ['osmose'] },
-            { key: 'telekinesie', emoji: '??', label: 'Télékinésie', matchers: ['telekinesie', 'télékinésie'] },
-            { key: 'invisibilite', emoji: '???', label: 'Invisibilité', matchers: ['invisibilite', 'invisibilité'] },
+            { key: 'telekinesie', emoji: '??', label: 'TÃ©lÃ©kinÃ©sie', matchers: ['telekinesie', 'tÃ©lÃ©kinÃ©sie'] },
+            { key: 'invisibilite', emoji: '???', label: 'InvisibilitÃ©', matchers: ['invisibilite', 'invisibilitÃ©'] },
             { key: 'vol', emoji: '???', label: 'Vol', matchers: ['vol'] },
             { key: 'soin', emoji: '??', label: 'Soin', matchers: ['soin'] },
-            { key: 'amelioration-sens', emoji: '??', label: 'Amélioration des sens', matchers: ['amelioration des sens', 'amélioration des sens'] },
-            { key: 'reve', emoji: '??', label: 'Rêve', matchers: ['reve', 'rêve'] },
-            { key: 'controle-mental', emoji: '??', label: 'Contrôle mental', matchers: ['controle mental', 'contrôle mental'] },
-            { key: 'controle-temps', emoji: '?', label: 'Contrôle du Temps', matchers: ['controle du temps', 'controle temps', 'contrôle du temps', 'contrôle temps'] },
+            { key: 'amelioration-sens', emoji: '??', label: 'AmÃ©lioration des sens', matchers: ['amelioration des sens', 'amÃ©lioration des sens'] },
+            { key: 'reve', emoji: '??', label: 'RÃªve', matchers: ['reve', 'rÃªve'] },
+            { key: 'controle-mental', emoji: '??', label: 'ContrÃ´le mental', matchers: ['controle mental', 'contrÃ´le mental'] },
+            { key: 'controle-temps', emoji: '?', label: 'ContrÃ´le du Temps', matchers: ['controle du temps', 'controle temps', 'contrÃ´le du temps', 'contrÃ´le temps'] },
             { key: 'portals', emoji: '??', label: 'Portals', matchers: ['portals', 'portal', 'portail', 'portails'] },
             { key: 'monde-poche', emoji: '??', label: 'Monde de poche', matchers: ['monde de poche'] },
-            { key: 'teleportation', emoji: '??', label: 'Téléportation', matchers: ['teleportation', 'téléportation'] },
+            { key: 'teleportation', emoji: '??', label: 'TÃ©lÃ©portation', matchers: ['teleportation', 'tÃ©lÃ©portation'] },
             { key: 'mana-brut', emoji: '??', label: 'Mana brut', matchers: ['mana brut'] },
             { key: 'ordre', emoji: '??', label: 'Ordre', matchers: ['ordre'] },
             { key: 'antimagie', emoji: '?', label: 'Antimagie', matchers: ['antimagie'] },
-            { key: 'amelioration-runique', emoji: '??', label: 'Amélioration runique', matchers: ['amelioration runique', 'amélioration runique'] },
-            { key: 'invocation-energie', emoji: '?', label: 'Invocation d’énergie', matchers: ['invocation d energie', 'invocation energie', 'invocation d’énergie'] },
-            { key: 'amplification-elementaire', emoji: '??', label: 'Amplification élémentaire', matchers: ['amplification elementaire', 'amplification élémentaire'] },
+            { key: 'amelioration-runique', emoji: '??', label: 'AmÃ©lioration runique', matchers: ['amelioration runique', 'amÃ©lioration runique'] },
+            { key: 'invocation-energie', emoji: '?', label: 'Invocation dâ€™Ã©nergie', matchers: ['invocation d energie', 'invocation energie', 'invocation dâ€™Ã©nergie'] },
+            { key: 'amplification-elementaire', emoji: '??', label: 'Amplification Ã©lÃ©mentaire', matchers: ['amplification elementaire', 'amplification Ã©lÃ©mentaire'] },
             { key: 'rotation', emoji: '??', label: 'Rotation', matchers: ['rotation'] },
-            { key: 'magnetisme', emoji: '??', label: 'Magnétisme', matchers: ['magnetisme', 'magnétisme'] },
+            { key: 'magnetisme', emoji: '??', label: 'MagnÃ©tisme', matchers: ['magnetisme', 'magnÃ©tisme'] },
             { key: 'fil', emoji: '??', label: 'Fil', matchers: ['fil'] },
             { key: 'sable', emoji: '???', label: 'Sable', matchers: ['sable'] },
             { key: 'ombres-solides', emoji: '??', label: 'Ombres solides', matchers: ['ombres solides'] },
@@ -310,51 +305,47 @@
             { key: 'cendres', emoji: '?', label: 'Cendres', matchers: ['cendres'] },
             { key: 'argile', emoji: '??', label: 'Argile', matchers: ['argile'] },
             { key: 'invocation-animale', emoji: '??', label: 'Invocation animale', matchers: ['invocation animale'] },
-            { key: 'invocation-armes', emoji: '??', label: 'Invocation d’armes', matchers: ['invocation d armes', 'invocation armes', 'invocation d’armes'] },
+            { key: 'invocation-armes', emoji: '??', label: 'Invocation dâ€™armes', matchers: ['invocation d armes', 'invocation armes', 'invocation dâ€™armes'] },
             { key: 'invocation-golems', emoji: '??', label: 'Invocation de golems', matchers: ['invocation de golems', 'invocation golems'] },
-            { key: 'esprits-elementaires', emoji: '??', label: 'Esprits élémentaires', matchers: ['esprits elementaires', 'esprits élémentaires'] },
+            { key: 'esprits-elementaires', emoji: '??', label: 'Esprits Ã©lÃ©mentaires', matchers: ['esprits elementaires', 'esprits Ã©lÃ©mentaires'] },
             { key: 'pantins', emoji: '??', label: 'Pantins', matchers: ['pantins'] },
             { key: 'fabrication-familiers', emoji: '??', label: 'Fabrication de familiers', matchers: ['fabrication de familiers', 'familiers'] },
-            { key: 'metamorphose-animale', emoji: '??', label: 'Métamorphose animale', matchers: ['metamorphose animale', 'métamorphose animale'] },
+            { key: 'metamorphose-animale', emoji: '??', label: 'MÃ©tamorphose animale', matchers: ['metamorphose animale', 'mÃ©tamorphose animale'] },
             { key: 'mutations', emoji: '??', label: 'Mutations', matchers: ['mutations'] },
-            { key: 'regeneration-avancee', emoji: '??', label: 'Régénération avancée', matchers: ['regeneration avancee', 'régénération avancée'] },
+            { key: 'regeneration-avancee', emoji: '??', label: 'RÃ©gÃ©nÃ©ration avancÃ©e', matchers: ['regeneration avancee', 'rÃ©gÃ©nÃ©ration avancÃ©e'] },
             { key: 'microbiologie', emoji: '??', label: 'MicroBiologie', matchers: ['microbiologie'] },
             { key: 'son', emoji: '??', label: 'Son', matchers: ['son'] },
             { key: 'illusion', emoji: '??', label: 'Illusion', matchers: ['illusion'] },
             { key: 'sang', emoji: '??', label: 'Sang', matchers: ['sang'] },
             { key: 'chance', emoji: '??', label: 'Chance / Malchance', matchers: ['chance', 'malchance'] },
             { key: 'lien', emoji: '??', label: 'Lien', matchers: ['lien'] },
-            { key: 'detection', emoji: '??', label: 'Détection', matchers: ['detection', 'détection'] },
+            { key: 'detection', emoji: '??', label: 'DÃ©tection', matchers: ['detection', 'dÃ©tection'] },
             { key: 'silence', emoji: '??', label: 'Silence', matchers: ['silence'] },
             { key: 'corruption', emoji: '??', label: 'Corruption', matchers: ['corruption'] },
-            { key: 'cercle-demoniaque', emoji: '???', label: 'Cercle démoniaque', matchers: ['cercle demoniaque', 'cercle démoniaque'] },
-            { key: 'devoreur-ames', emoji: '??', label: 'Dévoreur d’âmes', matchers: ['devoreur d ames', 'devoreur ames', 'dévoreur d’âmes'] },
+            { key: 'cercle-demoniaque', emoji: '???', label: 'Cercle dÃ©moniaque', matchers: ['cercle demoniaque', 'cercle dÃ©moniaque'] },
+            { key: 'devoreur-ames', emoji: '??', label: 'DÃ©voreur dâ€™Ã¢mes', matchers: ['devoreur d ames', 'devoreur ames', 'dÃ©voreur dâ€™Ã¢mes'] },
             { key: 'rouille', emoji: '??', label: 'Rouille', matchers: ['rouille'] },
             { key: 'berserker', emoji: '??', label: 'Berserker', matchers: ['berserker'] },
-            { key: 'maledictions', emoji: '??', label: 'Malédictions', matchers: ['maledictions', 'malédictions'] },
+            { key: 'maledictions', emoji: '??', label: 'MalÃ©dictions', matchers: ['maledictions', 'malÃ©dictions'] },
             { key: 'variation-masse', emoji: '??', label: 'Variation de masse', matchers: ['variation de masse'] },
-            { key: 'meteorologie', emoji: '???', label: 'Météorologie', matchers: ['meteorologie', 'météorologie'] },
+            { key: 'meteorologie', emoji: '???', label: 'MÃ©tÃ©orologie', matchers: ['meteorologie', 'mÃ©tÃ©orologie'] },
             { key: 'chimie-magique', emoji: '??', label: 'Chimie magique', matchers: ['chimie magique'] },
             { key: 'magie-astral', emoji: '??', label: 'Magie astral', matchers: ['magie astral', 'magie astrale'] },
             { key: 'elasticite', emoji: '??', label: '\u00c9lasticit\u00e9', matchers: ['elasticite', '\u00e9lasticit\u00e9'] }
         ];
-
         const SCROLL_TYPES = Array.isArray(window.astoriaScrollTypes) && window.astoriaScrollTypes.length
             ? window.astoriaScrollTypes
             : DEFAULT_SCROLL_TYPES;
-
         if (!Array.isArray(window.astoriaScrollTypes) || window.astoriaScrollTypes.length < DEFAULT_SCROLL_TYPES.length) {
             window.astoriaScrollTypes = DEFAULT_SCROLL_TYPES;
         }
         const SCROLL_TYPES_META_KEY = 'astoria_scroll_types_meta';
         const SCROLL_TYPE_FALLBACK_EMOJI = String.fromCodePoint(0x2728);
-
         function formatScrollTypeLabel(key) {
             const raw = String(key || '').replace(/[-_]+/g, ' ').trim();
             if (!raw) return '';
             return raw.charAt(0).toUpperCase() + raw.slice(1);
         }
-
         function getScrollTypeMetaByKey(key) {
             if (!key) return null;
             if (typeof window.astoriaGetScrollTypeMeta === 'function') {
@@ -371,7 +362,6 @@
                 matchers: []
             };
         }
-
         function persistScrollTypeMeta() {
             try {
                 const payload = SCROLL_TYPES.map((type) => ({
@@ -390,14 +380,11 @@
                 console.warn('Failed to persist scroll type metadata:', error);
             }
         }
-
         persistScrollTypeMeta();
-
         // =================================================================
         // =================================================================
         // STATE
         // =================================================================
-
         let currentCategory = 'all';
         let currentSearchQuery = '';
         let selectedItemIndex = null;
@@ -416,10 +403,8 @@
         let lastScrollItemId = null;
         let scrollTypeStore = {};
         let inventoryMigrated = false;
-
         // DOM REFERENCES
         // =================================================================
-
         const grid = document.getElementById('inventoryGrid');
         const detailPanel = document.getElementById('itemDetail');
         const emptyState = document.getElementById('emptyState');
@@ -442,7 +427,6 @@
         const scrollPanelAdd = document.getElementById('scrollPanelAdd');
         const scrollTypeSearch = document.getElementById('scrollTypeSearch');
         const scrollTypeSuggestions = document.getElementById('scrollTypeSuggestions');
-
         // Add panel elements
         const addPanel = document.getElementById('addPanel');
         const openAddBtn = document.getElementById('openAddPanel');
@@ -460,7 +444,6 @@
         const previewDescription = document.getElementById('previewDescription');
         const inventoryWrapper = document.querySelector('.inventory-wrapper');
         let inventoryAccessAllowed = true;
-
         const listHelpers = window.astoriaListHelpers || {};
         const filterItems = listHelpers.filterItems;
         const searchFields = [
@@ -468,16 +451,13 @@
             (item) => item?.description,
             (item) => item?.effect
         ];
-
         const searchHistory = window.astoriaSearchHistory
             ? window.astoriaSearchHistory.createSearchHistory({
                 storageKey: 'astoriaInventoryRecentSearches',
                 maxItems: 4
             })
             : null;
-
         const INVENTORY_SYNC_KEY = 'astoria_inventory_sync';
-
         function broadcastInventorySync(reason = 'update') {
             try {
                 const character = authApi?.getActiveCharacter?.();
@@ -492,19 +472,16 @@
                 console.warn('Inventory sync broadcast failed:', error);
             }
         }
-
         async function handleInventorySync(payload) {
             if (!payload) return;
             if (inventoryStorageMode !== 'character' || !authApi) return;
             const character = authApi.getActiveCharacter?.();
             if (!character?.id) return;
             if (String(payload.characterId) !== String(character.id)) return;
-
             await loadInventory();
             syncCurrencyItem();
             renderInventory();
         }
-
         window.addEventListener('storage', (event) => {
             if (event.key !== INVENTORY_SYNC_KEY || !event.newValue) return;
             try {
@@ -514,11 +491,9 @@
                 // ignore invalid payloads
             }
         });
-
         // =================================================================
         // INITIALIZATION
         // =================================================================
-
         /**
          * Initialize inventory - EMPTY BY DEFAULT
          * - Loads from localStorage ONLY (if present)
@@ -527,7 +502,6 @@
          */
         async function initInventory() {
             console.log('Initializing inventory...');
-
             await hydrateItemsFromDb();
             await initInventoryStorage();
             if (!inventoryAccessAllowed) {
@@ -536,17 +510,13 @@
             }
             await loadInventory();
             syncCurrencyItem();
-
             // Render
             renderInventory();
-
             // Note: Item selector is populated when add panel opens
         }
-
         // =================================================================
         // ITEM DATABASE ACCESS
         // =================================================================
-
         /**
          * TEMPORARY FUNCTION: Get all available items from data.js
          *
@@ -564,7 +534,6 @@
                 !isLocalItemTombstoned(item) && !isItemDisabled(item)
             );
         }
-
         function safeJson(value) {
             if (!value) return {};
             if (typeof value === 'object') return value;
@@ -577,7 +546,6 @@
             }
             return {};
         }
-
         function normalizeItemName(name) {
             return String(name || '')
                 .normalize('NFD')
@@ -585,10 +553,8 @@
                 .replace(/[^a-zA-Z0-9]+/g, '')
                 .toLowerCase();
         }
-
         const ITEM_TOMBSTONES_KEY = 'astoriaItemTombstones';
         let disabledItemNames = new Set();
-
         function getItemTombstones() {
             try {
                 const raw = localStorage.getItem(ITEM_TOMBSTONES_KEY);
@@ -598,7 +564,6 @@
                 return [];
             }
         }
-
         function isLocalItemTombstoned(item) {
             if (!item || item._dbId || item.source === 'db') return false;
             const key = normalizeItemName(item.name || item.nom || '');
@@ -606,25 +571,21 @@
             const tombstones = getItemTombstones();
             return tombstones.includes(key);
         }
-
         function isItemDisabled(item) {
             const key = normalizeItemName(item?.name || item?.nom || '');
             if (!key) return false;
             return disabledItemNames.has(key);
         }
-
         function resolveItemByKey(itemKey, itemIndex) {
             const allItems = getAllItems();
             const numericIndex = Number.isFinite(Number(itemIndex)) ? Number(itemIndex) : null;
             if (numericIndex != null && numericIndex >= 0 && allItems[numericIndex]) {
                 return { item: allItems[numericIndex], index: numericIndex };
             }
-
             const numericKey = Number.isFinite(Number(itemKey)) ? Number(itemKey) : null;
             if (numericKey != null && numericKey >= 0 && allItems[numericKey]) {
                 return { item: allItems[numericKey], index: numericKey };
             }
-
             const normalizedKey = normalizeItemName(itemKey);
             if (normalizedKey) {
                 const byName = allItems.findIndex((entry) =>
@@ -634,41 +595,33 @@
                     return { item: allItems[byName], index: byName };
                 }
             }
-
             return { item: null, index: -1 };
         }
-
         async function reconcileInventoryRows(characterId, rows) {
             if (!characterId || !inventoryApi?.setInventoryItem || !Array.isArray(rows)) return rows;
-
             const canonicalByName = new Map();
             rows.forEach((row) => {
                 const key = normalizeItemName(row?.item_key);
                 if (!key) return;
                 if (!canonicalByName.has(key)) canonicalByName.set(key, row);
             });
-
             const updates = [];
             const nextRows = [];
-
             rows.forEach((row) => {
                 const resolved = resolveItemByKey(row?.item_key, row?.item_index);
                 const canonicalKey = resolved?.item?.name ? String(resolved.item.name) : '';
                 const canonicalNorm = normalizeItemName(canonicalKey);
                 const rowNorm = normalizeItemName(row?.item_key);
-
                 if (!canonicalKey || !canonicalNorm || !rowNorm || canonicalNorm === rowNorm) {
                     nextRows.push(row);
                     return;
                 }
-
                 const canonicalRow = canonicalByName.get(canonicalNorm);
                 if (canonicalRow) {
                     // Canonical row already exists, drop the legacy key row.
                     updates.push(inventoryApi.setInventoryItem(characterId, String(row.item_key), row?.item_index, 0));
                     return;
                 }
-
                 // Migrate legacy key to canonical name.
                 updates.push(inventoryApi.setInventoryItem(characterId, String(row.item_key), row?.item_index, 0));
                 updates.push(inventoryApi.setInventoryItem(characterId, canonicalKey, resolved.index, row?.qty));
@@ -678,7 +631,6 @@
                     item_index: Number.isFinite(resolved.index) && resolved.index >= 0 ? resolved.index : row?.item_index
                 });
             });
-
             if (updates.length) {
                 try {
                     await Promise.allSettled(updates);
@@ -686,10 +638,8 @@
                     console.warn('Inventory reconcile failed:', error);
                 }
             }
-
             return nextRows;
         }
-
         function mapDbItem(row) {
             const images = safeJson(row.images);
             const primary = images.primary || images.url || row.image || row.image_url || '';
@@ -708,7 +658,6 @@
                 images: images
             };
         }
-
         async function hydrateItemsFromDb() {
             if (!Array.isArray(window.inventoryData)) return;
             try {
@@ -748,7 +697,6 @@
                 console.warn('Inventory DB items load failed:', error);
             }
         }
-
         /**
          * Populate the item selector dropdown with items from database
          * Filters by selected category for clarity
@@ -756,15 +704,12 @@
         function populateItemSelector() {
             const allItems = getAllItems();
             const selectedCategory = categorySelect.value;
-
             // Clear existing options (except the first placeholder)
-            itemSelect.innerHTML = '<option value="">-- Sélectionner un objet --</option>';
-
+            itemSelect.innerHTML = '<option value="">-- SÃ©lectionner un objet --</option>';
             // Filter items by category if not "all"
             const filteredItems = selectedCategory === 'all'
                 ? allItems
                 : allItems.filter(item => item.category === selectedCategory);
-
             // Add filtered items as options
             filteredItems.forEach((item, index) => {
                 // Use the original index from allItems for referencing
@@ -776,26 +721,20 @@
                 itemSelect.appendChild(option);
             });
         }
-
         // =================================================================
         // PERSISTENCE - LocalStorage (TEMPORARY)
         // =================================================================
-
         function hydrateInventoryFromCompact(items) {
             const allItems = getAllItems();
             inventoryItems = [];
             nextItemId = 1;
-
             if (!Array.isArray(items)) return;
-
             items.forEach((entry) => {
                 const idx = Number(entry?.idx);
                 const qty = Number(entry?.qty);
                 if (!Number.isFinite(idx) || !Number.isFinite(qty) || qty <= 0) return;
-
                 const sourceItem = allItems[idx];
                 if (!sourceItem) return;
-
                 inventoryItems.push({
                     id: nextItemId++,
                     sourceIndex: idx,
@@ -810,16 +749,12 @@
                 });
             });
         }
-
-
         function hydrateInventoryFromRows(rows) {
             const allItems = getAllItems();
             inventoryItems = [];
             nextItemId = 1;
             const missingRows = [];
-
             if (!Array.isArray(rows)) return;
-
             rows.forEach((row) => {
                 const qty = Number(row?.qty);
                 if (!Number.isFinite(qty) || qty <= 0) return;
@@ -829,7 +764,6 @@
                     missingRows.push(row);
                     return;
                 }
-
                 inventoryItems.push({
                     id: nextItemId++,
                     sourceIndex: resolved.index,
@@ -839,7 +773,6 @@
             });
             return missingRows;
         }
-
         function buildInventoryRows(characterId) {
             return inventoryItems
                 .map((item) => {
@@ -859,14 +792,12 @@
                 })
                 .filter(Boolean);
         }
-
         function serializeInventoryForProfile() {
             const totalQty = inventoryItems.reduce((sum, item) => {
                 if (item?.isCurrency) return sum;
                 const qty = Math.floor(Number(item?.quantity) || 0);
                 return sum + (Number.isFinite(qty) ? qty : 0);
             }, 0);
-
             return {
                 version: 1,
                 migrated: true,
@@ -875,7 +806,6 @@
                 scrollTypes: normalizeScrollTypeStore(scrollTypeStore)
             };
         }
-
         function syncCurrencyItem() {
             if (!authApi || typeof authApi.getActiveCharacter !== 'function') return;
             const character = authApi.getActiveCharacter();
@@ -897,8 +827,6 @@
                 isCurrency: true
             });
         }
-
-
         function renderInventoryAccessDenied() {
             if (!inventoryWrapper) return;
             inventoryWrapper.innerHTML = `
@@ -911,13 +839,10 @@
                 </div>
             `;
         }
-
-
         async function initInventoryStorage() {
             inventoryStorageMode = 'local';
             authApi = null;
             inventoryApi = null;
-
             try {
                 authApi = await import('./js/auth.js');
                 inventoryApi = await import('./js/api/inventory-service.js');
@@ -937,26 +862,20 @@
                 inventoryApi = null;
             }
         }
-
-
-
         async function loadInventory() {
             if (inventoryStorageMode !== 'character' || !authApi || !inventoryApi) {
                 loadFromLocalStorage();
                 return;
             }
-
             const character = authApi.getActiveCharacter?.();
             const payload = character?.profile_data?.inventory;
             const hasMigrated = payload?.migrated === true;
             inventoryMigrated = hasMigrated;
-
             if (payload && payload.scrollTypes && typeof payload.scrollTypes === 'object') {
                 scrollTypeStore = payload.scrollTypes;
             } else {
                 scrollTypeStore = {};
             }
-
             try {
                 const rows = await inventoryApi.getInventoryRows?.(character?.id);
                 if (Array.isArray(rows)) {
@@ -969,7 +888,6 @@
                         }
                         return;
                     }
-
                     if (!hasMigrated) {
                         loadFromLocalStorage();
                         if (inventoryItems.length > 0) {
@@ -984,7 +902,6 @@
                             // ignore cleanup failures
                         }
                     }
-
                     hydrateInventoryFromRows([]);
                     return;
                 }
@@ -993,7 +910,6 @@
             }
             hydrateInventoryFromRows([]);
         }
-
         async function cleanupMissingInventoryRows(characterId, rows) {
             if (!characterId || !inventoryApi?.setInventoryItem) return;
             const deletions = rows.map((row) => {
@@ -1009,19 +925,15 @@
                 console.warn('Failed to cleanup missing inventory items:', error);
             }
         }
-
         async function saveInventoryToCharacterProfile() {
             if (inventoryStorageMode !== 'character' || !authApi) return;
-
             const character = authApi.getActiveCharacter?.();
             if (!character || !character.id) return;
-
             const currentProfileData = character.profile_data || {};
             const nextProfileData = {
                 ...currentProfileData,
                 inventory: serializeInventoryForProfile(),
             };
-
             try {
                 const res = await authApi.updateCharacter?.(character.id, { profile_data: nextProfileData });
                 if (!res || !res.success) {
@@ -1031,46 +943,36 @@
                 console.warn('Inventory save error (profile_data):', error);
             }
         }
-
         async function saveInventoryToBackend() {
             if (inventoryStorageMode !== 'character' || !authApi || !inventoryApi) return;
-
             const character = authApi.getActiveCharacter?.();
             if (!character || !character.id) return;
-
             const rows = buildInventoryRows(character.id);
             let saved = false;
-
             try {
                 await inventoryApi.replaceInventoryRows?.(character.id, rows);
                 saved = true;
             } catch (error) {
                 console.warn('Inventory save error (character_inventory):', error);
             }
-
             await saveInventoryToCharacterProfile();
             if (saved) {
                 broadcastInventorySync('save');
             }
         }
-
         function persistInventory() {
             // Always keep local backup (handy for offline testing)
             saveToLocalStorage();
-
             if (inventoryStorageMode !== 'character') return;
-
             if (pendingProfileSaveTimer) {
                 clearTimeout(pendingProfileSaveTimer);
                 pendingProfileSaveTimer = null;
             }
-
             pendingProfileSaveTimer = setTimeout(() => {
                 pendingProfileSaveTimer = null;
                 void saveInventoryToBackend();
             }, 500);
         }
-
         /**
          * TEMPORARY: Load inventory from localStorage
          *
@@ -1104,7 +1006,6 @@
                 inventoryItems = [];
             }
         }
-
         /**
          * TEMPORARY: Save inventory to localStorage
          *
@@ -1119,30 +1020,24 @@
                 console.error('Error saving to localStorage:', error);
             }
         }
-
         // =================================================================
         // ADD ITEM PANEL
         // =================================================================
-
         /**
          * Open the add item panel
          * Pre-selects the current category filter for convenience
          */
         function openAddPanel() {
             addPanel.classList.add('open');
-
             // Pre-select current category (or "all" if viewing all)
             categorySelect.value = currentCategory;
-
             // Populate items based on pre-selected category
             populateItemSelector();
-
             // Reset other form fields
             itemSelect.value = '';
             quantityInput.value = 1;
             itemPreview.style.display = 'none';
         }
-
         /**
          * Close the add item panel
          */
@@ -1150,7 +1045,6 @@
             addPanel.classList.remove('open');
             resetAddForm();
         }
-
         /**
          * Reset the add form to defaults
          */
@@ -1161,33 +1055,27 @@
             itemPreview.style.display = 'none';
             populateItemSelector(); // Refresh item list
         }
-
         /**
          * Handle category change - refresh item dropdown
          */
         function handleCategoryChange() {
             // Refresh item dropdown with filtered items
             populateItemSelector();
-
             // Clear item selection since list changed
             itemSelect.value = '';
             itemPreview.style.display = 'none';
         }
-
         /**
          * Handle item selection - show preview
          */
         function handleItemSelection() {
             const selectedIndex = itemSelect.value;
-
             if (!selectedIndex) {
                 itemPreview.style.display = 'none';
                 return;
             }
-
             const allItems = getAllItems();
             const selectedItem = allItems[parseInt(selectedIndex)];
-
             if (selectedItem) {
                 // Show preview
                 const imageSrc = resolveImage(selectedItem);
@@ -1198,36 +1086,29 @@
                 itemPreview.style.display = 'block';
             }
         }
-
         /**
          * Add selected item to inventory
          */
         function addItemToInventory() {
             const selectedIndex = itemSelect.value;
             const quantity = parseInt(quantityInput.value) || 1;
-
             if (!selectedIndex) {
-                alert('Veuillez sélectionner un objet');
+                alert('Veuillez sÃ©lectionner un objet');
                 return;
             }
-
             if (quantity < 1) {
-                alert('La quantité doit être au moins 1');
+                alert('La quantitÃ© doit Ãªtre au moins 1');
                 return;
             }
-
             const allItems = getAllItems();
             const sourceItem = allItems[parseInt(selectedIndex)];
             const sourceIndex = parseInt(selectedIndex);
-
             if (!sourceItem) {
                 alert('Objet invalide');
                 return;
             }
-
             // Check if item already exists in inventory
             const existingItem = inventoryItems.find(i => i.sourceIndex === sourceIndex || i.name === sourceItem.name);
-
             if (existingItem) {
                 // Update quantity if already exists
                 existingItem.quantity += quantity;
@@ -1249,18 +1130,14 @@
                     sellPrice: sourceItem.sellPrice,
                     quantity: quantity
                 };
-
                 inventoryItems.push(newItem);
                 console.log(`Added ${newItem.name} x${quantity} to inventory`);
             }
-
             persistInventory();
-
             // Close panel and refresh display
             closeAddPanel();
             renderInventory();
         }
-
         /**
          * Quantity control buttons
          */
@@ -1268,12 +1145,10 @@
             const current = parseInt(quantityInput.value) || 1;
             quantityInput.value = Math.max(1, current - 1);
         }
-
         function increaseQuantity() {
             const current = parseInt(quantityInput.value) || 1;
             quantityInput.value = current + 1;
         }
-
         // Attach event listeners for add panel
         openAddBtn.addEventListener('click', openAddPanel);
         closeAddBtn.addEventListener('click', closeAddPanel);
@@ -1289,7 +1164,6 @@
                 closeAddPanel();
             }
         });
-
         if (scrollPanelAddBtn) {
             scrollPanelAddBtn.addEventListener('click', () => {
                 if (scrollPanelAddBtn.disabled) return;
@@ -1298,14 +1172,12 @@
                 syncScrollPanelHeights();
             });
         }
-
         if (scrollTypeSearch) {
             scrollTypeSearch.addEventListener('input', (event) => {
                 renderScrollSuggestions(event.target.value);
                 syncScrollPanelHeights();
             });
         }
-
         if (scrollTypeSuggestions) {
             scrollTypeSuggestions.addEventListener('click', (event) => {
                 const addButton = event.target.closest('.scroll-suggestion-add');
@@ -1317,7 +1189,6 @@
                 if (qtyInput) qtyInput.value = 1;
             });
         }
-
         if (scrollPanelList) {
             scrollPanelList.addEventListener('click', (event) => {
                 const addButton = event.target.closest('.scroll-type-add');
@@ -1355,7 +1226,6 @@
                     }
                 }
             });
-
             scrollPanelList.addEventListener('keydown', (event) => {
                 if (event.key !== 'Enter') return;
                 const input = event.target.closest('.scroll-type-qty-input');
@@ -1366,13 +1236,10 @@
                 input.value = 1;
             });
         }
-
         window.addEventListener('resize', syncScrollPanelHeights);
-
         // =================================================================
         // CATEGORY FILTERING
         // =================================================================
-
         /**
          * Filter inventory by category
          * - Updates active button
@@ -1382,7 +1249,6 @@
         function filterByCategory(category) {
             currentCategory = category;
             selectedItemIndex = null;
-
             // Update active button
             categoryButtons.forEach(btn => {
                 if (btn.dataset.category === category) {
@@ -1391,17 +1257,14 @@
                     btn.classList.remove('active');
                 }
             });
-
             renderInventory();
         }
-
         // Attach click handlers to category buttons
         categoryButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 filterByCategory(btn.dataset.category);
             });
         });
-
         if (searchRoot && searchInput && window.astoriaSearchBar) {
             window.astoriaSearchBar.bind({
                 root: searchRoot,
@@ -1418,11 +1281,9 @@
                 }
             });
         }
-
         // =================================================================
         // IMAGE RESOLUTION
         // =================================================================
-
         /**
          * Resolve image path from item data
          * - Checks IMAGE_CONFIG mappings
@@ -1431,15 +1292,13 @@
          */
         function resolveImage(item) {
             const helpers = window.astoriaImageHelpers || {};
-
             if (helpers.resolveItemImages) {
                 const resolved = helpers.resolveItemImages(item);
                 if (resolved && resolved.primary) {
                     return resolved.primary;
                 }
             }
-
-            // Fallback local (au cas où le helper n'est pas disponible)
+            // Fallback local (au cas oÃ¹ le helper n'est pas disponible)
             if (item) {
                 const raw = item.image || item.img || item?.images?.primary || item?.images?.url || '';
                 if (typeof raw === 'string' && raw.trim()) {
@@ -1450,16 +1309,13 @@
                     return 'assets/nokorah/lucky-soul.svg';
                 }
             }
-
             // No match found, use placeholder
             return PLACEHOLDER_IMAGE;
         }
-
         // =================================================================
         // SCROLL TYPES PANEL
         // =================================================================
         const normalizeText = window.astoriaListHelpers.normalizeText;
-
         function getScrollCategory(item) {
             const helper = window.astoriaItemTags;
             if (helper?.getScrollCategory) {
@@ -1472,7 +1328,6 @@
             if (name.includes('ascension')) return 'ascension';
             return null;
         }
-
         function getScrollTypeKey(item) {
             const taggedKey = window.astoriaItemTags?.getScrollTypeKeyFromTags?.(item);
             if (taggedKey) return taggedKey;
@@ -1481,7 +1336,6 @@
                     .filter(Boolean)
                     .join(' ')
             );
-
             for (const type of SCROLL_TYPES) {
                 for (const matcher of type.matchers) {
                     if (haystack.includes(normalizeText(matcher))) {
@@ -1489,12 +1343,9 @@
                     }
                 }
             }
-
             return null;
         }
-
         const SCROLL_STORAGE_PREFIX = 'astoriaScrollTypes:v1';
-
         function getEmptyScrollCounts() {
             const counts = {};
             SCROLL_TYPES.forEach((type) => {
@@ -1502,7 +1353,6 @@
             });
             return counts;
         }
-
         function getScrollItemKey(item) {
             const sourceIndex = Number(item?.sourceIndex);
             if (Number.isFinite(sourceIndex)) {
@@ -1518,12 +1368,10 @@
             }
             return 'unknown';
         }
-
         function getScrollStorageKey(category, item, useLegacy = false) {
             const idPart = useLegacy ? (item?.id ?? item?.name ?? 'unknown') : getScrollItemKey(item);
             return `${SCROLL_STORAGE_PREFIX}:${category}:${idPart}`;
         }
-
         function clearScrollCountsForItem(item) {
             const category = getScrollCategory(item);
             if (!category || !item) return;
@@ -1545,7 +1393,6 @@
                 // ignore storage cleanup failures
             }
         }
-
         function resetScrollCountsAfterQtyChange(item) {
             const category = getScrollCategory(item);
             if (!category) return;
@@ -1563,7 +1410,6 @@
                 persistInventory();
             }
         }
-
         function normalizeScrollCounts(rawCounts) {
             const counts = getEmptyScrollCounts();
             if (!rawCounts) return counts;
@@ -1578,7 +1424,6 @@
             });
             return counts;
         }
-
         function buildScrollItemKeyMap() {
             const map = {};
             inventoryItems.forEach((item) => {
@@ -1591,17 +1436,14 @@
             });
             return map;
         }
-
         function normalizeScrollTypeStore(rawStore) {
             if (!rawStore || typeof rawStore !== 'object') return {};
             const allowedKeys = buildScrollItemKeyMap();
             const cleaned = {};
-
             Object.entries(rawStore).forEach(([category, items]) => {
                 if (!items || typeof items !== 'object') return;
                 if (!allowedKeys[category]) return;
                 const cleanedItems = {};
-
                 Object.entries(items).forEach(([itemKey, entry]) => {
                     if (!allowedKeys[category].has(itemKey)) return;
                     const counts = normalizeScrollCounts(entry?.counts);
@@ -1612,15 +1454,12 @@
                         updatedAt: entry?.updatedAt || Date.now()
                     };
                 });
-
                 if (Object.keys(cleanedItems).length) {
                     cleaned[category] = cleanedItems;
                 }
             });
-
             return cleaned;
         }
-
         function getScrollStoreEntry(category, item) {
             if (!scrollTypeStore || typeof scrollTypeStore !== 'object') return null;
             const itemKey = getScrollItemKey(item);
@@ -1628,7 +1467,6 @@
             if (!bucket || typeof bucket !== 'object') return null;
             return bucket[itemKey] || null;
         }
-
         function setScrollStoreEntry(category, item, counts) {
             if (!scrollTypeStore || typeof scrollTypeStore !== 'object') {
                 scrollTypeStore = {};
@@ -1642,13 +1480,11 @@
                 updatedAt: Date.now()
             };
         }
-
         function loadScrollCountsFromLocalStorage(category, item) {
             const counts = getEmptyScrollCounts();
             const key = getScrollStorageKey(category, item, false);
             const legacyKey = getScrollStorageKey(category, item, true);
             const raw = localStorage.getItem(key) || (legacyKey !== key ? localStorage.getItem(legacyKey) : null);
-
             if (raw) {
                 try {
                     const parsed = JSON.parse(raw);
@@ -1659,10 +1495,8 @@
                     console.warn('Scroll counts parse failed:', error);
                 }
             }
-
             return { counts, hasStored: false };
         }
-
         function loadScrollCountsFromProfile(category, item) {
             const entry = getScrollStoreEntry(category, item);
             if (entry && entry.counts) {
@@ -1670,16 +1504,13 @@
             }
             return { counts: getEmptyScrollCounts(), hasStored: false };
         }
-
         function loadScrollCounts(category, item) {
             if (!category || !item) {
                 return { counts: getEmptyScrollCounts(), hasStored: false };
             }
-
             if (inventoryStorageMode === 'character' && authApi) {
                 const fromProfile = loadScrollCountsFromProfile(category, item);
                 if (fromProfile.hasStored) return fromProfile;
-
                 if (!inventoryMigrated) {
                     const legacy = loadScrollCountsFromLocalStorage(category, item);
                     if (legacy.hasStored) {
@@ -1688,10 +1519,8 @@
                     }
                 }
             }
-
             const local = loadScrollCountsFromLocalStorage(category, item);
             if (local.hasStored) return local;
-
             const seededTypeKey = getScrollTypeKey(item);
             const seededQty = Math.max(0, Number(item.quantity) || 0);
             if (seededTypeKey && seededQty > 0) {
@@ -1703,10 +1532,8 @@
                 saveScrollCounts(category, item, counts);
                 return { counts, hasStored: true };
             }
-
             return { counts: getEmptyScrollCounts(), hasStored: false };
         }
-
         function saveScrollCounts(category, item, counts) {
             if (!category || !item) return;
             const payload = {
@@ -1715,17 +1542,14 @@
             };
             const key = getScrollStorageKey(category, item, false);
             localStorage.setItem(key, JSON.stringify(payload));
-
             if (inventoryStorageMode === 'character' && authApi) {
                 setScrollStoreEntry(category, item, payload.counts);
                 persistInventory();
             }
         }
-
         function sumScrollCounts(counts) {
             return Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
         }
-
         function syncScrollPanelHeights() {
             if (!scrollTypesPanel || !detailPanel || !scrollPanelHeader || !scrollPanelBody) return;
             const detailHeight = detailPanel.offsetHeight;
@@ -1738,7 +1562,6 @@
             const maxBodyHeight = Math.max(160, detailHeight - headerHeight - paddingTop - paddingBottom);
             scrollPanelBody.style.maxHeight = `${maxBodyHeight}px`;
         }
-
         function setScrollPanelOpen(isOpen) {
             scrollPanelOpen = isOpen;
             if (inventoryContent) {
@@ -1756,7 +1579,6 @@
             }
             syncScrollPanelHeights();
         }
-
         function setScrollPanelEmpty(message) {
             if (!scrollPanelTitle || !scrollPanelEmpty || !scrollPanelList) return;
             scrollPanelTitle.textContent = 'Types de parchemins';
@@ -1765,25 +1587,21 @@
             scrollPanelList.innerHTML = '';
             scrollPanelList.style.display = 'none';
         }
-
         function renderScrollPanelList(category, counts) {
             if (!scrollPanelTitle || !scrollPanelList || !scrollPanelEmpty) return;
-
             const titleText = category === 'eveil' ? '\u00c9veil' : 'Ascension';
             const visibleKeys = Object.keys(counts).filter((key) => (counts[key] || 0) > 0);
             const visibleTypes = visibleKeys
                 .map((key) => getScrollTypeMetaByKey(key))
                 .filter(Boolean);
             scrollPanelTitle.textContent = titleText;
-
             if (visibleTypes.length === 0) {
-                scrollPanelEmpty.textContent = 'Aucun type enregistré pour ce parchemin.';
+                scrollPanelEmpty.textContent = 'Aucun type enregistrÃ© pour ce parchemin.';
                 scrollPanelEmpty.style.display = 'block';
                 scrollPanelList.innerHTML = '';
                 scrollPanelList.style.display = 'none';
                 return;
             }
-
             scrollPanelEmpty.style.display = 'none';
             scrollPanelList.style.display = 'grid';
             const rows = visibleTypes.map((type) => {
@@ -1809,7 +1627,6 @@
             }).join('');
             scrollPanelList.innerHTML = rows;
         }
-
         function setScrollAddOpen(isOpen) {
             scrollAddOpen = isOpen;
             if (!scrollPanelAdd || !scrollPanelAddBtn) return;
@@ -1820,7 +1637,6 @@
                 scrollTypeSearch.value = '';
             }
         }
-
         function renderScrollSuggestions(filterText) {
             if (!scrollTypeSuggestions) return;
             const term = normalizeText(filterText);
@@ -1831,7 +1647,7 @@
                 return type.matchers?.some((matcher) => normalizeText(matcher).includes(term));
             });
             if (filtered.length === 0) {
-                scrollTypeSuggestions.innerHTML = '<div class="scroll-suggestion-empty">Aucun type trouvé.</div>';
+                scrollTypeSuggestions.innerHTML = '<div class="scroll-suggestion-empty">Aucun type trouvÃ©.</div>';
                 return;
             }
             scrollTypeSuggestions.innerHTML = filtered.map((type) => {
@@ -1846,7 +1662,6 @@
                 `;
             }).join('');
         }
-
         function addScrollTypeCount(typeKey, qty) {
             if (!currentScrollItem || !scrollPanelCategory) return;
             const safeQty = Math.max(0, Math.floor(Number(qty) || 0));
@@ -1861,7 +1676,6 @@
             renderInventory();
             showItemDetail(currentScrollItem);
         }
-
         function removeScrollTypeCount(typeKey, qty) {
             if (!currentScrollItem || !scrollPanelCategory) return;
             const safeQty = Math.max(0, Math.floor(Number(qty) || 0));
@@ -1872,7 +1686,6 @@
             const next = Math.max(0, current - safeQty);
             counts[typeKey] = next;
             const total = sumScrollCounts(counts);
-
             if (total <= 0) {
                 clearScrollCountsForItem(currentScrollItem);
                 currentScrollItem.quantity = 0;
@@ -1888,14 +1701,12 @@
                 saveScrollCounts(scrollPanelCategory, currentScrollItem, counts);
                 currentScrollItem.quantity = total;
             }
-
             persistInventory();
             renderInventory();
             if (selectedItemIndex === currentScrollItem?.id && total > 0) {
                 showItemDetail(currentScrollItem);
             }
         }
-
         function updateScrollPanelForItem(item) {
             const category = getScrollCategory(item);
             scrollPanelCategory = category;
@@ -1918,14 +1729,12 @@
                 setScrollPanelEmpty('Aucun type de parchemin disponible.');
                 return;
             }
-
             if (scrollPanelToggleBtn) {
                 scrollPanelToggleBtn.disabled = false;
             }
             if (scrollPanelAddBtn) {
                 scrollPanelAddBtn.disabled = false;
             }
-
             const { counts, hasStored } = loadScrollCounts(category, item);
             if (hasStored) {
                 const total = sumScrollCounts(counts);
@@ -1934,7 +1743,6 @@
                     persistInventory();
                 }
             }
-
             renderScrollPanelList(category, counts);
             setScrollAddOpen(scrollAddOpen);
             renderScrollSuggestions(scrollTypeSearch?.value || '');
@@ -1943,7 +1751,6 @@
         // =================================================================
         // RENDERING
         // =================================================================
-
         /**
          * Render the entire inventory grid
          * - Filters by current category
@@ -1975,18 +1782,14 @@
                     });
                 }
             }
-
             if (selectedItemIndex !== null && !filtered.some(item => item.id === selectedItemIndex)) {
                 selectedItemIndex = null;
                 showDetailPlaceholder();
             }
-
             // Update count (shows currently filtered count)
             itemCountEl.textContent = `${filtered.length} objet${filtered.length > 1 ? 's' : ''}`;
-
             // Clear grid
             grid.innerHTML = '';
-
             // Show empty state if no items
             if (filtered.length === 0) {
                 if (emptyStateMessage) {
@@ -1999,18 +1802,15 @@
                 showDetailPlaceholder();
                 return;
             }
-
             // Show grid
             grid.style.display = 'grid';
             emptyState.style.display = 'none';
-
             // Render each item
             filtered.forEach((item) => {
                 const card = createItemCard(item);
                 grid.appendChild(card);
             });
         }
-
         /**
          * Create an item card element
          * - Resolves image
@@ -2024,11 +1824,9 @@
             if (item.id === selectedItemIndex) {
                 card.classList.add('selected');
             }
-
             // Resolve image
             const imageSrc = resolveImage(item);
             const isCurrency = item?.isCurrency === true;
-
             const actionHtml = isCurrency
                 ? ''
                 : `
@@ -2059,7 +1857,6 @@
                         </div>
                     </div>
                 `;
-
             card.innerHTML = `
                 <div class="item-image">
                     <img src="${escapeHtml(imageSrc)}"
@@ -2072,17 +1869,13 @@
                     ${item.quantity > 1 ? `<div class="item-quantity">x${item.quantity}</div>` : ''}
                 </div>
             `;
-
             // Click to select
             card.addEventListener('click', () => selectItem(item, card));
-
             return card;
         }
-
         // =================================================================
         // ITEM SELECTION & DETAILS
         // =================================================================
-
         /**
          * Select an item and show its details
          * - Removes previous selection
@@ -2094,15 +1887,12 @@
             document.querySelectorAll('.inventory-item').forEach(el => {
                 el.classList.remove('selected');
             });
-
             // Mark as selected
             cardElement.classList.add('selected');
             selectedItemIndex = item.id;
-
             // Show details
             showItemDetail(item);
         }
-
         /**
          * Show item details in right panel
          * - Resolves image
@@ -2114,7 +1904,6 @@
                 consommable: '&#x1F9EA; Consommable',
                 agricole: '&#x1F33E; Agricole'
             };
-
             const scrollCategory = getScrollCategory(item);
             const isCurrency = item?.isCurrency === true;
             if (scrollCategory) {
@@ -2127,7 +1916,6 @@
                     }
                 }
             }
-
             const actionHtml = isCurrency
                 ? ''
                 : `
@@ -2158,15 +1946,12 @@
                         </div>
                     </div>
                 `;
-
             const priceInfo = [];
             if (item.buyPrice) priceInfo.push(`Achat: ${item.buyPrice}`);
             if (item.sellPrice) priceInfo.push(`Vente: ${item.sellPrice}`);
-            const priceText = priceInfo.length > 0 ? priceInfo.join(' | ') : 'Prix non défini';
-
+            const priceText = priceInfo.length > 0 ? priceInfo.join(' | ') : 'Prix non dÃ©fini';
             // Resolve image
             const imageSrc = resolveImage(item);
-
             detailPanel.innerHTML = `
                 <div class="detail-header">
                     <div class="detail-title-wrapper">
@@ -2198,7 +1983,7 @@
                     </div>
                     ${(item.quantity > 1 || isCurrency) ? `
                     <div class="detail-section">
-                        <span class="detail-label">Quantité</span>
+                        <span class="detail-label">QuantitÃ©</span>
                         <p class="detail-text">x${item.quantity}</p>
                     </div>
                     ` : ''}
@@ -2215,16 +2000,14 @@
                     }
                 });
             }
-
             setScrollPanelOpen(scrollPanelOpen);
             updateScrollPanelForItem(item);
         }
-
         function showDetailPlaceholder() {
             detailPanel.innerHTML = `
                 <div class="detail-placeholder">
                     <div class="placeholder-icon">&#x1F446;</div>
-                    <p>Sélectionnez un objet pour voir ses détails</p>
+                    <p>SÃ©lectionnez un objet pour voir ses dÃ©tails</p>
                 </div>
             `;
             scrollPanelToggleBtn = null;
@@ -2240,11 +2023,9 @@
             setScrollPanelOpen(false);
             setScrollPanelEmpty("Aucun type de parchemin disponible.");
         }
-
         // =================================================================
         // ITEM ACTIONS (USE & DELETE)
         // =================================================================
-
         // Delete modal elements
         const deleteModal = document.getElementById('deleteModal');
         const deleteItemNameEl = document.getElementById('deleteItemName');
@@ -2253,10 +2034,8 @@
         const deleteQtyPlusBtn = document.getElementById('deleteQtyPlus');
         const cancelDeleteBtn = document.getElementById('cancelDelete');
         const confirmDeleteBtn = document.getElementById('confirmDelete');
-
         let currentDeleteItemId = null;
         let currentDeleteItemMaxQty = 0;
-
         /**
          * Use an item - decreases quantity by 1
          * - Finds item by ID
@@ -2268,20 +2047,15 @@
         function useItem(itemId) {
             const itemIndex = inventoryItems.findIndex(i => i.id === itemId);
             if (itemIndex === -1) return;
-
             const item = inventoryItems[itemIndex];
             if (item?.isCurrency) return;
-
             if (item.quantity < 1) {
-                alert('Quantité insuffisante pour utiliser cet objet');
+                alert('QuantitÃ© insuffisante pour utiliser cet objet');
                 return;
             }
-
             // Decrease quantity
             item.quantity -= 1;
-
             console.log(`Used ${item.name}. Quantity now: ${item.quantity}`);
-
             // If quantity reaches 0, remove item
             if (item.quantity <= 0) {
                 resetScrollCountsAfterQtyChange(item);
@@ -2293,14 +2067,11 @@
                 // Refresh the detail view to update quantity display
                 showItemDetail(item);
             }
-
             // Save to localStorage
             persistInventory();
-
             // Re-render grid
             renderInventory();
         }
-
         /**
          * Open delete confirmation modal
          * - Sets current item ID
@@ -2313,19 +2084,15 @@
             const item = inventoryItems.find(i => i.id === itemId);
             if (!item) return;
             if (item.isCurrency) return;
-
             currentDeleteItemId = itemId;
             currentDeleteItemMaxQty = item.quantity;
-
             // Update modal content
             deleteItemNameEl.textContent = item.name;
             deleteQuantityInput.value = 1;
             deleteQuantityInput.max = item.quantity;
-
             // Open modal
             deleteModal.classList.add('open');
         }
-
         /**
          * Close delete modal
          */
@@ -2334,7 +2101,6 @@
             currentDeleteItemId = null;
             currentDeleteItemMaxQty = 0;
         }
-
         /**
          * Confirm deletion from modal
          * - Gets quantity to delete
@@ -2344,24 +2110,18 @@
          */
         function confirmDeletion() {
             if (!currentDeleteItemId) return;
-
             const qtyToDelete = parseInt(deleteQuantityInput.value) || 1;
-
             if (qtyToDelete < 1) {
-                alert('La quantité doit être au moins 1');
+                alert('La quantitÃ© doit Ãªtre au moins 1');
                 return;
             }
-
             if (qtyToDelete > currentDeleteItemMaxQty) {
-                alert(`La quantité maximum est ${currentDeleteItemMaxQty}`);
+                alert(`La quantitÃ© maximum est ${currentDeleteItemMaxQty}`);
                 return;
             }
-
             const itemIndex = inventoryItems.findIndex(i => i.id === currentDeleteItemId);
             if (itemIndex === -1) return;
-
             const item = inventoryItems[itemIndex];
-
             // Update quantity or remove item
             if (qtyToDelete >= item.quantity) {
                 // Remove item entirely
@@ -2377,15 +2137,12 @@
                 showItemDetail(item);
                 console.log(`Deleted ${qtyToDelete} of ${item.name}. Remaining: ${item.quantity}`);
             }
-
             // Save to localStorage
             persistInventory();
-
             // Close modal and re-render
             closeDeleteModal();
             renderInventory();
         }
-
         /**
          * Decrease delete quantity
          */
@@ -2393,7 +2150,6 @@
             const current = parseInt(deleteQuantityInput.value) || 1;
             deleteQuantityInput.value = Math.max(1, current - 1);
         }
-
         /**
          * Increase delete quantity
          */
@@ -2402,28 +2158,23 @@
             const max = currentDeleteItemMaxQty;
             deleteQuantityInput.value = Math.min(max, current + 1);
         }
-
         // Attach event listeners for delete modal
         deleteQtyMinusBtn.addEventListener('click', decreaseDeleteQuantity);
         deleteQtyPlusBtn.addEventListener('click', increaseDeleteQuantity);
         cancelDeleteBtn.addEventListener('click', closeDeleteModal);
         confirmDeleteBtn.addEventListener('click', confirmDeletion);
-
         // Close modal when clicking outside
         deleteModal.addEventListener('click', (e) => {
             if (e.target === deleteModal) {
                 closeDeleteModal();
             }
         });
-
         // Make functions globally accessible for onclick handlers
         window.useItem = useItem;
         window.openDeleteModal = openDeleteModal;
-
         // =================================================================
         // ITEM DELETION (OLD - KEPT FOR COMPATIBILITY)
         // =================================================================
-
         /**
          * Delete an item from inventory
          * - Removes from array
@@ -2434,37 +2185,28 @@
         function deleteItem(itemId) {
             const itemIndex = inventoryItems.findIndex(i => i.id === itemId);
             if (itemIndex === -1) return;
-
             const itemName = inventoryItems[itemIndex].name;
             if (inventoryItems[itemIndex].isCurrency) return;
-
             // Confirm deletion
             if (!confirm(`Supprimer "${itemName}" de l'inventaire ?`)) {
                 return;
             }
-
             // Remove from array
             resetScrollCountsAfterQtyChange(inventoryItems[itemIndex]);
             inventoryItems.splice(itemIndex, 1);
-
             // Save to localStorage
             persistInventory();
-
             // Clear selection
             selectedItemIndex = null;
             showDetailPlaceholder();
-
             // Re-render
             renderInventory();
         }
-
         // Make deleteItem globally accessible for onclick
         window.deleteItem = deleteItem;
-
         // =================================================================
         // UTILITIES
         // =================================================================
-
         /**
          * Escape HTML to prevent XSS
          */
@@ -2477,11 +2219,9 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
         }
-
         // =================================================================
         // ENTRY POINT
         // =================================================================
-
         /**
          * Initialize on page load
          */
@@ -2497,7 +2237,6 @@
                 showItemDetail(currency);
             }
         });
-
         /**
          * Expose API for external use
          * - Can be called from codex.html or other pages
@@ -2505,24 +2244,19 @@
         window.InventoryModule = {
             // Current state
             items: () => inventoryItems,
-
             // Core functions
             renderInventory,
             filterByCategory,
-
             // Add item from external page (e.g., codex.html)
             addItemFromExternal: (itemName, quantity = 1) => {
                 const allItems = getAllItems();
                 const sourceItem = allItems.find(i => i.name === itemName);
                 const sourceIndex = allItems.indexOf(sourceItem);
-
                 if (!sourceItem) {
                     console.error(`Item not found: ${itemName}`);
                     return false;
                 }
-
                 const existingItem = inventoryItems.find(i => i.sourceIndex === sourceIndex || i.name === itemName);
-
                 if (existingItem) {
                     existingItem.quantity += quantity;
                     if (!Number.isFinite(Number(existingItem.sourceIndex)) && Number.isFinite(sourceIndex)) {
@@ -2536,12 +2270,10 @@
                         quantity: quantity
                     });
                 }
-
                 persistInventory();
                 renderInventory();
                 return true;
             },
-
             // Clear entire inventory (for testing)
             clearAll: () => {
                 if (confirm('Effacer tout l\'inventaire ?')) {
@@ -2558,31 +2290,3 @@
     <script src="js/sidebar.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

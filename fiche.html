@@ -18,10 +18,20 @@
             input, select, textarea { @apply transition-shadow duration-200 ease-out; }
             a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
         }
-    </style>
+    
+        @layer utilities {
+            .fade-in {
+                @apply opacity-0 translate-y-2;
+                animation: fadeIn 0.6s ease forwards;
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
 </head>
-<body>
-    <main class="fiche-page" aria-labelledby="fichePageTitle">
+<body class="min-h-screen">
+    <main class="fiche-page fade-in" aria-labelledby="fichePageTitle">
         <header class="page-header">
             <a href="index.html" class="magic-back-link" title="Retour à l'accueil">← Retour</a>
             <div class="page-header-main">
@@ -43,7 +53,6 @@
                 </div>
             </div>
         </header>
-
         <section class="fiche-container">
             <!-- Navigation (onglets) -->
             <nav class="fiche-sidebar" aria-label="Sections de la fiche">
@@ -59,7 +68,6 @@
                 <button type="button" class="tab-button" data-tab="physique">Physique</button>
                 <button type="button" class="tab-button" data-tab="background">Background</button>
             </nav>
-
             <!-- Contenu -->
             <section class="fiche-content" aria-live="polite">
                 <form class="fiche-form">
@@ -69,7 +77,6 @@
                             <h2 class="section-title section-title--inline">Identité</h2>
                             <button type="button" class="save-tab-button" data-tab="identite">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="identiteNomPrenom">Nom &amp; prénom</label>
                             <input
@@ -79,7 +86,6 @@
                                 placeholder="Nom complet, titres éventuels et patronymes (la noblesse peut avoir un nom long)."
                             >
                         </div>
-
                         <div class="field-group field-group--inline">
                             <div class="field-group">
                                 <label class="field-label" for="identiteAge">&Acirc;ge</label>
@@ -94,7 +100,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="field-group field-group--inline">
                             <div class="field-group">
                                 <label class="field-label" for="identiteRace">Race</label>
@@ -116,7 +121,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="identitePaysOrigine">Pays d'origine</label>
                             <select id="identitePaysOrigine" class="field-input">
@@ -144,14 +148,12 @@
                             </p>
                         </div>
                     </section>
-
                     <!-- Appartenance -->
                     <section id="tab-appartenance" class="tab-panel" aria-label="Appartenance">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Appartenance</h2>
                             <button type="button" class="save-tab-button" data-tab="appartenance">Sauvegarder</button>
                         </div>
-
                         <div class="field-group field-group--inline">
                             <div class="field-group">
                                 <label class="field-label" for="appRole">Rôle</label>
@@ -175,7 +177,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="field-group field-group--inline">
                             <div class="field-group">
                                 <label class="field-label" for="appAffection">Affection</label>
@@ -200,7 +201,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="field-group field-group--inline">
                             <div class="field-group">
                                 <label class="field-label" for="appHouse">House</label>
@@ -223,14 +223,12 @@
                             </div>
                         </div>
                     </section>
-
                     <!-- Combat -->
                     <section id="tab-combat" class="tab-panel" aria-label="Combat">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Combat</h2>
                             <button type="button" class="save-tab-button" data-tab="combat">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="combatStyle">Style de combat</label>
                             <textarea
@@ -240,7 +238,6 @@
                                 placeholder="Décrivez le style de combat global : posture, philosophie, forces et faiblesses."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="combatArme">Type d'arme</label>
                             <input
@@ -250,7 +247,6 @@
                                 placeholder="Type d'arme principale : épée, faux, arme improvisée, etc."
                             >
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="combatArmeDescription">Description de l'arme</label>
                             <textarea
@@ -260,7 +256,6 @@
                                 placeholder="Décrivez l'apparence, les caractéristiques et les particularités de votre arme..."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="combatArmeImage">Image de l'arme (URL)</label>
                             <input
@@ -270,7 +265,6 @@
                                 placeholder="Lien vers une illustration de l'arme (optionnel)."
                             >
                         </div>
-
                         <!-- Combat Techniques Section -->
                         <div class="combat-techniques-section">
                             <div class="combat-techniques-header">
@@ -296,7 +290,6 @@
                             </ul>
                         </div>
                     </section>
-
                     <!-- Nokorah -->
                     <section id="tab-nokorah" class="tab-panel" aria-label="Mon Nokorah">
                         <div class="tab-panel-header">
@@ -304,14 +297,12 @@
                         </div>
                         <div class="nokorah-manager" data-nokorah-root="fiche"></div>
                     </section>
-
                     <!-- Alice -->
                     <section id="tab-alice" class="tab-panel" aria-label="Alice">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Alice</h2>
                             <button type="button" class="save-tab-button" data-tab="alice">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="aliceStatus">Status Alice</label>
                             <select id="aliceStatus" class="field-input">
@@ -320,7 +311,6 @@
                                 <option value="double">Double Alice</option>
                             </select>
                         </div>
-
                         <div id="alice-container" class="alice-grid">
                             <div id="alice-fields" class="conditional-block">
                                 <h3 class="alice-subtitle">Alice principale</h3>
@@ -328,7 +318,6 @@
                                     <label class="field-label" for="aliceNom">Nom de l'Alice</label>
                                     <input id="aliceNom" class="field-input" type="text" placeholder="Nom ou titre de l'Alice.">
                                 </div>
-
                                 <div class="field-group">
                                     <label class="field-label" for="aliceType">Type</label>
                                     <select id="aliceType" class="field-input">
@@ -340,7 +329,6 @@
                                         <option value="Dangereux">Dangereux</option>
                                     </select>
                                 </div>
-
                                 <div class="field-group">
                                     <label class="field-label" for="aliceForme">Forme</label>
                                     <select id="aliceForme" class="field-input">
@@ -351,7 +339,6 @@
                                         <option value="Limitée">Limitée</option>
                                     </select>
                                 </div>
-
                                 <div class="field-group">
                                     <label class="field-label" for="aliceFiche">Fiche complète (URL)</label>
                                     <input
@@ -362,14 +349,12 @@
                                     >
                                 </div>
                             </div>
-
                             <div id="alice2-fields" class="conditional-block alice-secondary-fields">
                                 <h3 class="alice-subtitle">Double Alice</h3>
                                 <div class="field-group">
                                     <label class="field-label" for="alice2Nom">Nom de l'Alice</label>
                                     <input id="alice2Nom" class="field-input" type="text" placeholder="Nom ou titre de l'Alice.">
                                 </div>
-
                                 <div class="field-group">
                                     <label class="field-label" for="alice2Type">Type</label>
                                     <select id="alice2Type" class="field-input">
@@ -381,7 +366,6 @@
                                         <option value="Dangereux">Dangereux</option>
                                     </select>
                                 </div>
-
                                 <div class="field-group">
                                     <label class="field-label" for="alice2Forme">Forme</label>
                                     <select id="alice2Forme" class="field-input">
@@ -392,7 +376,6 @@
                                         <option value="Limitée">Limitée</option>
                                     </select>
                                 </div>
-
                                 <div class="field-group">
                                     <label class="field-label" for="alice2Fiche">Fiche complète (URL)</label>
                                     <input
@@ -404,23 +387,19 @@
                                 </div>
                             </div>
                         </div>
-
                     </section>
-
                     <!-- Sorcellerie -->
                     <section id="tab-sorcellerie" class="tab-panel" aria-label="Sorcellerie">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Sorcellerie</h2>
                             <button type="button" class="save-tab-button" data-tab="sorcellerie">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label">
                                 <input id="hasMagic" type="checkbox">
                                 Possède de la magie
                             </label>
                         </div>
-
                         <div id="sorcellerie-fields" class="conditional-block" hidden>
                             <p class="fiche-hint">Deblocage par parchemins d'eveil et tags Sorcier: stub en cours.</p>
                             <div class="field-group">
@@ -500,7 +479,6 @@
                                     <option value="🪢 &Eacute;lasticit&eacute;">🪢 &Eacute;lasticit&eacute;</option>
                                 </select>
                             </div>
-
                             <div class="field-group">
                                 <label class="field-label" for="sorcellerieSecondaire">Magie secondaire</label>
                                 <select id="sorcellerieSecondaire" class="field-input">
@@ -578,7 +556,6 @@
                                     <option value="🪢 &Eacute;lasticit&eacute;">🪢 &Eacute;lasticit&eacute;</option>
                                 </select>
                             </div>
-
                             <div class="field-group">
                                 <label class="field-label" for="sorcellerieCachee">Magie cachée</label>
                                 <select id="sorcellerieCachee" class="field-input">
@@ -656,7 +633,6 @@
                                     <option value="🪢 &Eacute;lasticit&eacute;">🪢 &Eacute;lasticit&eacute;</option>
                                 </select>
                             </div>
-
                             <div class="field-group">
                                 <label class="field-label" for="sorcelleriePotentiel">Potentiel magique</label>
                                 <input
@@ -668,29 +644,24 @@
                                     placeholder="Score de potentiel magique."
                                 >
                             </div>
-
                             <div class="magie-sup-actions">
                                 <button type="button" id="addMagieSupplementaire" class="btn-secondary">+ Ajouter une magie supplémentaire</button>
                             </div>
-
                             <div id="magie-supplementaire-container"></div>
                         </div>
                     </section>
-
                     <!-- Eater -->
                     <section id="tab-eater" class="tab-panel" aria-label="Eater">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Eater</h2>
                             <button type="button" class="save-tab-button" data-tab="eater">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label">
                                 <input id="hasEater" type="checkbox">
                                 Possède une capacité d'âme
                             </label>
                         </div>
-
                         <div id="eater-fields" class="conditional-block" hidden>
                             <!-- Soul Counter Panel -->
                             <div class="eater-counter">
@@ -719,7 +690,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="field-group">
                                 <label class="field-label" for="eaterRole">Rôle</label>
                                 <select id="eaterRole" class="field-input">
@@ -728,7 +698,6 @@
                                     <option value="weapon">Weapon</option>
                                 </select>
                             </div>
-
                             <div class="field-group">
                                 <label class="field-label" for="eaterTypeArme">Type d'arme</label>
                                 <select id="eaterTypeArme" class="field-input">
@@ -738,7 +707,6 @@
                                     <option value="jumelees">Jumelées</option>
                                 </select>
                             </div>
-
                             <div class="field-group">
                                 <label class="field-label" for="eaterDescriptionArme">Description de l'arme</label>
                                 <textarea
@@ -748,7 +716,6 @@
                                     placeholder="Description détaillée de l'arme, de ses formes et particularités."
                                 ></textarea>
                             </div>
-
                             <div class="field-group">
                                 <label class="field-label" for="eaterImageArme">Image de l'arme (URL)</label>
                                 <input
@@ -760,14 +727,12 @@
                             </div>
                         </div>
                     </section>
-
                     <!-- Religion -->
                     <section id="tab-religion" class="tab-panel" aria-label="Religion">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Religion</h2>
                             <button type="button" class="save-tab-button" data-tab="religion">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="religionCroyance">Croyance</label>
                             <textarea
@@ -777,7 +742,6 @@
                                 placeholder="Religion, panthéon ou croyance principale du personnage."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="religionProphetie">Prophétie</label>
                             <textarea
@@ -787,7 +751,6 @@
                                 placeholder="Prophétie, présage ou destinée annoncée (le cas échéant)."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="religionBenediction">Bénédiction</label>
                             <textarea
@@ -797,7 +760,6 @@
                                 placeholder="Bénédictions divines, protections, dons particuliers."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="religionMalediction">Malédiction</label>
                             <textarea
@@ -808,14 +770,12 @@
                             ></textarea>
                         </div>
                     </section>
-
                     <!-- Mental -->
                     <section id="tab-mental" class="tab-panel" aria-label="Mental">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Mental</h2>
                             <button type="button" class="save-tab-button" data-tab="mental">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="mentalCaractere">Caractère</label>
                             <textarea
@@ -825,7 +785,6 @@
                                 placeholder="5 lignes minimum : tempérament, réactions, qualités, défauts, évolution possible."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="mentalButsReves">But(s) &amp; rêve(s)</label>
                             <textarea
@@ -835,7 +794,6 @@
                                 placeholder="Au moins un but et un rêve obligatoires (objectifs de vie, aspirations profondes)."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="mentalAutre">Autre</label>
                             <textarea
@@ -846,14 +804,12 @@
                             ></textarea>
                         </div>
                     </section>
-
                     <!-- Physique -->
                     <section id="tab-physique" class="tab-panel" aria-label="Physique">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Physique</h2>
                             <button type="button" class="save-tab-button" data-tab="physique">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="physiqueDescription">Description physique</label>
                             <textarea
@@ -863,7 +819,6 @@
                                 placeholder="3 lignes minimum : allure, tenues, détails marquants (cicatrices, bijoux, etc.)."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="physiqueSante">Santé</label>
                             <textarea
@@ -874,14 +829,12 @@
                             ></textarea>
                         </div>
                     </section>
-
                     <!-- Background -->
                     <section id="tab-background" class="tab-panel" aria-label="Background">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Background</h2>
                             <button type="button" class="save-tab-button" data-tab="background">Sauvegarder</button>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="backgroundFamille">Parents / famille</label>
                             <textarea
@@ -891,7 +844,6 @@
                                 placeholder="Famille proche, liens importants, éventuels liens nobles ou religieux."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="backgroundHistoire">Histoire</label>
                             <textarea
@@ -901,7 +853,6 @@
                                 placeholder="Minimum ~2000 caractères (avec espaces). Racontez le parcours complet du personnage, les événements marquants, sa place dans le monde."
                             ></textarea>
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="backgroundImage1">Image 1 (URL)</label>
                             <input
@@ -911,7 +862,6 @@
                                 placeholder="Lien vers une référence visuelle du personnage."
                             >
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="backgroundImage2">Image 2 (URL)</label>
                             <input
@@ -921,7 +871,6 @@
                                 placeholder="Deuxième lien d'image (optionnel)."
                             >
                         </div>
-
                         <div class="field-group">
                             <label class="field-label" for="backgroundImage3">Image 3 (URL)</label>
                             <input
@@ -936,7 +885,6 @@
             </section>
         </section>
     </main>
-
     <script type="module" src="js/ui/app-shell.js"></script>
     <script type="module" src="js/nokorah.js"></script>
     <script>
@@ -971,7 +919,6 @@
             } catch (error) {
                 authApi = null;
             }
-
             try {
                 summaryModule = await import('./js/ui/character-summary.js');
             } catch (error) {
@@ -980,7 +927,6 @@
             const summaryState = await summaryModule?.initCharacterSummary({ includeQueryParam: true, enableDropdown: true, showKaels: true }) || null;
             summaryElements = summaryState?.elements || null;
             currentCharacterKey = summaryState?.context?.key || currentCharacterKey;
-
             function updateRelationLink(row) {
                 const input = row.querySelector('.relation-character');
                 const link = row.querySelector('.relation-link-btn');
@@ -994,7 +940,6 @@
                 link.hidden = false;
                 link.href = `profil.html?character=${encodeURIComponent(value)}`;
             }
-
             function updateRelationIcon(row) {
                 const iconEl = row.querySelector('.relation-icon');
                 const typeSelect = row.querySelector('.relation-type');
@@ -1008,16 +953,13 @@
                     iconEl.removeAttribute('title');
                 }
             }
-
             function createRelationRow(data) {
                 const row = document.createElement('div');
                 row.className = 'relation-row';
-
                 const nameInput = document.createElement('input');
                 nameInput.className = 'field-input relation-name';
                 nameInput.type = 'text';
                 nameInput.placeholder = 'Nom du lien';
-
                 const typeSelect = document.createElement('select');
                 typeSelect.className = 'field-input relation-type';
                 RELATION_TYPES.forEach((optionData) => {
@@ -1026,40 +968,32 @@
                     option.textContent = optionData.label;
                     typeSelect.appendChild(option);
                 });
-
                 const charInput = document.createElement('input');
                 charInput.className = 'field-input relation-character';
                 charInput.type = 'text';
                 charInput.placeholder = 'ID personnage (optionnel)';
-
                 const link = document.createElement('a');
                 link.className = 'relation-link-btn';
                 link.textContent = 'Voir profil';
                 link.target = '_blank';
                 link.rel = 'noopener';
                 link.hidden = true;
-
                 const icon = document.createElement('span');
                 icon.className = 'relation-icon';
                 icon.hidden = true;
                 icon.setAttribute('aria-hidden', 'true');
-
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'relation-remove-btn';
                 removeBtn.textContent = 'Retirer';
-
                 row.append(nameInput, typeSelect, charInput, icon, link, removeBtn);
-
                 if (data) {
                     if (data.name) nameInput.value = data.name;
                     if (data.type) typeSelect.value = data.type;
                     if (data.characterId) charInput.value = data.characterId;
                 }
-
                 updateRelationLink(row);
                 updateRelationIcon(row);
-
                 const markDirty = () => markTabDirty('background');
                 nameInput.addEventListener('input', markDirty);
                 typeSelect.addEventListener('change', () => {
@@ -1070,15 +1004,12 @@
                     updateRelationLink(row);
                     markDirty();
                 });
-
                 removeBtn.addEventListener('click', () => {
                     row.remove();
                     markDirty();
                 });
-
                 return row;
             }
-
             function collectRelations() {
                 if (!relationsContainer) return [];
                 const rows = Array.from(relationsContainer.querySelectorAll('.relation-row'));
@@ -1092,7 +1023,6 @@
                     })
                     .filter(Boolean);
             }
-
             function restoreRelations(relations) {
                 if (!relationsContainer) return;
                 relationsContainer.innerHTML = '';
@@ -1100,12 +1030,10 @@
                     relationsContainer.appendChild(createRelationRow(relation));
                 });
             }
-
             function getInputValue(id) {
                 const input = document.getElementById(id);
                 return input ? input.value.trim() : '';
             }
-
             function getSelectLabel(id) {
                 const select = document.getElementById(id);
                 if (!select) return '';
@@ -1113,7 +1041,6 @@
                 const option = select.options[select.selectedIndex];
                 return option ? option.textContent.trim() : '';
             }
-
             function syncProfileFromFiche() {
                 const active = summaryModule?.getActiveCharacterFromStorage
                     ? summaryModule.getActiveCharacterFromStorage()
@@ -1130,13 +1057,11 @@
                     role: roleText || 'Classe / Role / Surnom',
                     avatar_url: avatarUrl
                 };
-
                 if (summary.id) {
                     try {
                         localStorage.setItem(LEGACY_SUMMARY_KEY, JSON.stringify(summary));
                     } catch {}
                 }
-
                 if (active && active.id) {
                     const next = { ...active };
                     if (name) next.name = name;
@@ -1147,11 +1072,9 @@
                         localStorage.setItem(CHARACTER_STORAGE_KEY, JSON.stringify(next));
                     } catch {}
                 }
-
                 if (summaryModule?.applySummaryToElements) {
                     summaryModule.applySummaryToElements(summaryElements, summary);
                 }
-
                 if (authApi?.updateCharacter && active?.id) {
                     const updates = {
                         profile_data: { ...profileData, fiche_summary: summary }
@@ -1162,20 +1085,16 @@
                     authApi.updateCharacter(active.id, updates).catch(() => {});
                 }
             }
-
             /**
              * Synchronise les sélections de la fiche avec les tags du profil
              * Les tags sont automatiquement activés en fonction des choix de l'utilisateur
              */
             function syncProfileTags() {
                 if (!currentCharacterKey) return;
-
                 const profileTagsKey = `profile-tags-${currentCharacterKey}`;
                 const metadataKey = `profile-tags-${currentCharacterKey}-metadata`;
-
                 let selectedTagIds = JSON.parse(localStorage.getItem(profileTagsKey) || '[]');
                 let metadata = JSON.parse(localStorage.getItem(metadataKey) || '{"autoSynced": []}');
-
                 // S'assurer que c'est un tableau
                 if (!Array.isArray(selectedTagIds)) {
                     selectedTagIds = [];
@@ -1183,7 +1102,6 @@
                 if (!metadata.autoSynced || !Array.isArray(metadata.autoSynced)) {
                     metadata.autoSynced = [];
                 }
-
                 // Table de mapping complète: 10 champs → tags
                 const fieldToTagMapping = {
                     'identiteSexe': {
@@ -1274,74 +1192,57 @@
                         'Limitée': 'alice_limited'
                     }
                 };
-
                 // Collecter tous les tags à auto-synchroniser selon les valeurs actuelles du formulaire
                 const newAutoSyncedTags = [];
-
                 Object.keys(fieldToTagMapping).forEach(fieldId => {
                     const element = document.getElementById(fieldId);
                     if (!element) return;
-
                     const value = element.value;
                     if (!value) return;
-
                     const tagId = fieldToTagMapping[fieldId][value];
-
                     if (tagId) {
                         newAutoSyncedTags.push(tagId);
-
                         if (!selectedTagIds.includes(tagId)) {
                             selectedTagIds.push(tagId);
                         }
                     }
                 });
-
                 // Retirer les anciens tags auto-synchronisés qui ne sont plus sélectionnés
                 const oldAutoSyncedTags = metadata.autoSynced || [];
                 const tagsToRemove = oldAutoSyncedTags.filter(tag => !newAutoSyncedTags.includes(tag));
-
                 tagsToRemove.forEach(tagId => {
                     const index = selectedTagIds.indexOf(tagId);
                     if (index > -1) {
                         selectedTagIds.splice(index, 1);
                     }
                 });
-
                 // Mettre à jour les métadonnées
                 metadata.autoSynced = newAutoSyncedTags;
-
                 // Sauvegarder
                 localStorage.setItem(profileTagsKey, JSON.stringify(selectedTagIds));
                 localStorage.setItem(metadataKey, JSON.stringify(metadata));
             }
-
             function getTabStorageKey(tabName) {
                 return `${STORAGE_PREFIX}-${currentCharacterKey}-${tabName}`;
             }
-
             function getLegacyTabStorageKey(tabName) {
                 return `${STORAGE_PREFIX}-${tabName}`;
             }
-
             function clearAllDirty() {
                 dirtyTabs.clear();
                 saveButtons.forEach((btn) => btn.classList.remove('save-button--highlight'));
             }
-
             // Combat Techniques Variables
             let combatTechniques = [];
             let editingTechniqueId = null;
             let techniqueNextId = 1;
-
             // Tab switching
             tabButtons.forEach((button) => {
                 button.addEventListener('click', () => {
                     const target = button.dataset.tab;
                     if (!target) return;
-
                     tabButtons.forEach((btn) => btn.classList.remove('active'));
                     button.classList.add('active');
-
                     tabPanels.forEach((panel) => {
                         const isActive = panel.id === 'tab-' + target;
                         panel.classList.toggle('active', isActive);
@@ -1349,19 +1250,14 @@
                     });
                 });
             });
-
             // Alice status dropdown visibility
             const aliceContainer = document.getElementById('alice-container');
             const alice2Fields = document.getElementById('alice2-fields');
-
             const updateAliceVisibility = () => {
                 const aliceStatusSelect = document.getElementById('aliceStatus');
                 if (!aliceStatusSelect) return;
-
                 const status = aliceStatusSelect.value;
-
                 if (!aliceContainer || !alice2Fields) return;
-
                 // Logique de visibilité basée sur le menu déroulant
                 if (status === '') {
                     // Aucune Alice sélectionnée
@@ -1376,26 +1272,21 @@
                     alice2Fields.style.display = 'block';
                 }
             };
-
             const aliceStatusSelect = document.getElementById('aliceStatus');
             if (aliceStatusSelect) {
                 aliceStatusSelect.addEventListener('change', updateAliceVisibility);
             }
-
             // Other conditional visibility
             const conditionalConfigs = [
                 { checkboxId: 'hasMagic', panelId: 'sorcellerie-fields' },
                 { checkboxId: 'hasEater', panelId: 'eater-fields' }
             ];
-
             conditionalConfigs.forEach(({ checkboxId, panelId }) => {
                 const checkbox = document.getElementById(checkboxId);
                 const panel = document.getElementById(panelId);
                 if (!checkbox || !panel) return;
-
                 checkbox.addEventListener('change', updateConditionalVisibility);
             });
-
             function updateConditionalVisibility() {
                 conditionalConfigs.forEach(({ checkboxId, panelId }) => {
                     const checkbox = document.getElementById(checkboxId);
@@ -1404,9 +1295,7 @@
                     panel.hidden = !checkbox.checked;
                 });
             }
-
             updateConditionalVisibility();
-
             // Magic options - used for all magic dropdowns
             const MAGIC_OPTIONS = `
                 <option value="">-- Sélectionner --</option>
@@ -1482,12 +1371,10 @@
                 <option value="🌌 Magie astral">🌌 Magie astral</option>
                 <option value="🪢 &Eacute;lasticit&eacute;">🪢 &Eacute;lasticit&eacute;</option>
             `;
-
             // Dynamic Magie Supplémentaire
             const addMagieBtn = document.getElementById('addMagieSupplementaire');
             const magieContainer = document.getElementById('magie-supplementaire-container');
             let magieSupCount = 0;
-
             addMagieBtn.addEventListener('click', () => {
                 magieSupCount++;
                 const fieldGroup = document.createElement('div');
@@ -1505,16 +1392,13 @@
                     </div>
                 `;
                 magieContainer.appendChild(fieldGroup);
-
                 // Remove button handler
                 fieldGroup.querySelector('.remove-magie-btn').addEventListener('click', () => {
                     fieldGroup.remove();
                     markTabDirty('sorcellerie');
                 });
-
                 markTabDirty('sorcellerie');
             });
-
             if (addRelationBtn) {
                 addRelationBtn.addEventListener('click', () => {
                     if (!relationsContainer) return;
@@ -1522,7 +1406,6 @@
                     markTabDirty('background');
                 });
             }
-
             // Mark tab as dirty when any input changes
             function markTabDirty(tabName) {
                 dirtyTabs.add(tabName);
@@ -1531,7 +1414,6 @@
                     saveBtn.classList.add('save-button--highlight');
                 }
             }
-
             function clearTabDirty(tabName) {
                 dirtyTabs.delete(tabName);
                 const saveBtn = document.querySelector(`.save-tab-button[data-tab="${tabName}"]`);
@@ -1539,11 +1421,9 @@
                     saveBtn.classList.remove('save-button--highlight');
                 }
             }
-
             function resetTab(tabName) {
                 const panel = document.getElementById('tab-' + tabName);
                 if (!panel) return;
-
                 const inputs = panel.querySelectorAll('input, select, textarea');
                 inputs.forEach((input) => {
                     if (input.classList.contains('magie-supplementaire')) return;
@@ -1555,7 +1435,6 @@
                         input.value = '';
                     }
                 });
-
                 if (tabName === 'sorcellerie' && magieContainer) {
                     const extraInputs = magieContainer.querySelectorAll('.magie-supplementaire');
                     extraInputs.forEach((input) => {
@@ -1568,18 +1447,15 @@
                     relationsContainer.innerHTML = '';
                 }
             }
-
             // Add change listeners to all inputs
             tabPanels.forEach((panel) => {
                 const tabName = panel.id.replace('tab-', '');
                 const inputs = panel.querySelectorAll('input, select, textarea');
-
                 inputs.forEach((input) => {
                     input.addEventListener('input', () => markTabDirty(tabName));
                     input.addEventListener('change', () => markTabDirty(tabName));
                 });
             });
-
             // Save button functionality
             saveButtons.forEach((btn) => {
                 btn.addEventListener('click', () => {
@@ -1588,42 +1464,34 @@
                     clearTabDirty(tabName);
                 });
             });
-
             // ====================================================================
             // COMBAT TECHNIQUES FUNCTIONS
             // ====================================================================
-
             /**
              * Render combat techniques list
              */
             function renderCombatTechniques(filterType = "") {
                 const list = document.getElementById("combatTechniqueList");
                 if (!list) return;
-
                 const filtered = filterType
                     ? combatTechniques.filter(t => t.type === filterType)
                     : combatTechniques;
-
                 if (filtered.length === 0) {
                     list.innerHTML = '<li class="combat-technique-empty">Aucune technique ajoutée.</li>';
                     return;
                 }
-
                 list.innerHTML = "";
-
                 filtered.forEach(technique => {
                     const li = document.createElement("li");
                     li.className = "combat-technique-item";
                     li.dataset.type = technique.type;
                     li.dataset.id = technique.id;
-
                     const typeLabels = {
                         offensif: "Offensif",
                         defensif: "Défensif",
                         mobilite: "Mobilité",
                         controle: "Contrôle"
                     };
-
                     li.innerHTML = `
                         <button type="button" class="combat-technique-header" aria-expanded="false">
                             <div class="combat-technique-main">
@@ -1655,7 +1523,6 @@
                             </div>
                         </div>
                     `;
-
                     // Toggle expand/collapse
                     const header = li.querySelector(".combat-technique-header");
                     header.addEventListener("click", () => {
@@ -1664,14 +1531,11 @@
                         const toggle = header.querySelector(".combat-technique-toggle");
                         if (toggle) toggle.textContent = isOpen ? "▴" : "▾";
                     });
-
                     list.appendChild(li);
                 });
-
                 // Attach edit/delete handlers
                 attachTechniqueActionHandlers();
             }
-
             /**
              * Open technique modal for add/edit
              */
@@ -1679,14 +1543,11 @@
                 const backdrop = document.getElementById("combatTechniqueBackdrop");
                 const form = document.getElementById("combatTechniqueForm");
                 const title = document.getElementById("combatModalTitle");
-
                 editingTechniqueId = techniqueId;
-
                 if (techniqueId) {
                     // Edit mode
                     const technique = combatTechniques.find(t => t.id === techniqueId);
                     if (!technique) return;
-
                     title.textContent = "Modifier la technique";
                     form.name.value = technique.name;
                     form.type.value = technique.type;
@@ -1698,24 +1559,20 @@
                     title.textContent = "Ajouter une technique";
                     form.reset();
                 }
-
                 backdrop.classList.add("open");
                 backdrop.setAttribute("aria-hidden", "false");
             }
-
             /**
              * Close technique modal
              */
             function closeTechniqueModal() {
                 const backdrop = document.getElementById("combatTechniqueBackdrop");
                 const form = document.getElementById("combatTechniqueForm");
-
                 backdrop.classList.remove("open");
                 backdrop.setAttribute("aria-hidden", "true");
                 form.reset();
                 editingTechniqueId = null;
             }
-
             /**
              * Save technique (add or update)
              */
@@ -1728,7 +1585,6 @@
                     effect: formData.effect,
                     limits: formData.limits || ""
                 };
-
                 if (editingTechniqueId) {
                     // Update existing
                     const index = combatTechniques.findIndex(t => t.id === editingTechniqueId);
@@ -1739,25 +1595,21 @@
                     // Add new
                     combatTechniques.push(technique);
                 }
-
                 saveCombatData();
                 renderCombatTechniques();
                 closeTechniqueModal();
                 markTabDirty('combat');
             }
-
             /**
              * Delete technique
              */
             function deleteTechnique(techniqueId) {
                 if (!confirm("Supprimer cette technique ?")) return;
-
                 combatTechniques = combatTechniques.filter(t => t.id !== techniqueId);
                 saveCombatData();
                 renderCombatTechniques();
                 markTabDirty('combat');
             }
-
             /**
              * Save combat data (techniques + text fields) to localStorage
              */
@@ -1770,7 +1622,6 @@
                 };
                 localStorage.setItem('fiche-combat', JSON.stringify(data));
             }
-
             /**
              * Attach event listeners to edit/delete buttons
              */
@@ -1781,7 +1632,6 @@
                         openTechniqueModal(btn.dataset.id);
                     });
                 });
-
                 document.querySelectorAll(".combat-btn-delete").forEach(btn => {
                     btn.addEventListener("click", (e) => {
                         e.stopPropagation();
@@ -1789,7 +1639,6 @@
                     });
                 });
             }
-
             /**
              * Escape HTML to prevent XSS
              */
@@ -1799,18 +1648,14 @@
                 div.textContent = str;
                 return div.innerHTML;
             }
-
             // ====================================================================
             // END COMBAT TECHNIQUES FUNCTIONS
             // ====================================================================
-
             function saveTab(tabName) {
                 const panel = document.getElementById('tab-' + tabName);
                 if (!panel) return;
-
                 const data = {};
                 const inputs = panel.querySelectorAll('input, select, textarea');
-
                 inputs.forEach((input) => {
                     if (input.type === 'checkbox') {
                         data[input.id] = input.checked;
@@ -1818,7 +1663,6 @@
                         data[input.id] = input.value;
                     }
                 });
-
                 // Save dynamic magie supplementaire
                 if (tabName === 'sorcellerie') {
                     const magieSupInputs = panel.querySelectorAll('.magie-supplementaire');
@@ -1827,31 +1671,25 @@
                 if (tabName === 'background') {
                     data.backgroundRelations = collectRelations();
                 }
-
                 // Save combat techniques
                 if (tabName === 'combat') {
                     data.techniques = combatTechniques;
                 }
-
                 localStorage.setItem(getTabStorageKey(tabName), JSON.stringify(data));
                 console.log('Saved tab:', tabName, data);
-
                 if (tabName === 'identite' || tabName === 'appartenance') {
                     syncProfileFromFiche();
                     syncProfileTags(); // Sync profile tags when saving identity or appartenance sections
                 }
-
                 // Visual feedback
                 btn.textContent = 'Sauvegardé ✓';
                 setTimeout(() => {
                     btn.textContent = 'Sauvegarder';
                 }, 2000);
             }
-
             function loadTab(tabName) {
                 const panel = document.getElementById('tab-' + tabName);
                 if (!panel) return;
-
                 const storageKey = getTabStorageKey(tabName);
                 let savedData = localStorage.getItem(storageKey);
                 if (!savedData) {
@@ -1864,9 +1702,7 @@
                 }
                 resetTab(tabName);
                 if (!savedData) return;
-
                 const data = JSON.parse(savedData);
-
                 // Migrate old appNiveauScolaire values to new format
                 if (tabName === 'appartenance' && data.appNiveauScolaire) {
                     const oldToNewMapping = {
@@ -1875,48 +1711,39 @@
                         'lycee': 'lycee-emeraude',
                         'universite': 'universite-onyx'
                     };
-
                     if (oldToNewMapping[data.appNiveauScolaire]) {
                         data.appNiveauScolaire = oldToNewMapping[data.appNiveauScolaire];
                     }
                 }
-
                 // Migrate old Alice checkbox data to new dropdown format
                 if (tabName === 'alice') {
                     if (data.hasAlice !== undefined || data.hasDoubleAlice !== undefined) {
                         const hasAlice = data.hasAlice === true;
                         const hasDoubleAlice = data.hasDoubleAlice === true;
-
                         let aliceStatus = '';
                         if (hasDoubleAlice) {
                             aliceStatus = 'double';
                         } else if (hasAlice) {
                             aliceStatus = 'simple';
                         }
-
                         data.aliceStatus = aliceStatus;
-
                         // Remove old checkbox values
                         delete data.hasAlice;
                         delete data.hasDoubleAlice;
                     }
                 }
-
                 Object.keys(data).forEach((key) => {
                     if (key === 'magieSupplementaire') return; // Handle separately
                     if (key === 'techniques') return; // Handle separately
                     if (key === 'backgroundRelations') return; // Handle separately
-
                     const input = document.getElementById(key);
                     if (!input) return;
-
                     if (input.type === 'checkbox') {
                         input.checked = data[key];
                     } else {
                         input.value = data[key];
                     }
                 });
-
                 // Restore dynamic magie supplementaire
                 if (tabName === 'sorcellerie' && data.magieSupplementaire) {
                     data.magieSupplementaire.forEach((value) => {
@@ -1937,18 +1764,15 @@
                             </div>
                         `;
                         magieContainer.appendChild(fieldGroup);
-
                         // Set the saved value
                         const select = fieldGroup.querySelector('select');
                         select.value = value;
-
                         fieldGroup.querySelector('.remove-magie-btn').addEventListener('click', () => {
                             fieldGroup.remove();
                             markTabDirty('sorcellerie');
                         });
                     });
                 }
-
                 // Restore combat techniques
                 if (tabName === 'combat' && Array.isArray(data.techniques)) {
                     combatTechniques = data.techniques;
@@ -1958,7 +1782,6 @@
                     }), 0) + 1;
                     renderCombatTechniques();
                 }
-
                 // Trigger visibility updates
                 if (tabName === 'alice') {
                     updateAliceVisibility();
@@ -1968,16 +1791,13 @@
                 }
                 updateConditionalVisibility();
             }
-
             // Load all tabs on page load
             const allTabs = ['identite', 'appartenance', 'combat', 'alice', 'sorcellerie', 'eater', 'religion', 'mental', 'physique', 'background'];
-
             function loadAllTabs() {
                 allTabs.forEach(loadTab);
                 updateAliceVisibility();
                 updateConditionalVisibility();
             }
-
             const initialContext = summaryModule?.resolveCharacterContext
                 ? summaryModule.resolveCharacterContext({ includeQueryParam: true })
                 : { key: currentCharacterKey, character: null };
@@ -1986,7 +1806,6 @@
                 summaryModule.applySummaryToElements(summaryElements, summaryModule.buildSummary(initialContext));
             }
             loadAllTabs();
-
             setInterval(() => {
                 if (!summaryModule?.resolveCharacterContext || !summaryModule?.buildSummary) return;
                 const nextContext = summaryModule.resolveCharacterContext({ includeQueryParam: true });
@@ -1997,11 +1816,9 @@
                     loadAllTabs();
                 }
             }, 800);
-
             // ====================================================================
             // COMBAT TECHNIQUES EVENT LISTENERS
             // ====================================================================
-
             // Add technique button
             const addTechniqueBtn = document.getElementById("combatAddTechniqueBtn");
             if (addTechniqueBtn) {
@@ -2009,18 +1826,15 @@
                     openTechniqueModal();
                 });
             }
-
             // Modal close buttons
             const modalCloseBtn = document.getElementById("combatModalClose");
             if (modalCloseBtn) {
                 modalCloseBtn.addEventListener("click", closeTechniqueModal);
             }
-
             const modalCancelBtn = document.getElementById("combatModalCancel");
             if (modalCancelBtn) {
                 modalCancelBtn.addEventListener("click", closeTechniqueModal);
             }
-
             // Modal backdrop click (close on outside click)
             const modalBackdrop = document.getElementById("combatTechniqueBackdrop");
             if (modalBackdrop) {
@@ -2030,7 +1844,6 @@
                     }
                 });
             }
-
             // Form submission
             const techniqueForm = document.getElementById("combatTechniqueForm");
             if (techniqueForm) {
@@ -2046,7 +1859,6 @@
                     saveTechnique(formData);
                 });
             }
-
             // Filter change
             const techniqueFilter = document.getElementById("combatTechniqueFilter");
             if (techniqueFilter) {
@@ -2054,11 +1866,9 @@
                     renderCombatTechniques(e.target.value);
                 });
             }
-
             // ====================================================================
             // END COMBAT TECHNIQUES EVENT LISTENERS
             // ====================================================================
-
             // ====================================================================
             // PROFILE TAGS SYNCHRONIZATION EVENT LISTENERS
             // ====================================================================
@@ -2078,7 +1888,6 @@
                 'alice2Type',
                 'alice2Forme'
             ];
-
             tagSyncFields.forEach(fieldId => {
                 const element = document.getElementById(fieldId);
                 if (element) {
@@ -2092,7 +1901,6 @@
             // ====================================================================
         })();
     </script>
-
     <!-- Combat Technique Modal -->
     <div class="combat-modal-backdrop" id="combatTechniqueBackdrop" aria-hidden="true">
         <div class="combat-modal" role="dialog" aria-modal="true">
@@ -2136,5 +1944,3 @@
     <script src="js/sidebar.js"></script>
 </body>
 </html>
-
-

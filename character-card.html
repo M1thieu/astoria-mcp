@@ -16,16 +16,25 @@
             input, select, textarea { @apply transition-shadow duration-200 ease-out; }
             a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
         }
-    </style>
+    
+        @layer utilities {
+            .fade-in {
+                @apply opacity-0 translate-y-2;
+                animation: fadeIn 0.6s ease forwards;
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
 </head>
-<body class="cc-body">
-    <main class="cc-gallery" data-card-gallery>
+<body class="cc-body min-h-screen">
+    <main class="cc-gallery fade-in" data-card-gallery>
         <header class="cc-header">
             <p class="cc-kicker">Astoria templates</p>
             <h1>Character stat cards</h1>
             <p>Pick a design below. Each template is a separate layout with its own stat logic.</p>
         </header>
-
         <nav class="cc-tabs" role="tablist" aria-label="Card templates">
             <button class="cc-tab is-active" data-card-tab="crest" aria-selected="true" type="button">
                 <span class="cc-tab-avatar">A</span>
@@ -48,7 +57,6 @@
                 Echo Pulse
             </button>
         </nav>
-
         <section class="cc-stage">
             <article class="cc-card cc-card--crest" data-card-panel="crest">
                 <div class="cc-crest-header">
@@ -91,7 +99,6 @@
                     <span class="cc-chip">Frontline</span>
                 </div>
             </article>
-
             <article class="cc-card cc-card--skyline is-hidden" data-card-panel="skyline" hidden>
                 <div class="cc-skyline-header">
                     <div class="cc-skyline-avatar">S</div>
@@ -120,7 +127,6 @@
                 </div>
                 <p class="cc-skyline-note">Relay streak active. Bonus to route memory and sprint recovery.</p>
             </article>
-
             <article class="cc-card cc-card--sigil is-hidden" data-card-panel="sigil" hidden>
                 <p class="cc-kicker-line">Sigil Stack</p>
                 <h2 class="cc-name">Alix Rune</h2>
@@ -145,7 +151,6 @@
                     <span class="cc-chip">Arc</span>
                 </div>
             </article>
-
             <article class="cc-card cc-card--matrix is-hidden" data-card-panel="matrix" hidden>
                 <div class="cc-matrix-header">
                     <p class="cc-kicker-line">Flux Matrix</p>
@@ -171,7 +176,6 @@
                     </div>
                 </div>
             </article>
-
             <article class="cc-card cc-card--echo is-hidden" data-card-panel="echo" hidden>
                 <div class="cc-echo-header">
                     <div class="cc-echo-ring" style="--value: 0.68">
@@ -192,10 +196,7 @@
             </article>
         </section>
     </main>
-
     <script src="js/ui/character-card.js"></script>
     <script src="js/sidebar.js"></script>
 </body>
 </html>
-
-

@@ -19,10 +19,20 @@
             input, select, textarea { @apply transition-shadow duration-200 ease-out; }
             a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
         }
-    </style>
+    
+        @layer utilities {
+            .fade-in {
+                @apply opacity-0 translate-y-2;
+                animation: fadeIn 0.6s ease forwards;
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
 </head>
-<body class="quest-board">
-    <main class="quest-page">
+<body class="quest-board min-h-screen">
+    <main class="quest-page fade-in">
         <header class="quest-header">
             <a class="quest-back" href="profil.html" title="Retour au profil">&#8592; Retour</a>
             <div class="quest-title-wrap">
@@ -49,11 +59,9 @@
                 <button class="quest-add-btn" id="questAddBtn" type="button" data-admin-only>+ Ajouter</button>
             </div>
         </header>
-
         <div class="quest-divider" aria-hidden="true">
             <span class="quest-divider-moon">&#9790;</span>
         </div>
-
         <section class="quest-search" aria-label="Recherche de qu&#234;tes">
             <div class="quest-search-panel">
                 <div class="quest-search-title">Recherche</div>
@@ -81,11 +89,9 @@
                 </div>
             </div>
         </section>
-
         <div class="quest-quickbar">
             <a class="quest-quick-btn" href="#questHistory">Historique</a>
         </div>
-
         <section class="quest-carousel" aria-label="Liste des qu&#234;tes">
             <button class="quest-arrow quest-arrow--left" id="questPrevBtn" type="button" aria-label="Qu&#234;tes pr&#233;c&#233;dentes">&#10094;</button>
             <div class="quest-carousel-viewport" id="questViewport">
@@ -93,7 +99,6 @@
             </div>
             <button class="quest-arrow quest-arrow--right" id="questNextBtn" type="button" aria-label="Qu&#234;tes suivantes">&#10095;</button>
         </section>
-
         <section class="quest-history" id="questHistory" aria-label="Historique des qu&#234;tes">
             <div class="quest-history-tabs" role="tablist" aria-label="Navigation qu&#234;tes">
                 <button class="quest-history-tab" type="button" role="tab" aria-selected="false">Qu&#234;tes</button>
@@ -127,7 +132,6 @@
             </div>
         </section>
     </main>
-
     <div class="quest-modal" id="questDetailModal" aria-hidden="true">
         <div class="quest-modal-scrim" data-close="true"></div>
         <div class="quest-modal-card" role="dialog" aria-modal="true" aria-labelledby="questDetailTitle">
@@ -182,7 +186,6 @@
             </div>
         </div>
     </div>
-
     <div class="quest-modal quest-modal--editor" id="questEditorModal" aria-hidden="true">
         <div class="quest-modal-scrim" data-close="true"></div>
         <div class="quest-modal-card quest-editor-card" role="dialog" aria-modal="true" aria-labelledby="questEditorTitle">
@@ -281,7 +284,6 @@
             </div>
         </div>
     </div>
-
     <div class="quest-cropper-backdrop" id="questCropperBackdrop" aria-hidden="true">
         <div class="quest-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="questCropperTitle">
             <div class="quest-cropper-header">
@@ -304,7 +306,6 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
     <script src="js/data.js"></script>
     <script src="js/ui/searchbar.js"></script>
@@ -312,9 +313,3 @@
     <script src="js/sidebar.js"></script>
 </body>
 </html>
-
-
-
-
-
-

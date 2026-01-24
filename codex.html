@@ -20,16 +20,25 @@
             input, select, textarea { @apply transition-shadow duration-200 ease-out; }
             a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
         }
-    </style>
+    
+        @layer utilities {
+            .fade-in {
+                @apply opacity-0 translate-y-2;
+                animation: fadeIn 0.6s ease forwards;
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
 </head>
-<body>
-    <main class="wrapper" aria-labelledby="pageTitle">
+<body class="min-h-screen">
+    <main class="wrapper fade-in" aria-labelledby="pageTitle">
         <div class="top-bar">
             <!-- Navigation placeholder -->
             <nav aria-label="Navigation principale" class="top-nav">
                 <span class="top-nav-placeholder" aria-hidden="true"></span>
             </nav>
-
             <h1 class="title" id="pageTitle">Liste d'objets</h1>
             <div class="character-summary" aria-label="Résumé du personnage">
                 <div class="character-avatar-wrapper">
@@ -53,7 +62,6 @@
             </div>
             <span class="stats-badge" id="statsBadge">0 objet</span>
             <button type="button" class="admin-add-btn" id="adminAddItemBtn" hidden>+ Ajouter un objet</button>
-
             <!-- Dropdown catégories -->
             <select id="categoryFilter" class="category-dropdown">
                 <option value="">Toutes catégories</option>
@@ -61,7 +69,6 @@
                 <option value="consommable">&#x1F9EA; Consommables</option>
                 <option value="agricole">&#x1F33E; Agricole</option>
             </select>
-
             <div class="inventory-search" id="codexSearch">
                 <button type="button" class="inventory-search-toggle" id="codexSearchToggle" aria-label="Rechercher" aria-expanded="false">
                     <span class="inventory-search-icon">&#x1F50D;</span>
@@ -81,9 +88,7 @@
                 <div class="recent-searches-dropdown inventory-search-history" id="recentSearchesDropdown"></div>
             </div>
         </div>
-
         <div class="filter-chips" id="filterChips"></div>
-
         <div class="table-container">
             <table id="inventoryTable">
                 <thead>
@@ -100,7 +105,6 @@
             </table>
         </div>
     </main>
-
     <!-- Modal pour voir un item en grand / détails -->
     <div
         id="itemModal"
@@ -135,7 +139,6 @@
             </div>
         </div>
     </div>
-
     <div class="codex-admin-backdrop" id="adminItemBackdrop" aria-hidden="true">
         <div class="codex-admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminItemTitle">
             <div class="codex-admin-header">
@@ -168,17 +171,14 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="codex-admin-section">
                     <div class="codex-admin-section-title">Description</div>
                     <textarea class="codex-admin-textarea" id="adminItemDescription" name="description" rows="3" placeholder="Description courte..."></textarea>
                 </div>
-
                 <div class="codex-admin-section">
                     <div class="codex-admin-section-title">Effet</div>
                     <textarea class="codex-admin-textarea" id="adminItemEffect" name="effect" rows="2" placeholder="Effet principal..."></textarea>
                 </div>
-
                 <div class="codex-admin-section">
                     <div class="codex-admin-section-title">Image</div>
                     <div class="codex-admin-image">
@@ -194,7 +194,6 @@
                         <input type="file" id="adminItemImageInput" accept="image/*" hidden>
                     </div>
                 </div>
-
                 <div class="codex-admin-actions">
                     <button type="button" class="codex-admin-button danger" id="adminItemDelete" hidden>🗑️ Supprimer</button>
                     <div class="codex-admin-actions-group">
@@ -205,7 +204,6 @@
             </form>
         </div>
     </div>
-
     <div class="codex-cropper-backdrop" id="itemCropperBackdrop" aria-hidden="true">
         <div class="codex-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="itemCropperTitle">
             <div class="codex-cropper-header">
@@ -228,7 +226,6 @@
             </div>
         </div>
     </div>
-
     <!-- Delete confirmation modal -->
     <div class="codex-delete-backdrop" id="deleteItemBackdrop" aria-hidden="true">
         <div class="codex-delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteItemTitle">
@@ -245,7 +242,6 @@
             </div>
         </div>
     </div>
-
     <!-- Données des objets -->
     <script src="js/image-helpers.js"></script>
     <script src="js/data.js"></script>
@@ -254,13 +250,9 @@
     <script src="js/ui/searchbar.js"></script>
     <script type="module" src="js/ui/app-shell.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
-
     <script src="js/codex.js"></script>
     <script type="module" src="js/codex-admin-summary.js"></script>
-
     <script type="module" src="js/codex-admin.js"></script>
     <script src="js/sidebar.js"></script>
 </body>
 </html>
-
-

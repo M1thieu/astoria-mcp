@@ -17,10 +17,20 @@
             input, select, textarea { @apply transition-shadow duration-200 ease-out; }
             a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none ring-2 ring-astoria-400 ring-offset-2 ring-offset-white; }
         }
-    </style>
+    
+        @layer utilities {
+            .fade-in {
+                @apply opacity-0 translate-y-2;
+                animation: fadeIn 0.6s ease forwards;
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
 </head>
-<body>
-    <main class="character-select-page" aria-labelledby="characterSelectTitle">
+<body class="min-h-screen">
+    <main class="character-select-page fade-in" aria-labelledby="characterSelectTitle">
         <header class="character-select-header">
             <div>
                 <h1 class="character-select-title" id="characterSelectTitle">S&#233;lectionner un personnage</h1>
@@ -51,16 +61,13 @@
                 <button type="button" class="character-select-logout" id="logoutButton">D&#233;connexion</button>
             </div>
         </header>
-
         <section class="character-select-grid" id="characterGrid" role="list"></section>
         <p class="character-select-status" id="characterSelectStatus" role="status" aria-live="polite"></p>
     </main>
-
     <div class="select-modal-backdrop" id="createCharacterBackdrop" aria-hidden="true">
         <div class="select-modal" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
             <div class="select-modal-title" id="createCharacterTitle">Cr&#233;er un personnage</div>
             <div class="select-modal-error" id="createCharacterError" role="alert"></div>
-
             <form id="createCharacterForm">
                 <div class="select-modal-group">
                     <label class="select-modal-label" for="characterNameInput">Nom</label>
@@ -74,7 +81,6 @@
                     <label class="select-modal-label" for="characterClassInput">Classe (optionnel)</label>
                     <input class="select-modal-input" id="characterClassInput" name="class" autocomplete="off">
                 </div>
-
                 <div class="select-modal-actions">
                     <button type="button" class="select-modal-button secondary" id="createCharacterCancel">Annuler</button>
                     <button type="submit" class="select-modal-button" id="createCharacterSubmit">Cr&#233;er</button>
@@ -82,7 +88,6 @@
             </form>
         </div>
     </div>
-
     <script type="module" src="js/character-select.js"></script>
     <script type="module">
         import { initCharacterSummary } from './js/ui/character-summary.js';
@@ -91,7 +96,6 @@
             await initCharacterSummary({ enableDropdown: true, showKaels: true });
         });
     </script>
-
     <script>
         // ES modules (imports) do not work over file:// in most browsers.
         (function () {
@@ -105,5 +109,3 @@
     <script src="js/sidebar.js"></script>
 </body>
 </html>
-
-
