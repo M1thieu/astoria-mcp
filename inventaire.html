@@ -27,11 +27,18 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
 </head>
 <body class="min-h-screen">
             <!-- Main inventory wrapper -->
-    <main class="inventory-wrapper fade-in" aria-labelledby="inventoryTitle">
+    <main class="inventory-wrapper fade-in tw-surface" aria-labelledby="inventoryTitle">
                 <!-- Header with title and back button -->
         <div class="inventory-header">
             <a href="codex.html" class="back-link" title="Retour à la liste">&#x2190;</a>
@@ -58,7 +65,7 @@
             </div>
             <div class="inventory-actions">
                 <span id="itemCount" class="inventory-info">0 objets</span>
-                <button class="add-item-btn" id="openAddPanel" title="Ajouter un objet">
+                <button class="add-item-btn tw-press" id="openAddPanel" title="Ajouter un objet">
                     <span class="add-icon">+</span>
                     <span class="add-label">Ajouter</span>
                 </button>
@@ -67,25 +74,25 @@
         <!-- Category filter bar + search -->
         <div class="inventory-toolbar">
             <nav class="inventory-categories" aria-label="Cat&eacute;gories d'inventaire">
-                <button class="category-btn active" data-category="all">
+                <button class="category-btn active tw-press" data-category="all">
                     <span class="category-icon">&#x1F4E6;</span>
                     <span class="category-label">Tous</span>
                 </button>
-                <button class="category-btn" data-category="equipement">
+                <button class="category-btn tw-press" data-category="equipement">
                     <span class="category-icon">&#x2694;&#xFE0F;</span>
                     <span class="category-label">&Eacute;quipements</span>
                 </button>
-                <button class="category-btn" data-category="consommable">
+                <button class="category-btn tw-press" data-category="consommable">
                     <span class="category-icon">&#x1F9EA;</span>
                     <span class="category-label">Consommables</span>
                 </button>
-                <button class="category-btn" data-category="agricole">
+                <button class="category-btn tw-press" data-category="agricole">
                     <span class="category-icon">&#x1F33E;</span>
                     <span class="category-label">Agricole</span>
                 </button>
             </nav>
             <div class="inventory-search" id="inventorySearch">
-                <button type="button" class="inventory-search-toggle" id="inventorySearchToggle" aria-label="Rechercher" aria-expanded="false">
+                <button type="button" class="inventory-search-toggle tw-press" id="inventorySearchToggle" aria-label="Rechercher" aria-expanded="false">
                     <span class="inventory-search-icon">&#x1F50D;</span>
                 </button>
                 <input
@@ -95,7 +102,7 @@
                     placeholder="Rechercher un objet..."
                     aria-label="Rechercher un objet"
                 >
-                <button type="button" class="inventory-search-clear" id="inventorySearchClear" aria-label="Effacer la recherche" hidden>x</button>
+                <button type="button" class="inventory-search-clear tw-press" id="inventorySearchClear" aria-label="Effacer la recherche" hidden>x</button>
                 <div class="recent-searches-dropdown inventory-search-history" id="inventorySearchHistory"></div>
             </div>
         </div>
@@ -121,13 +128,13 @@
                 <!-- Details will be rendered here when item is selected -->
             </div>
             <!-- Scroll types panel (right-most side) -->
-            <aside class="scroll-types-panel" id="scrollTypesPanel" aria-hidden="true">
+            <aside class="scroll-types-panel tw-surface" id="scrollTypesPanel" aria-hidden="true">
                 <div class="scroll-panel-header">
                     <h3 id="scrollPanelTitle">Types de parchemins</h3>
-                    <button class="scroll-panel-add-btn" id="scrollPanelAddBtn" type="button" title="Ajouter des parchemins" aria-label="Ajouter des parchemins" aria-expanded="false" aria-controls="scrollPanelAdd" disabled>+</button>
+                    <button class="scroll-panel-add-btn tw-press" id="scrollPanelAddBtn" type="button" title="Ajouter des parchemins" aria-label="Ajouter des parchemins" aria-expanded="false" aria-controls="scrollPanelAdd" disabled>+</button>
                 </div>
-                <div class="scroll-panel-body" id="scrollPanelBody">
-                    <div class="scroll-panel-add" id="scrollPanelAdd" aria-hidden="true">
+                <div class="scroll-panel-body tw-surface" id="scrollPanelBody">
+                    <div class="scroll-panel-add tw-surface" id="scrollPanelAdd" aria-hidden="true">
                         <div class="scroll-add-search">
                             <input type="text" id="scrollTypeSearch" placeholder="Rechercher un type">
                         </div>
@@ -140,13 +147,13 @@
         </div>
     </main>
     <!-- Add item panel (slide-in from right) -->
-    <div class="add-panel" id="addPanel">
-        <div class="add-panel-inner">
+    <div class="add-panel tw-surface" id="addPanel">
+        <div class="add-panel-inner tw-surface">
             <div class="add-panel-header">
                 <h2>Ajouter un objet</h2>
-                <button class="panel-close-btn" id="closeAddPanel">&times;</button>
+                <button class="panel-close-btn tw-press" id="closeAddPanel">&times;</button>
             </div>
-            <div class="add-panel-body">
+            <div class="add-panel-body tw-surface">
                 <!-- Item selector (from existing database) -->
                 <div class="form-group">
                     <label for="itemSelect">Objet *</label>
@@ -169,9 +176,9 @@
                 <div class="form-group">
                     <label for="quantityInput">Quantité *</label>
                     <div class="quantity-control">
-                        <button type="button" class="qty-btn" id="qtyMinus">-</button>
+                        <button type="button" class="qty-btn tw-press" id="qtyMinus">-</button>
                         <input type="number" id="quantityInput" min="1" value="1">
-                        <button type="button" class="qty-btn" id="qtyPlus">+</button>
+                        <button type="button" class="qty-btn tw-press" id="qtyPlus">+</button>
                     </div>
                 </div>
                 <!-- Item preview (shows selected item details) -->
@@ -189,31 +196,31 @@
                 </div>
             </div>
             <div class="add-panel-footer">
-                <button type="button" class="btn-secondary" id="cancelAdd">Annuler</button>
-                <button type="button" class="btn-primary" id="confirmAdd">Ajouter</button>
+                <button type="button" class="btn-secondary tw-press" id="cancelAdd">Annuler</button>
+                <button type="button" class="btn-primary tw-press" id="confirmAdd">Ajouter</button>
             </div>
         </div>
     </div>
     <!-- Delete confirmation modal -->
-    <div class="delete-modal-overlay" id="deleteModal">
-        <div class="delete-modal">
+    <div class="delete-modal-overlay tw-surface" id="deleteModal">
+        <div class="delete-modal tw-surface">
             <div class="delete-modal-header">
                 <h3>Supprimer l'objet</h3>
             </div>
-            <div class="delete-modal-body">
+            <div class="delete-modal-body tw-surface">
                 <p>Combien d'unités de <span class="delete-modal-item-name" id="deleteItemName"></span> voulez-vous supprimer ?</p>
                 <div class="form-group">
                     <label for="deleteQuantityInput">Quantité à supprimer</label>
                     <div class="quantity-control">
-                        <button type="button" class="qty-btn" id="deleteQtyMinus">-</button>
+                        <button type="button" class="qty-btn tw-press" id="deleteQtyMinus">-</button>
                         <input type="number" id="deleteQuantityInput" min="1" value="1">
-                        <button type="button" class="qty-btn" id="deleteQtyPlus">+</button>
+                        <button type="button" class="qty-btn tw-press" id="deleteQtyPlus">+</button>
                     </div>
                 </div>
             </div>
             <div class="delete-modal-footer">
-                <button type="button" class="btn-secondary" id="cancelDelete">Annuler</button>
-                <button type="button" class="btn-danger" id="confirmDelete">Supprimer</button>
+                <button type="button" class="btn-secondary tw-press" id="cancelDelete">Annuler</button>
+                <button type="button" class="btn-danger tw-press" id="confirmDelete">Supprimer</button>
             </div>
         </div>
     </div>
@@ -1615,11 +1622,11 @@
                         </div>
                         ${isSelected ? `
                         <div class="scroll-type-controls">
-                            <button type="button" class="scroll-type-qty-btn" data-action="minus">-</button>
+                            <button type="button" class="scroll-type-qty-btn tw-press" data-action="minus">-</button>
                             <input type="number" min="1" value="1" class="scroll-type-qty-input">
-                            <button type="button" class="scroll-type-qty-btn" data-action="plus">+</button>
-                            <button type="button" class="scroll-type-add">Ajouter</button>
-                            <button type="button" class="scroll-type-remove">Retirer</button>
+                            <button type="button" class="scroll-type-qty-btn tw-press" data-action="plus">+</button>
+                            <button type="button" class="scroll-type-add tw-press">Ajouter</button>
+                            <button type="button" class="scroll-type-remove tw-press">Retirer</button>
                         </div>
                         ` : ''}
                     </div>
@@ -1656,7 +1663,7 @@
                         <span class="scroll-suggestion-label">${escapeHtml(type.emoji)} ${escapeHtml(type.label)}</span>
                         <div class="scroll-suggestion-controls">
                             <input type="number" min="1" value="1" class="scroll-suggestion-qty">
-                            <button type="button" class="scroll-suggestion-add">Ajouter</button>
+                            <button type="button" class="scroll-suggestion-add tw-press">Ajouter</button>
                         </div>
                     </div>
                 `;
@@ -1831,7 +1838,7 @@
                 ? ''
                 : `
                     <div class="detail-actions">
-                        <button class="item-action-use"
+                        <button class="item-action-use tw-press"
                                 onclick="useItem(${item.id})"
                                 title="Utiliser l'objet"
                                 ${item.quantity < 1 ? 'disabled' : ''}
@@ -1839,13 +1846,13 @@
                             &#x2728;
                         </button>
                         <div class="action-stack">
-                            <button class="item-action-delete"
+                            <button class="item-action-delete tw-press"
                                     onclick="openDeleteModal(${item.id})"
                                     title="Supprimer l'objet"
                                     aria-label="Supprimer l'objet">
                                 &#x1F5D1;&#xFE0F;
                             </button>
-                            <button class="item-action-scroll-toggle"
+                            <button class="item-action-scroll-toggle tw-press"
                                     type="button"
                                     id="scrollTypesToggle"
                                     title="Types de parchemins"
@@ -1920,7 +1927,7 @@
                 ? ''
                 : `
                     <div class="detail-actions">
-                        <button class="item-action-use"
+                        <button class="item-action-use tw-press"
                                 onclick="useItem(${item.id})"
                                 title="Utiliser l'objet"
                                 ${item.quantity < 1 ? 'disabled' : ''}
@@ -1928,13 +1935,13 @@
                             &#x2728;
                         </button>
                         <div class="action-stack">
-                            <button class="item-action-delete"
+                            <button class="item-action-delete tw-press"
                                     onclick="openDeleteModal(${item.id})"
                                     title="Supprimer l'objet"
                                     aria-label="Supprimer l'objet">
                                 &#x1F5D1;&#xFE0F;
                             </button>
-                            <button class="item-action-scroll-toggle"
+                            <button class="item-action-scroll-toggle tw-press"
                                     type="button"
                                     id="scrollTypesToggle"
                                     title="Types de parchemins"

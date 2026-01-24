@@ -123,6 +123,13 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
     <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -157,7 +164,7 @@
                     <div class="character-summary-text">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <a class="character-name" id="characterSummaryName" href="profil.html">Nom du personnage</a>
-                            <button type="button" id="shareProfileBtn" class="share-profile-btn" title="Partager le profil" hidden style="background: none; border: none; cursor: pointer; font-size: 1.2em; opacity: 0.7; transition: opacity 0.2s;">??</button>
+                            <button type="button" id="shareProfileBtn" class="share-profile-btn tw-press" title="Partager le profil" hidden style="background: none; border: none; cursor: pointer; font-size: 1.2em; opacity: 0.7; transition: opacity 0.2s;">??</button>
                         </div>
                         <span class="character-tagline" id="characterSummaryTagline">Classe / Role / Surnom</span>
                         <div class="character-summary-meta">
@@ -174,14 +181,14 @@
         <section class="profile-layout">
             <!-- Colonne gauche : look, liens rapides -->
             <aside class="profile-sidebar" aria-label="Navigation du profil">
-                <section class="profile-panel">
+                <section class="profile-panel tw-surface">
                     <h2 class="profile-panel-title">Mon look</h2>
-                    <div class="profile-look-card">
-                        <div class="profile-summary-card profile-summary-card--compact" aria-label="Résumé du joueur">
+                    <div class="profile-look-card tw-surface tw-hover">
+                        <div class="profile-summary-card profile-summary-card--compact tw-surface tw-hover" aria-label="Résumé du joueur">
                             <div class="profile-summary-header">
                                 <span class="profile-summary-title">Résumé</span>
                             </div>
-                            <button type="button" class="profile-avatar-large" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
+                            <button type="button" class="profile-avatar-large tw-press" id="avatarUploadTrigger" aria-label="Mettre a jour l'avatar">
                                 <img class="profile-avatar-img" id="characterAvatarImg" alt="Avatar" hidden>
                                 <span class="profile-avatar-placeholder" id="characterInitial">Avatar</span>
                             </button>
@@ -200,7 +207,7 @@
                     <div class="profile-tags" id="profileTags" aria-label="Tags de profil">
                         <div class="profile-tags-header">
                             <span class="profile-tags-title">Tags</span>
-                            <button type="button" class="profile-tags-toggle" id="tagToggle" aria-expanded="false" aria-haspopup="true">+</button>
+                            <button type="button" class="profile-tags-toggle tw-press" id="tagToggle" aria-expanded="false" aria-haspopup="true">+</button>
                         </div>
                         <div class="profile-tags-selected" id="selectedTags" aria-label="Tags sélectionnés"></div>
                         <div class="profile-tags-dropdown" id="tagDropdown" hidden></div>
@@ -216,7 +223,7 @@
                             <h2 class="profile-section-title">Presentation</h2>
                         </div>
                         <div class="profile-section-actions">
-                            <button type="button" class="profile-edit-btn" id="presentationEditBtn" hidden>Modifier</button>
+                            <button type="button" class="profile-edit-btn tw-press" id="presentationEditBtn" hidden>Modifier</button>
                         </div>
                     </header>
                     <div class="profile-presentation-shell">
@@ -240,10 +247,10 @@
                                 <div class="profile-editor-main">
                                     <div class="profile-editor-toolbar" id="presentationToolbar" role="toolbar" aria-label="Barre d'outils">
                                         <div class="profile-toolbar-group">
-                                            <button type="button" class="profile-toolbar-button" data-action="bold" aria-label="Gras"><strong>B</strong></button>
-                                            <button type="button" class="profile-toolbar-button" data-action="italic" aria-label="Italique"><em>I</em></button>
-                                            <button type="button" class="profile-toolbar-button" data-action="underline" aria-label="Souligne"><span class="profile-toolbar-underline">U</span></button>
-                                            <button type="button" class="profile-toolbar-button" data-action="strike" aria-label="Barre"><span class="profile-toolbar-strike">S</span></button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="bold" aria-label="Gras"><strong>B</strong></button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="italic" aria-label="Italique"><em>I</em></button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="underline" aria-label="Souligne"><span class="profile-toolbar-underline">U</span></button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="strike" aria-label="Barre"><span class="profile-toolbar-strike">S</span></button>
                                         </div>
                                         <div class="profile-toolbar-group">
                                             <select class="profile-toolbar-select" data-action="align" aria-label="Alignement">
@@ -253,8 +260,8 @@
                                                 <option value="right">Droite</option>
                                                 <option value="justify">Justifie</option>
                                             </select>
-                                            <button type="button" class="profile-toolbar-button" data-action="list-bullet" aria-label="Liste a puces">•</button>
-                                            <button type="button" class="profile-toolbar-button" data-action="list-ordered" aria-label="Liste numerotee">1.</button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="list-bullet" aria-label="Liste a puces">•</button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="list-ordered" aria-label="Liste numerotee">1.</button>
                                         </div>
                                         <div class="profile-toolbar-group">
                                             <label class="profile-toolbar-color">
@@ -267,9 +274,9 @@
                                             </label>
                                         </div>
                                         <div class="profile-toolbar-group">
-                                            <button type="button" class="profile-toolbar-button" data-action="image" aria-label="Inserer une image">IMG</button>
-                                            <button type="button" class="profile-toolbar-button" data-action="link" aria-label="Inserer un lien">Lien</button>
-                                            <button type="button" class="profile-toolbar-button" data-action="emoji" aria-label="Inserer un emoji">:-)</button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="image" aria-label="Inserer une image">IMG</button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="link" aria-label="Inserer un lien">Lien</button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="emoji" aria-label="Inserer un emoji">:-)</button>
                                         </div>
                                         <div class="profile-toolbar-group">
                                             <select class="profile-toolbar-select" data-action="header" aria-label="Styles de texte">
@@ -279,7 +286,7 @@
                                                 <option value="3">Titre 3</option>
                                                 <option value="blockquote">Citation</option>
                                             </select>
-                                            <button type="button" class="profile-toolbar-button" data-action="html" aria-label="Basculer HTML source">&lt;&gt;</button>
+                                            <button type="button" class="profile-toolbar-button tw-press" data-action="html" aria-label="Basculer HTML source">&lt;&gt;</button>
                                         </div>
                                     </div>
                                     <div class="profile-editor-surface">
@@ -287,8 +294,8 @@
                                         <textarea class="profile-editor-html" id="presentationHtmlSource" rows="12" hidden></textarea>
                                     </div>
                                     <div class="profile-editor-actions">
-                                        <button type="button" class="profile-editor-cancel" id="presentationCancel">Annuler</button>
-                                        <button type="button" class="profile-editor-save" id="presentationSave">Enregistrer</button>
+                                        <button type="button" class="profile-editor-cancel tw-press" id="presentationCancel">Annuler</button>
+                                        <button type="button" class="profile-editor-save tw-press" id="presentationSave">Enregistrer</button>
                                     </div>
                                 </div>
                                 <aside class="profile-presentations-sidebar" id="presentationSidebar" aria-label="Liste des presentations">
@@ -297,7 +304,7 @@
                                         <span class="profile-sidebar-count" id="presentationCount">0/10</span>
                                     </div>
                                     <div class="profile-presentations-list" id="presentationList"></div>
-                                    <button type="button" class="profile-new-presentation" id="presentationCreateBtn">+ Nouvelle presentation</button>
+                                    <button type="button" class="profile-new-presentation tw-press" id="presentationCreateBtn">+ Nouvelle presentation</button>
                                     <div class="profile-presentation-custom">
                                         <h4 class="profile-sidebar-title">Personnalisation</h4>
                                         <label class="profile-custom-label" for="presentationHeroTitleInput">Titre</label>
@@ -313,7 +320,7 @@
                                             <option value="center">Centré</option>
                                             <option value="split">Image + texte</option>
                                         </select>
-                                        <button type="button" class="profile-custom-reset" id="presentationHeroReset">Réinitialiser l'en-tête</button>
+                                        <button type="button" class="profile-custom-reset tw-press" id="presentationHeroReset">Réinitialiser l'en-tête</button>
                                     </div>
                                 </aside>
                             </div>
@@ -324,7 +331,7 @@
         </section>
     </main>
     <div class="profile-modal-backdrop" id="createCharacterBackdrop" aria-hidden="true">
-        <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
+        <div class="profile-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
             <div class="profile-modal-title" id="createCharacterTitle">Créer un personnage</div>
             <div class="profile-modal-error" id="createCharacterError" role="alert"></div>
             <form id="createCharacterForm">
@@ -341,17 +348,17 @@
                     <input class="profile-modal-input" id="characterClassInput" name="class" autocomplete="off">
                 </div>
                 <div class="profile-modal-actions">
-                    <button type="button" class="profile-modal-button secondary" id="createCharacterCancel">Annuler</button>
-                    <button type="submit" class="profile-modal-button" id="createCharacterSubmit">Créer</button>
+                    <button type="button" class="profile-modal-button secondary tw-press" id="createCharacterCancel">Annuler</button>
+                    <button type="submit" class="profile-modal-button tw-press" id="createCharacterSubmit">Créer</button>
                 </div>
             </form>
         </div>
     </div>
     <div class="profile-cropper-backdrop" id="avatarCropperBackdrop" aria-hidden="true">
-        <div class="profile-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="avatarCropperTitle">
+        <div class="profile-cropper-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="avatarCropperTitle">
             <div class="profile-cropper-header">
                 <h2 class="profile-cropper-title" id="avatarCropperTitle">Ajuster l'avatar</h2>
-                <button type="button" class="profile-cropper-close" id="avatarCropperClose" aria-label="Fermer">×</button>
+                <button type="button" class="profile-cropper-close tw-press" id="avatarCropperClose" aria-label="Fermer">×</button>
             </div>
             <div class="profile-cropper-body">
                 <div class="profile-cropper-stage">
@@ -364,8 +371,8 @@
                 </div>
             </div>
             <div class="profile-cropper-actions">
-                <button type="button" class="profile-modal-button secondary" id="avatarCropperCancel">Annuler</button>
-                <button type="button" class="profile-modal-button" id="avatarCropperConfirm">Enregistrer</button>
+                <button type="button" class="profile-modal-button secondary tw-press" id="avatarCropperCancel">Annuler</button>
+                <button type="button" class="profile-modal-button tw-press" id="avatarCropperConfirm">Enregistrer</button>
             </div>
         </div>
     </div>
@@ -373,16 +380,16 @@
         <div class="profile-modal profile-image-modal" role="dialog" aria-modal="true" aria-labelledby="imageInsertTitle">
             <div class="profile-modal-title" id="imageInsertTitle">Inserer une image</div>
             <div class="profile-modal-error" id="imageInsertError" role="alert"></div>
-            <div class="profile-modal-form">
-                <div class="profile-modal-field">
+            <div class="profile-modal-form tw-surface">
+                <div class="profile-modal-field tw-surface">
                     <label class="profile-modal-label" for="imageUrlInput">URL de l'image</label>
                     <input class="profile-modal-input" id="imageUrlInput" placeholder="https://exemple.com/image.jpg" autocomplete="off">
                 </div>
-                <div class="profile-modal-field">
+                <div class="profile-modal-field tw-surface">
                     <label class="profile-modal-label" for="imageAltInput">Texte alternatif (alt)</label>
                     <input class="profile-modal-input" id="imageAltInput" placeholder="Description de l'image" autocomplete="off">
                 </div>
-                <div class="profile-modal-grid">
+                <div class="profile-modal-grid tw-surface">
                     <div>
                         <label class="profile-modal-label" for="imageWidthInput">Largeur</label>
                         <input class="profile-modal-input" id="imageWidthInput" placeholder="300px">
@@ -396,8 +403,8 @@
                     <span class="profile-image-preview-text">Apercu</span>
                 </div>
                 <div class="profile-modal-actions">
-                    <button type="button" class="profile-modal-button secondary" id="imageInsertCancel">Annuler</button>
-                    <button type="button" class="profile-modal-button" id="imageInsertConfirm">Inserer</button>
+                    <button type="button" class="profile-modal-button secondary tw-press" id="imageInsertCancel">Annuler</button>
+                    <button type="button" class="profile-modal-button tw-press" id="imageInsertConfirm">Inserer</button>
                 </div>
             </div>
         </div>
@@ -933,8 +940,8 @@
                         ${item.isActive ? '<span class="profile-presentation-badge">ACTIVE</span>' : ''}
                     </div>
                     <div class="profile-presentation-actions">
-                        <button type="button" class="profile-presentation-choose" data-action="choose">Choisir</button>
-                        <button type="button" class="profile-presentation-delete" data-action="delete" aria-label="Supprimer">x</button>
+                        <button type="button" class="profile-presentation-choose tw-press" data-action="choose">Choisir</button>
+                        <button type="button" class="profile-presentation-delete tw-press" data-action="delete" aria-label="Supprimer">x</button>
                     </div>
                 `;
                 presentationList.appendChild(card);

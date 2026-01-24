@@ -27,6 +27,13 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
 </head>
 <body class="min-h-screen">
@@ -58,14 +65,14 @@
             <div class="character-select-actions">
                 <span class="character-select-user" id="currentUserName"></span>
                 <span class="character-select-badge" id="currentUserRole"></span>
-                <button type="button" class="character-select-logout" id="logoutButton">D&#233;connexion</button>
+                <button type="button" class="character-select-logout tw-press" id="logoutButton">D&#233;connexion</button>
             </div>
         </header>
         <section class="character-select-grid" id="characterGrid" role="list"></section>
         <p class="character-select-status" id="characterSelectStatus" role="status" aria-live="polite"></p>
     </main>
     <div class="select-modal-backdrop" id="createCharacterBackdrop" aria-hidden="true">
-        <div class="select-modal" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
+        <div class="select-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
             <div class="select-modal-title" id="createCharacterTitle">Cr&#233;er un personnage</div>
             <div class="select-modal-error" id="createCharacterError" role="alert"></div>
             <form id="createCharacterForm">
@@ -82,8 +89,8 @@
                     <input class="select-modal-input" id="characterClassInput" name="class" autocomplete="off">
                 </div>
                 <div class="select-modal-actions">
-                    <button type="button" class="select-modal-button secondary" id="createCharacterCancel">Annuler</button>
-                    <button type="submit" class="select-modal-button" id="createCharacterSubmit">Cr&#233;er</button>
+                    <button type="button" class="select-modal-button secondary tw-press" id="createCharacterCancel">Annuler</button>
+                    <button type="submit" class="select-modal-button tw-press" id="createCharacterSubmit">Cr&#233;er</button>
                 </div>
             </form>
         </div>

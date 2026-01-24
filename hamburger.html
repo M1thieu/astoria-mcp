@@ -25,11 +25,18 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
 </head>
 <body class="min-h-screen">
   <main class="hamburger-demo fade-in">
-    <button class="hamburger-icon hamburger-icon--1" data-hamburger type="button" aria-label="Toggle navigation" aria-expanded="false">
+    <button class="hamburger-icon hamburger-icon--1 tw-press" data-hamburger type="button" aria-label="Toggle navigation" aria-expanded="false">
       <span></span>
       <span></span>
       <span></span>

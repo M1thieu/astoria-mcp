@@ -722,6 +722,13 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
     <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -770,21 +777,21 @@
                 <!-- Boutons générés par JavaScript -->
             </aside>
             <!-- Panneau de droite -->
-            <section class="skills-panel" aria-live="polite">
-                <button type="button" class="skills-page-hint skills-page-hint--left" id="skillsPagePrev" aria-label="Page précédente">
+            <section class="skills-panel tw-surface" aria-live="polite">
+                <button type="button" class="skills-page-hint skills-page-hint--left tw-press" id="skillsPagePrev" aria-label="Page précédente">
                     &lt;
                 </button>
-                <button type="button" class="skills-page-hint skills-page-hint--right" id="skillsPageNext" aria-label="Page suivante">
+                <button type="button" class="skills-page-hint skills-page-hint--right tw-press" id="skillsPageNext" aria-label="Page suivante">
                     &gt;
                 </button>
                 <div class="skills-panel-header">
-                    <div class="skills-panel-heading">
+                    <div class="skills-panel-heading tw-surface">
                         <h2 class="skills-panel-title" id="skillsCategoryTitle">Catégorie</h2>
                     </div>
-                    <div class="skills-panel-controls">
-                        <div class="skills-points-box" aria-label="Points à répartir" role="status" aria-live="polite">
+                    <div class="skills-panel-controls tw-surface">
+                        <div class="skills-points-box tw-surface" aria-label="Points à répartir" role="status" aria-live="polite">
                             <span class="skills-points-label">Points à répartir :</span>
-                            <button type="button" class="skills-points-btn" id="skillsPointsMinus" aria-label="Retirer un point">
+                            <button type="button" class="skills-points-btn tw-press" id="skillsPointsMinus" aria-label="Retirer un point">
                                 −
                             </button>
                             <input
@@ -797,14 +804,14 @@
                                 inputmode="numeric"
                                 aria-label="Nombre de points à répartir pour cette catégorie"
                             >
-                            <button type="button" class="skills-points-btn" id="skillsPointsPlus" aria-label="Ajouter un point">
+                            <button type="button" class="skills-points-btn tw-press" id="skillsPointsPlus" aria-label="Ajouter un point">
                                 +
                             </button>
-                            <button type="button" class="skills-points-btn" id="skillsPointsReset" aria-label="Réinitialiser les points de la catégorie">
+                            <button type="button" class="skills-points-btn tw-press" id="skillsPointsReset" aria-label="Réinitialiser les points de la catégorie">
                                 ↺
                             </button>
                         </div>
-                        <button type="button" class="skills-confirm-btn" id="skillsConfirmBtn" aria-label="Valider mes points" title="Valider mes points"></button>
+                        <button type="button" class="skills-confirm-btn tw-press" id="skillsConfirmBtn" aria-label="Valider mes points" title="Valider mes points"></button>
                     </div>
                 </div>
                 <ul class="skills-list" id="skillsList">

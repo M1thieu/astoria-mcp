@@ -80,6 +80,13 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
     <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -95,7 +102,7 @@
 </head>
 <body class="min-h-screen">
     <h1>🔍 Diagnostic localStorage - Astoria</h1>
-    <div class="panel">
+    <div class="panel tw-surface">
         <h2>1. Informations Page</h2>
         <div class="key">URL :</div>
         <div class="value" id="pageUrl"></div>
@@ -104,28 +111,28 @@
         <div class="key">Protocol :</div>
         <div class="value" id="pageProtocol"></div>
     </div>
-    <div class="panel">
+    <div class="panel tw-surface">
         <h2>2. localStorage.getItem('astoria_session')</h2>
         <div id="sessionCheck"></div>
     </div>
-    <div class="panel">
+    <div class="panel tw-surface">
         <h2>3. localStorage.getItem('astoria_active_character')</h2>
         <div id="characterCheck"></div>
     </div>
-    <div class="panel">
+    <div class="panel tw-surface">
         <h2>4. Test import modules</h2>
         <div id="moduleCheck"></div>
     </div>
-    <div class="panel">
+    <div class="panel tw-surface">
         <h2>5. Tout le localStorage</h2>
         <div id="allStorage"></div>
     </div>
-    <div class="panel">
+    <div class="panel tw-surface">
         <h2>Actions</h2>
-        <button onclick="window.location.href='index.html'">Aller à index.html</button>
-        <button onclick="window.location.href='hdv.html'">Aller à hdv.html</button>
-        <button onclick="window.location.href='profil.html'">Aller à profil.html</button>
-        <button onclick="window.location.reload()">Recharger</button>
+        <button onclick="window.location.href='index.html'" class="tw-press">Aller à index.html</button>
+        <button onclick="window.location.href='hdv.html'" class="tw-press">Aller à hdv.html</button>
+        <button onclick="window.location.href='profil.html'" class="tw-press">Aller à profil.html</button>
+        <button onclick="window.location.reload()" class="tw-press">Recharger</button>
     </div>
     <script type="module">
         // 1. Page info

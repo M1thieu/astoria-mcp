@@ -26,6 +26,13 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
 </head>
 <body class="cc-body min-h-screen">
@@ -36,29 +43,29 @@
             <p>Pick a design below. Each template is a separate layout with its own stat logic.</p>
         </header>
         <nav class="cc-tabs" role="tablist" aria-label="Card templates">
-            <button class="cc-tab is-active" data-card-tab="crest" aria-selected="true" type="button">
+            <button class="cc-tab is-active tw-press" data-card-tab="crest" aria-selected="true" type="button">
                 <span class="cc-tab-avatar">A</span>
                 Crest Panel
             </button>
-            <button class="cc-tab" data-card-tab="skyline" aria-selected="false" type="button">
+            <button class="cc-tab tw-press" data-card-tab="skyline" aria-selected="false" type="button">
                 <span class="cc-tab-avatar cc-tab-avatar--rune">S</span>
                 Skyline Relay
             </button>
-            <button class="cc-tab" data-card-tab="sigil" aria-selected="false" type="button">
+            <button class="cc-tab tw-press" data-card-tab="sigil" aria-selected="false" type="button">
                 <span class="cc-tab-avatar cc-tab-avatar--ledger">G</span>
                 Sigil Stack
             </button>
-            <button class="cc-tab" data-card-tab="matrix" aria-selected="false" type="button">
+            <button class="cc-tab tw-press" data-card-tab="matrix" aria-selected="false" type="button">
                 <span class="cc-tab-avatar cc-tab-avatar--relic">M</span>
                 Flux Matrix
             </button>
-            <button class="cc-tab" data-card-tab="echo" aria-selected="false" type="button">
+            <button class="cc-tab tw-press" data-card-tab="echo" aria-selected="false" type="button">
                 <span class="cc-tab-avatar cc-tab-avatar--companion">E</span>
                 Echo Pulse
             </button>
         </nav>
         <section class="cc-stage">
-            <article class="cc-card cc-card--crest" data-card-panel="crest">
+            <article class="cc-card cc-card--crest tw-surface tw-hover" data-card-panel="crest">
                 <div class="cc-crest-header">
                 <div class="cc-crest-emblem" data-cc-emblem>A</div>
                 <div>
@@ -99,7 +106,7 @@
                     <span class="cc-chip">Frontline</span>
                 </div>
             </article>
-            <article class="cc-card cc-card--skyline is-hidden" data-card-panel="skyline" hidden>
+            <article class="cc-card cc-card--skyline is-hidden tw-surface tw-hover" data-card-panel="skyline" hidden>
                 <div class="cc-skyline-header">
                     <div class="cc-skyline-avatar">S</div>
                     <div>
@@ -127,20 +134,20 @@
                 </div>
                 <p class="cc-skyline-note">Relay streak active. Bonus to route memory and sprint recovery.</p>
             </article>
-            <article class="cc-card cc-card--sigil is-hidden" data-card-panel="sigil" hidden>
+            <article class="cc-card cc-card--sigil is-hidden tw-surface tw-hover" data-card-panel="sigil" hidden>
                 <p class="cc-kicker-line">Sigil Stack</p>
                 <h2 class="cc-name">Alix Rune</h2>
                 <p class="cc-tagline">Glyph weaver, third circle</p>
                 <div class="cc-sigil-stack">
-                    <div class="cc-sigil-card">
+                    <div class="cc-sigil-card tw-surface tw-hover">
                         <span>Rune Focus</span>
                         <strong>82</strong>
                     </div>
-                    <div class="cc-sigil-card">
+                    <div class="cc-sigil-card tw-surface tw-hover">
                         <span>Flow Control</span>
                         <strong>67</strong>
                     </div>
-                    <div class="cc-sigil-card">
+                    <div class="cc-sigil-card tw-surface tw-hover">
                         <span>Mana Tension</span>
                         <strong>54</strong>
                     </div>
@@ -151,7 +158,7 @@
                     <span class="cc-chip">Arc</span>
                 </div>
             </article>
-            <article class="cc-card cc-card--matrix is-hidden" data-card-panel="matrix" hidden>
+            <article class="cc-card cc-card--matrix is-hidden tw-surface tw-hover" data-card-panel="matrix" hidden>
                 <div class="cc-matrix-header">
                     <p class="cc-kicker-line">Flux Matrix</p>
                     <h2 class="cc-name">Cass Nox</h2>
@@ -176,7 +183,7 @@
                     </div>
                 </div>
             </article>
-            <article class="cc-card cc-card--echo is-hidden" data-card-panel="echo" hidden>
+            <article class="cc-card cc-card--echo is-hidden tw-surface tw-hover" data-card-panel="echo" hidden>
                 <div class="cc-echo-header">
                     <div class="cc-echo-ring" style="--value: 0.68">
                         <strong>68</strong>

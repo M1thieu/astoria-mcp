@@ -28,6 +28,13 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
 </head>
 <body class="min-h-screen">
@@ -56,26 +63,26 @@
         <section class="fiche-container">
             <!-- Navigation (onglets) -->
             <nav class="fiche-sidebar" aria-label="Sections de la fiche">
-                <button type="button" class="tab-button active" data-tab="identite">Identité</button>
-                <button type="button" class="tab-button" data-tab="appartenance">Appartenance</button>
-                <button type="button" class="tab-button" data-tab="combat">Combat</button>
-                <button type="button" class="tab-button" data-tab="nokorah">Mon Nokorah</button>
-                <button type="button" class="tab-button" data-tab="alice">Alice</button>
-                <button type="button" class="tab-button" data-tab="sorcellerie">Sorcellerie</button>
-                <button type="button" class="tab-button" data-tab="eater">Eater</button>
-                <button type="button" class="tab-button" data-tab="religion">Religion</button>
-                <button type="button" class="tab-button" data-tab="mental">Mental</button>
-                <button type="button" class="tab-button" data-tab="physique">Physique</button>
-                <button type="button" class="tab-button" data-tab="background">Background</button>
+                <button type="button" class="tab-button active tw-press" data-tab="identite">Identité</button>
+                <button type="button" class="tab-button tw-press" data-tab="appartenance">Appartenance</button>
+                <button type="button" class="tab-button tw-press" data-tab="combat">Combat</button>
+                <button type="button" class="tab-button tw-press" data-tab="nokorah">Mon Nokorah</button>
+                <button type="button" class="tab-button tw-press" data-tab="alice">Alice</button>
+                <button type="button" class="tab-button tw-press" data-tab="sorcellerie">Sorcellerie</button>
+                <button type="button" class="tab-button tw-press" data-tab="eater">Eater</button>
+                <button type="button" class="tab-button tw-press" data-tab="religion">Religion</button>
+                <button type="button" class="tab-button tw-press" data-tab="mental">Mental</button>
+                <button type="button" class="tab-button tw-press" data-tab="physique">Physique</button>
+                <button type="button" class="tab-button tw-press" data-tab="background">Background</button>
             </nav>
             <!-- Contenu -->
             <section class="fiche-content" aria-live="polite">
                 <form class="fiche-form">
                     <!-- Identité -->
-                    <section id="tab-identite" class="tab-panel active" aria-label="Identité">
+                    <section id="tab-identite" class="tab-panel active tw-surface" aria-label="Identité">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Identité</h2>
-                            <button type="button" class="save-tab-button" data-tab="identite">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="identite">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="identiteNomPrenom">Nom &amp; prénom</label>
@@ -140,7 +147,7 @@
                         <div class="field-group">
                             <div class="relations-header">
                                 <label class="field-label">Liens &amp; relations</label>
-                                <button type="button" class="relation-add-btn" id="addBackgroundRelation">+ Ajouter un lien</button>
+                                <button type="button" class="relation-add-btn tw-press" id="addBackgroundRelation">+ Ajouter un lien</button>
                             </div>
                             <div class="relations-list" id="backgroundRelations"></div>
                             <p class="relations-hint">
@@ -149,10 +156,10 @@
                         </div>
                     </section>
                     <!-- Appartenance -->
-                    <section id="tab-appartenance" class="tab-panel" aria-label="Appartenance">
+                    <section id="tab-appartenance" class="tab-panel tw-surface" aria-label="Appartenance">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Appartenance</h2>
-                            <button type="button" class="save-tab-button" data-tab="appartenance">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="appartenance">Sauvegarder</button>
                         </div>
                         <div class="field-group field-group--inline">
                             <div class="field-group">
@@ -224,10 +231,10 @@
                         </div>
                     </section>
                     <!-- Combat -->
-                    <section id="tab-combat" class="tab-panel" aria-label="Combat">
+                    <section id="tab-combat" class="tab-panel tw-surface" aria-label="Combat">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Combat</h2>
-                            <button type="button" class="save-tab-button" data-tab="combat">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="combat">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="combatStyle">Style de combat</label>
@@ -280,7 +287,7 @@
                                         <option value="mobilite">Mobilité</option>
                                         <option value="controle">Contrôle</option>
                                     </select>
-                                    <button type="button" class="combat-btn combat-btn-primary" id="combatAddTechniqueBtn">
+                                    <button type="button" class="combat-btn combat-btn-primary tw-press" id="combatAddTechniqueBtn">
                                         + Ajouter une technique
                                     </button>
                                 </div>
@@ -291,17 +298,17 @@
                         </div>
                     </section>
                     <!-- Nokorah -->
-                    <section id="tab-nokorah" class="tab-panel" aria-label="Mon Nokorah">
+                    <section id="tab-nokorah" class="tab-panel tw-surface" aria-label="Mon Nokorah">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Mon Nokorah</h2>
                         </div>
                         <div class="nokorah-manager" data-nokorah-root="fiche"></div>
                     </section>
                     <!-- Alice -->
-                    <section id="tab-alice" class="tab-panel" aria-label="Alice">
+                    <section id="tab-alice" class="tab-panel tw-surface" aria-label="Alice">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Alice</h2>
-                            <button type="button" class="save-tab-button" data-tab="alice">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="alice">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="aliceStatus">Status Alice</label>
@@ -312,7 +319,7 @@
                             </select>
                         </div>
                         <div id="alice-container" class="alice-grid">
-                            <div id="alice-fields" class="conditional-block">
+                            <div id="alice-fields" class="conditional-block tw-surface">
                                 <h3 class="alice-subtitle">Alice principale</h3>
                                 <div class="field-group">
                                     <label class="field-label" for="aliceNom">Nom de l'Alice</label>
@@ -349,7 +356,7 @@
                                     >
                                 </div>
                             </div>
-                            <div id="alice2-fields" class="conditional-block alice-secondary-fields">
+                            <div id="alice2-fields" class="conditional-block alice-secondary-fields tw-surface">
                                 <h3 class="alice-subtitle">Double Alice</h3>
                                 <div class="field-group">
                                     <label class="field-label" for="alice2Nom">Nom de l'Alice</label>
@@ -389,10 +396,10 @@
                         </div>
                     </section>
                     <!-- Sorcellerie -->
-                    <section id="tab-sorcellerie" class="tab-panel" aria-label="Sorcellerie">
+                    <section id="tab-sorcellerie" class="tab-panel tw-surface" aria-label="Sorcellerie">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Sorcellerie</h2>
-                            <button type="button" class="save-tab-button" data-tab="sorcellerie">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="sorcellerie">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label">
@@ -400,7 +407,7 @@
                                 Possède de la magie
                             </label>
                         </div>
-                        <div id="sorcellerie-fields" class="conditional-block" hidden>
+                        <div id="sorcellerie-fields" class="conditional-block tw-surface" hidden>
                             <p class="fiche-hint">Deblocage par parchemins d'eveil et tags Sorcier: stub en cours.</p>
                             <div class="field-group">
                                 <label class="field-label" for="sorcelleriePrincipale">Magie principale</label>
@@ -645,16 +652,16 @@
                                 >
                             </div>
                             <div class="magie-sup-actions">
-                                <button type="button" id="addMagieSupplementaire" class="btn-secondary">+ Ajouter une magie supplémentaire</button>
+                                <button type="button" id="addMagieSupplementaire" class="btn-secondary tw-press">+ Ajouter une magie supplémentaire</button>
                             </div>
                             <div id="magie-supplementaire-container"></div>
                         </div>
                     </section>
                     <!-- Eater -->
-                    <section id="tab-eater" class="tab-panel" aria-label="Eater">
+                    <section id="tab-eater" class="tab-panel tw-surface" aria-label="Eater">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Eater</h2>
-                            <button type="button" class="save-tab-button" data-tab="eater">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="eater">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label">
@@ -662,7 +669,7 @@
                                 Possède une capacité d'âme
                             </label>
                         </div>
-                        <div id="eater-fields" class="conditional-block" hidden>
+                        <div id="eater-fields" class="conditional-block tw-surface" hidden>
                             <!-- Soul Counter Panel -->
                             <div class="eater-counter">
                                 <h3 class="eater-counter-title">Compteur d'âmes</h3>
@@ -728,10 +735,10 @@
                         </div>
                     </section>
                     <!-- Religion -->
-                    <section id="tab-religion" class="tab-panel" aria-label="Religion">
+                    <section id="tab-religion" class="tab-panel tw-surface" aria-label="Religion">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Religion</h2>
-                            <button type="button" class="save-tab-button" data-tab="religion">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="religion">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="religionCroyance">Croyance</label>
@@ -771,10 +778,10 @@
                         </div>
                     </section>
                     <!-- Mental -->
-                    <section id="tab-mental" class="tab-panel" aria-label="Mental">
+                    <section id="tab-mental" class="tab-panel tw-surface" aria-label="Mental">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Mental</h2>
-                            <button type="button" class="save-tab-button" data-tab="mental">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="mental">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="mentalCaractere">Caractère</label>
@@ -805,10 +812,10 @@
                         </div>
                     </section>
                     <!-- Physique -->
-                    <section id="tab-physique" class="tab-panel" aria-label="Physique">
+                    <section id="tab-physique" class="tab-panel tw-surface" aria-label="Physique">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Physique</h2>
-                            <button type="button" class="save-tab-button" data-tab="physique">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="physique">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="physiqueDescription">Description physique</label>
@@ -830,10 +837,10 @@
                         </div>
                     </section>
                     <!-- Background -->
-                    <section id="tab-background" class="tab-panel" aria-label="Background">
+                    <section id="tab-background" class="tab-panel tw-surface" aria-label="Background">
                         <div class="tab-panel-header">
                             <h2 class="section-title section-title--inline">Background</h2>
-                            <button type="button" class="save-tab-button" data-tab="background">Sauvegarder</button>
+                            <button type="button" class="save-tab-button tw-press" data-tab="background">Sauvegarder</button>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="backgroundFamille">Parents / famille</label>
@@ -1388,7 +1395,7 @@
                         >
                             ${MAGIC_OPTIONS}
                         </select>
-                        <button type="button" class="remove-magie-btn">×</button>
+                        <button type="button" class="remove-magie-btn tw-press">×</button>
                     </div>
                 `;
                 magieContainer.appendChild(fieldGroup);
@@ -1493,7 +1500,7 @@
                         controle: "Contrôle"
                     };
                     li.innerHTML = `
-                        <button type="button" class="combat-technique-header" aria-expanded="false">
+                        <button type="button" class="combat-technique-header tw-press" aria-expanded="false">
                             <div class="combat-technique-main">
                                 <span class="combat-technique-name">${escapeHtml(technique.name)}</span>
                                 <span class="combat-technique-meta">${typeLabels[technique.type] || technique.type}</span>
@@ -1518,8 +1525,8 @@
                             </div>
                             ` : ''}
                             <div class="combat-technique-actions">
-                                <button type="button" class="combat-btn-edit" data-id="${technique.id}">Modifier</button>
-                                <button type="button" class="combat-btn-delete" data-id="${technique.id}">Supprimer</button>
+                                <button type="button" class="combat-btn-edit tw-press" data-id="${technique.id}">Modifier</button>
+                                <button type="button" class="combat-btn-delete tw-press" data-id="${technique.id}">Supprimer</button>
                             </div>
                         </div>
                     `;
@@ -1760,7 +1767,7 @@
                                 >
                                     ${MAGIC_OPTIONS}
                                 </select>
-                                <button type="button" class="remove-magie-btn">×</button>
+                                <button type="button" class="remove-magie-btn tw-press">×</button>
                             </div>
                         `;
                         magieContainer.appendChild(fieldGroup);
@@ -1903,15 +1910,15 @@
     </script>
     <!-- Combat Technique Modal -->
     <div class="combat-modal-backdrop" id="combatTechniqueBackdrop" aria-hidden="true">
-        <div class="combat-modal" role="dialog" aria-modal="true">
+        <div class="combat-modal tw-surface" role="dialog" aria-modal="true">
             <div class="combat-modal-header">
                 <h2 class="combat-modal-title" id="combatModalTitle">Ajouter une technique</h2>
-                <button type="button" class="combat-modal-close" id="combatModalClose" aria-label="Fermer">×</button>
+                <button type="button" class="combat-modal-close tw-press" id="combatModalClose" aria-label="Fermer">×</button>
             </div>
             <form id="combatTechniqueForm">
-                <div class="combat-modal-section">
+                <div class="combat-modal-section tw-surface">
                     <div class="combat-modal-section-title">Informations de base</div>
-                    <div class="combat-modal-grid">
+                    <div class="combat-modal-grid tw-surface">
                         <input name="name" id="techniqueName" placeholder="Nom de la technique" required>
                         <select name="type" id="techniqueType" required>
                             <option value="">-- Type --</option>
@@ -1922,21 +1929,21 @@
                         </select>
                     </div>
                 </div>
-                <div class="combat-modal-section">
+                <div class="combat-modal-section tw-surface">
                     <label class="combat-modal-label">Description RP</label>
                     <textarea name="rp" id="techniqueRp" placeholder="Description narrative de la technique..." rows="3"></textarea>
                 </div>
-                <div class="combat-modal-section">
+                <div class="combat-modal-section tw-surface">
                     <label class="combat-modal-label">Effet mécanique</label>
                     <textarea name="effect" id="techniqueEffect" placeholder="Effets mécaniques, dégâts, durée..." rows="3" required></textarea>
                 </div>
-                <div class="combat-modal-section">
+                <div class="combat-modal-section tw-surface">
                     <label class="combat-modal-label">Limites / Conditions</label>
                     <textarea name="limits" id="techniqueLimits" placeholder="Conditions d'utilisation, contraintes..." rows="2"></textarea>
                 </div>
                 <div class="combat-modal-footer">
-                    <button type="button" class="combat-btn-secondary" id="combatModalCancel">Annuler</button>
-                    <button type="submit" class="combat-btn-primary" id="combatModalSubmit">Enregistrer</button>
+                    <button type="button" class="combat-btn-secondary tw-press" id="combatModalCancel">Annuler</button>
+                    <button type="submit" class="combat-btn-primary tw-press" id="combatModalSubmit">Enregistrer</button>
                 </div>
             </form>
         </div>

@@ -30,10 +30,17 @@
         @keyframes fadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @layer components {
+            .tw-surface { @apply shadow-soft ring-1 ring-black/5; }
+            .tw-surface-strong { @apply shadow-soft ring-2 ring-astoria-200/60; }
+            .tw-press { @apply transition-transform duration-200 ease-out active:scale-[0.98]; }
+            .tw-hover { @apply transition-transform duration-200 ease-out hover:-translate-y-0.5; }
+        }
 </style>
 </head>
 <body class="min-h-screen">
-    <main class="wrapper fade-in" aria-labelledby="pageTitle">
+    <main class="wrapper fade-in tw-surface" aria-labelledby="pageTitle">
         <div class="top-bar">
             <!-- Navigation placeholder -->
             <nav aria-label="Navigation principale" class="top-nav">
@@ -61,7 +68,7 @@
                 </div>
             </div>
             <span class="stats-badge" id="statsBadge">0 objet</span>
-            <button type="button" class="admin-add-btn" id="adminAddItemBtn" hidden>+ Ajouter un objet</button>
+            <button type="button" class="admin-add-btn tw-press" id="adminAddItemBtn" hidden>+ Ajouter un objet</button>
             <!-- Dropdown catégories -->
             <select id="categoryFilter" class="category-dropdown">
                 <option value="">Toutes catégories</option>
@@ -70,7 +77,7 @@
                 <option value="agricole">&#x1F33E; Agricole</option>
             </select>
             <div class="inventory-search" id="codexSearch">
-                <button type="button" class="inventory-search-toggle" id="codexSearchToggle" aria-label="Rechercher" aria-expanded="false">
+                <button type="button" class="inventory-search-toggle tw-press" id="codexSearchToggle" aria-label="Rechercher" aria-expanded="false">
                     <span class="inventory-search-icon">&#x1F50D;</span>
                 </button>
                 <input
@@ -81,7 +88,7 @@
                     aria-label="Rechercher un objet">
                 <button
                     id="clearSearchBtn"
-                    class="inventory-search-clear"
+                    class="inventory-search-clear tw-press"
                     type="button"
                     aria-label="Effacer la recherche"
                     hidden>x</button>
@@ -108,26 +115,26 @@
     <!-- Modal pour voir un item en grand / détails -->
     <div
         id="itemModal"
-        class="modal"
+        class="modal tw-surface"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modalName"
         aria-describedby="modalDescription"
     >
-        <div class="modal-inner">
+        <div class="modal-inner tw-surface">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalName"></h2>
                 <div class="modal-admin-actions" id="modalAdminActions" hidden>
-                    <button type="button" class="admin-edit-btn" id="adminEditBtn">Modifier</button>
+                    <button type="button" class="admin-edit-btn tw-press" id="adminEditBtn">Modifier</button>
                 </div>
-                <button class="modal-close" aria-label="Fermer la fenêtre">×</button>
+                <button class="modal-close tw-press" aria-label="Fermer la fenêtre">×</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body tw-surface">
                 <div class="modal-media">
-                    <div class="modal-carousel" id="modalCarousel">
-                        <button class="carousel-btn prev" id="carouselPrev" aria-label="Image précédente">‹</button>
+                    <div class="modal-carousel tw-surface" id="modalCarousel">
+                        <button class="carousel-btn prev tw-press" id="carouselPrev" aria-label="Image précédente">‹</button>
                         <img id="modalImage" alt="">
-                        <button class="carousel-btn next" id="carouselNext" aria-label="Image suivante">›</button>
+                        <button class="carousel-btn next tw-press" id="carouselNext" aria-label="Image suivante">›</button>
                     </div>
                     <div class="carousel-dots" id="carouselDots"></div>
                 </div>
@@ -140,10 +147,10 @@
         </div>
     </div>
     <div class="codex-admin-backdrop" id="adminItemBackdrop" aria-hidden="true">
-        <div class="codex-admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminItemTitle">
+        <div class="codex-admin-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="adminItemTitle">
             <div class="codex-admin-header">
                 <h2 class="codex-admin-title" id="adminItemTitle">Ajouter un objet</h2>
-                <button type="button" class="codex-admin-close" id="adminItemClose" aria-label="Fermer">x</button>
+                <button type="button" class="codex-admin-close tw-press" id="adminItemClose" aria-label="Fermer">x</button>
             </div>
             <div class="codex-admin-error" id="adminItemError" role="alert"></div>
             <div class="codex-admin-note" id="adminItemNote"></div>
@@ -187,7 +194,7 @@
                             <img id="adminItemImage" alt="Apercu image" hidden>
                         </div>
                         <div class="codex-admin-image-actions">
-                            <button type="button" class="codex-admin-button secondary" id="adminItemImageBtn">Importer l'image</button>
+                            <button type="button" class="codex-admin-button secondary tw-press" id="adminItemImageBtn">Importer l'image</button>
                             <span class="codex-admin-image-hint">Recadre en carre pour garder la taille.</span>
                         </div>
                         <div class="codex-admin-image-meta" id="adminItemImageMeta">Aucun fichier</div>
@@ -195,20 +202,20 @@
                     </div>
                 </div>
                 <div class="codex-admin-actions">
-                    <button type="button" class="codex-admin-button danger" id="adminItemDelete" hidden>🗑️ Supprimer</button>
+                    <button type="button" class="codex-admin-button danger tw-press" id="adminItemDelete" hidden>🗑️ Supprimer</button>
                     <div class="codex-admin-actions-group">
-                        <button type="button" class="codex-admin-button secondary" id="adminItemCancel">Annuler</button>
-                        <button type="submit" class="codex-admin-button" id="adminItemSave">Enregistrer</button>
+                        <button type="button" class="codex-admin-button secondary tw-press" id="adminItemCancel">Annuler</button>
+                        <button type="submit" class="codex-admin-button tw-press" id="adminItemSave">Enregistrer</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
     <div class="codex-cropper-backdrop" id="itemCropperBackdrop" aria-hidden="true">
-        <div class="codex-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="itemCropperTitle">
+        <div class="codex-cropper-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="itemCropperTitle">
             <div class="codex-cropper-header">
                 <h2 class="codex-cropper-title" id="itemCropperTitle">Recadrer l'image</h2>
-                <button type="button" class="codex-cropper-close" id="itemCropperClose" aria-label="Fermer">x</button>
+                <button type="button" class="codex-cropper-close tw-press" id="itemCropperClose" aria-label="Fermer">x</button>
             </div>
             <div class="codex-cropper-body">
                 <div class="codex-cropper-stage">
@@ -221,14 +228,14 @@
                 </div>
             </div>
             <div class="codex-cropper-actions">
-                <button type="button" class="codex-admin-button secondary" id="itemCropperCancel">Annuler</button>
-                <button type="button" class="codex-admin-button" id="itemCropperConfirm">Appliquer</button>
+                <button type="button" class="codex-admin-button secondary tw-press" id="itemCropperCancel">Annuler</button>
+                <button type="button" class="codex-admin-button tw-press" id="itemCropperConfirm">Appliquer</button>
             </div>
         </div>
     </div>
     <!-- Delete confirmation modal -->
     <div class="codex-delete-backdrop" id="deleteItemBackdrop" aria-hidden="true">
-        <div class="codex-delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteItemTitle">
+        <div class="codex-delete-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="deleteItemTitle">
             <div class="codex-delete-header">
                 <h2 class="codex-delete-title" id="deleteItemTitle">Supprimer l'objet</h2>
             </div>
@@ -237,8 +244,8 @@
                 <p class="codex-delete-warning">Cette action est irréversible.</p>
             </div>
             <div class="codex-delete-actions">
-                <button type="button" class="codex-admin-button secondary" id="deleteItemCancel">Annuler</button>
-                <button type="button" class="codex-admin-button danger" id="deleteItemConfirm">Supprimer</button>
+                <button type="button" class="codex-admin-button secondary tw-press" id="deleteItemCancel">Annuler</button>
+                <button type="button" class="codex-admin-button danger tw-press" id="deleteItemConfirm">Supprimer</button>
             </div>
         </div>
     </div>
