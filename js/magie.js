@@ -58,7 +58,7 @@
             id: "cap-support",
             name: "Chant de synchronisation",
             type: "soutien",
-            rank: "majeur",
+            rank: "mineur",
             stats: ["Social", "Pouvoirs"],
             rp: "Une mélodie résonne entre meister et arme, renforçant leur lien.",
             effect: "Octroie un bonus temporaire aux actions coordonnées meister/arme.",
@@ -78,6 +78,9 @@
         { key: "nature", label: "Nature", emoji: String.fromCodePoint(0x1F331) },
         { key: "tenebres", label: "Ténèbres", emoji: String.fromCodePoint(0x1F319) }
     ];
+    const FICHE_STORAGE_PREFIX = "fiche";
+    const ALICE_EMOJI = String.fromCodePoint(0x1F4AB);
+    const EATER_EMOJI = String.fromCodePoint(0x1F480);
 
     const MAGIC_ASCENSION_COSTS = {
         primary: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
@@ -108,10 +111,68 @@
         return `${entry.emoji} ${entry.label}`;
     }
 
+    function getFicheTabData(tabName) {
+        if (!currentCharacterKey) return null;
+        const key = `${FICHE_STORAGE_PREFIX}-${currentCharacterKey}-${tabName}`;
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return parsed && typeof parsed === "object" ? parsed : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function getAliceStatus() {
+        const data = getFicheTabData("alice");
+        const status = data?.aliceStatus || "";
+        if (status === "simple" || status === "double") return status;
+        return "";
+    }
+
+    function getEaterStatus() {
+        const data = getFicheTabData("eater");
+        return Boolean(data?.hasEater);
+    }
+
+    function syncSpecializationPages({ specialization, count, nameBase }) {
+        if (!specialization) return;
+        const matches = pages.filter((page) => page?.fields?.magicSpecialization === specialization);
+        for (let i = 0; i < count; i += 1) {
+            const page = matches[i] || createDefaultPage();
+            page.fields = { ...(page.fields || {}) };
+            page.fields.magicSpecialization = specialization;
+            page.fields.magicAffinityKey = "";
+            page.fields.magicName = count > 1 ? `${nameBase} ${i + 1}` : nameBase;
+            page.hidden = false;
+            if (!matches[i]) {
+                pages.push(page);
+            }
+        }
+        for (let i = count; i < matches.length; i += 1) {
+            matches[i].hidden = true;
+        }
+    }
+
     function updateAffinityDisplay(fields) {
         if (!affinityDisplay) return;
         const key = fields?.magicAffinityKey;
-        affinityDisplay.textContent = key ? getAffinityLabel(key) : "Non assignée";
+        if (key) {
+            affinityDisplay.textContent = getAffinityLabel(key);
+            return;
+        }
+        const specialization = fields?.magicSpecialization;
+        if (specialization) {
+            const fallback = specialization === "alice"
+                ? "Alice"
+                : specialization === "eater" || specialization === "meister"
+                    ? "Eater"
+                    : "Sorcellerie";
+            affinityDisplay.textContent = fields?.magicName || fallback;
+            return;
+        }
+        affinityDisplay.textContent = "Non assignée";
     }
 
     const createDefaultPage = () => ({
@@ -192,6 +253,8 @@
         const progress = loadMagicProgress();
         const enabled = Array.isArray(progress.enabledAffinities) ? progress.enabledAffinities : [];
         const affinities = getMagicAffinities();
+        const aliceStatus = getAliceStatus();
+        const eaterEnabled = getEaterStatus();
         const existingMap = new Map();
         pages.forEach((page, index) => {
             let key = page?.fields?.magicAffinityKey;
@@ -205,6 +268,13 @@
             }
             if (key) {
                 existingMap.set(key, index);
+                page.fields.magicSpecialization = page.fields.magicSpecialization || "sorcellerie";
+            }
+        });
+
+        pages.forEach((page) => {
+            if (page?.fields?.magicSpecialization === "meister") {
+                page.fields.magicSpecialization = "eater";
             }
         });
 
@@ -225,13 +295,33 @@
 
         pages.forEach((page) => {
             const key = page?.fields?.magicAffinityKey;
-            if (!key) {
-                page.hidden = false;
-                return;
-            }
+            if (!key) return;
             const entry = progress.affinities[key] || {};
             const enabledKey = enabled.includes(key);
             page.hidden = !(enabledKey && entry.unlocked);
+        });
+
+        syncSpecializationPages({
+            specialization: "alice",
+            count: aliceStatus === "double" ? 2 : aliceStatus === "simple" ? 1 : 0,
+            nameBase: "Alice"
+        });
+        syncSpecializationPages({
+            specialization: "eater",
+            count: eaterEnabled ? 1 : 0,
+            nameBase: "Eater"
+        });
+
+        const hasAssignedPages = pages.some((page) => {
+            if (page.hidden) return false;
+            if (page?.fields?.magicAffinityKey) return true;
+            if (page?.fields?.magicSpecialization) return true;
+            return false;
+        });
+        pages.forEach((page) => {
+            if (page?.fields?.magicAffinityKey) return;
+            if (page?.fields?.magicSpecialization) return;
+            page.hidden = hasAssignedPages;
         });
 
         ensureActivePageVisible();
@@ -516,6 +606,16 @@
     function renderPageTabs() {
         if (!pageTabs) return;
         const addBtn = addPageBtn || document.createElement("button");
+        const visiblePages = pages.filter((page) => !isPageHidden(page));
+        const specializationCounts = {};
+        const specializationIndexes = {};
+        const numberedSpecializations = new Set(["alice", "eater"]);
+
+        visiblePages.forEach((page) => {
+            const specialization = page?.fields?.magicSpecialization;
+            if (!specialization || !numberedSpecializations.has(specialization)) return;
+            specializationCounts[specialization] = (specializationCounts[specialization] || 0) + 1;
+        });
 
         if (!addPageBtn) {
             addBtn.type = "button";
@@ -533,7 +633,22 @@
             const tab = document.createElement("button");
             tab.type = "button";
             tab.className = "magic-page-tab" + (index === activePageIndex ? " magic-page-tab--active" : "");
-            tab.textContent = String(index + 1);
+            const affinityKey = page?.fields?.magicAffinityKey;
+            const specialization = page?.fields?.magicSpecialization;
+            let label = String(index + 1);
+            if (affinityKey) {
+                const entry = getMagicAffinities().find((item) => item.key === affinityKey);
+                label = entry?.emoji || FALLBACK_SCROLL_EMOJI;
+            } else if (specialization === "alice") {
+                label = ALICE_EMOJI;
+            } else if (specialization === "eater" || specialization === "meister") {
+                label = EATER_EMOJI;
+            }
+            if (specialization && numberedSpecializations.has(specialization) && (specializationCounts[specialization] || 0) > 1) {
+                specializationIndexes[specialization] = (specializationIndexes[specialization] || 0) + 1;
+                label = `${label} ${specializationIndexes[specialization]}`;
+            }
+            tab.textContent = label;
             tab.dataset.index = String(index);
             tab.setAttribute("role", "tab");
             tab.setAttribute("aria-selected", index === activePageIndex ? "true" : "false");
@@ -547,7 +662,8 @@
     const specializationLabels = {
         meister: "Meister Arme",
         sorcellerie: "Sorcellerie",
-        alice: "Alice"
+        alice: "Alice",
+        eater: "Eater"
     };
 
     function renderPagesOverview() {

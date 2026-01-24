@@ -20,6 +20,15 @@
         }
     
         @layer utilities {
+            .ring-astoria-400 {
+                --tw-ring-opacity: 1;
+                --tw-ring-color: rgb(255 106 162 / var(--tw-ring-opacity));
+            }
+            .ring-astoria-400\/40 {
+                --tw-ring-opacity: 0.4;
+                --tw-ring-color: rgb(255 106 162 / var(--tw-ring-opacity));
+            }
+
             .fade-in {
                 @apply opacity-0 translate-y-2;
                 animation: fadeIn 0.6s ease forwards;
@@ -1166,9 +1175,9 @@
                 return ['<option value="">-- S&eacute;lectionner --</option>', ...options].join('');
             }
 
-            function applyMagicOptions(select) {
+            function applyMagicOptions(select, preferredValue = '') {
                 if (!select) return;
-                const currentValue = select.value;
+                const currentValue = preferredValue || select.value;
                 select.innerHTML = buildMagicOptionsHtml();
                 if (!currentValue) return;
                 const normalized = normalizeText(currentValue);
@@ -1420,21 +1429,21 @@
                     const unlocked = Boolean(entry.unlocked);
                     const ascensionLevel = Number(entry.ascensionLevel) || 0;
                     const nextCost = getAscensionCost(affinityType, ascensionLevel + 1);
+                    const nextCostLabel = nextCost ? nextCost : '—';
                     const eveilCost = getEveilCost(affinityType);
                     const eveilOwned = Number(eveilCounts[key]) || 0;
                     const ascensionOwned = Number(ascensionCounts[key]) || 0;
                     const unlockDisabled = unlocked || eveilOwned < eveilCost;
-                    const ascensionDisabled = !unlocked || !nextCost || ascensionOwned < nextCost;
                     return `
                         <div class="magie-scroll-row" data-affinity="${key}">
                             <div class="magie-scroll-meta">
                                 <strong>${formatAffinityLabel(key)}</strong>
                                 <span>Éveil: ${eveilOwned} / ${eveilCost}</span>
                                 <span>Ascension: ${ascensionOwned} • Niveau ${ascensionLevel}</span>
+                                <span>Prochain coût: ${nextCostLabel}</span>
                             </div>
                             <div class="magie-scroll-actions">
                                 <button type="button" class="magie-scroll-btn${unlockDisabled ? ' is-disabled' : ''}" data-action="unlock" data-affinity="${key}" ${unlockDisabled ? 'disabled' : ''}>Déverrouiller</button>
-                                <button type="button" class="magie-scroll-btn${ascensionDisabled ? ' is-disabled' : ''}" data-action="ascend" data-affinity="${key}" ${ascensionDisabled ? 'disabled' : ''}>Ascension +1</button>
                             </div>
                         </div>
                     `;
@@ -1452,6 +1461,14 @@
                 document.getElementById('sorcellerieCachee')
             ];
             sorcellerieSelects.forEach(applyMagicOptions);
+            function attachMagieSupplementaireListeners(select) {
+                if (!select) return;
+                select.addEventListener('input', () => markTabDirty('sorcellerie'));
+                select.addEventListener('change', () => {
+                    markTabDirty('sorcellerie');
+                    syncMagicSelections({ persistProfile: false });
+                });
+            }
             let magieSupCount = 0;
             addMagieBtn.addEventListener('click', () => {
                 magieSupCount++;
@@ -1470,7 +1487,9 @@
                     </div>
                 `;
                 magieContainer.appendChild(fieldGroup);
-                applyMagicOptions(fieldGroup.querySelector('select'));
+                const select = fieldGroup.querySelector('select');
+                applyMagicOptions(select);
+                attachMagieSupplementaireListeners(select);
                 // Remove button handler
                 fieldGroup.querySelector('.remove-magie-btn').addEventListener('click', () => {
                     fieldGroup.remove();
@@ -1497,15 +1516,6 @@
                         const result = await applyScrollCost({ category: 'eveil', affinityKey, cost });
                         if (!result.ok) return;
                         entry.unlocked = true;
-                    }
-
-                    if (action === 'ascend') {
-                        const nextLevel = Number(entry.ascensionLevel) + 1;
-                        const cost = getAscensionCost(affinityType, nextLevel);
-                        if (!cost) return;
-                        const result = await applyScrollCost({ category: 'ascension', affinityKey, cost });
-                        if (!result.ok) return;
-                        entry.ascensionLevel = nextLevel;
                     }
 
                     progress.affinities[affinityKey] = entry;
@@ -1889,8 +1899,8 @@
                         magieContainer.appendChild(fieldGroup);
                         // Set the saved value
                         const select = fieldGroup.querySelector('select');
-                        applyMagicOptions(select);
-                        select.value = value;
+                        applyMagicOptions(select, value);
+                        attachMagieSupplementaireListeners(select);
                         fieldGroup.querySelector('.remove-magie-btn').addEventListener('click', () => {
                             fieldGroup.remove();
                             markTabDirty('sorcellerie');

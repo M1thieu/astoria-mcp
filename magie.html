@@ -20,6 +20,15 @@
         }
     
         @layer utilities {
+            .ring-astoria-400 {
+                --tw-ring-opacity: 1;
+                --tw-ring-color: rgb(255 106 162 / var(--tw-ring-opacity));
+            }
+            .ring-astoria-400\/40 {
+                --tw-ring-opacity: 0.4;
+                --tw-ring-color: rgb(255 106 162 / var(--tw-ring-opacity));
+            }
+
             .fade-in {
                 @apply opacity-0 translate-y-2;
                 animation: fadeIn 0.6s ease forwards;
@@ -84,9 +93,6 @@
                         </button>
                         <button class="magic-nav-btn tw-press tw-btn-ghost" data-target="magic-capacities">
                             Capacités &amp; sorts
-                        </button>
-                        <button class="magic-nav-btn tw-press tw-btn-ghost" data-target="magic-progression">
-                            Progression &amp; limitations
                         </button>
                         <button class="magic-nav-btn magic-nav-btn--admin tw-press tw-btn-ghost" data-target="magic-admin">
                             Zone admin
@@ -232,7 +238,6 @@
                                         <label class="magic-label" for="magicNewCapRank">Rang</label>
                                         <select id="magicNewCapRank" class="magic-input tw-input">
                                             <option value="mineur">Mineur</option>
-                                            <option value="majeur">Majeur</option>
                                             <option value="signature">Signature</option>
                                             <option value="ultime">Ultime</option>
                                         </select>
@@ -264,47 +269,6 @@
                             <ul class="magic-capacity-list" id="magicCapacityList" aria-label="Liste des capacités">
                                 <!-- Capacités exemple : purement placeholders -->
                             </ul>
-                        </section>
-                        <!-- 4. Progression & limitations -->
-                        <section id="magic-progression" class="magic-section" aria-label="Progression & limitations">
-                            <h2 class="magic-section-title">Progression &amp; limitations</h2>
-                            <p class="magic-section-help magic-progress-hint">Deverrouillage auto par tags (Weapon / Meister / Alice / Sorcier) et ames: stub en cours.</p>
-                            <div class="magic-cards-grid magic-cards-grid--two tw-surface tw-hover">
-                                <article class="magic-card tw-surface tw-hover">
-                                    <h3 class="magic-card-title">Cadre global</h3>
-                                    <div class="magic-form-row magic-form-row--split">
-                                        <div class="magic-form-field">
-                                            <label class="magic-label" for="magicMaxSlots">Nombre maximum de capacités</label>
-                                            <input id="magicMaxSlots" class="magic-input tw-input" type="number" min="0" max="99" value="8">
-                                        </div>
-                                        <div class="magic-form-field">
-                                            <label class="magic-label" for="magicStartingSlots">Capacités débloquées au départ</label>
-                                            <input id="magicStartingSlots" class="magic-input tw-input" type="number" min="0" max="99" value="4">
-                                        </div>
-                                    </div>
-                                    <div class="magic-form-row">
-                                        <label class="magic-label" for="magicUnlockConditions">Conditions de déblocage</label>
-                                        <textarea id="magicUnlockConditions" class="magic-input tw-input--textarea tw-input" rows="3" placeholder="Par exemple : progression RP, validation MJ, paliers de niveau, quêtes, etc."></textarea>
-                                    </div>
-                                </article>
-                                <article class="magic-card tw-surface tw-hover">
-                                    <h3 class="magic-card-title">Capacités futures</h3>
-                                    <div class="magic-future-slots" aria-label="Emplacements de capacités futures">
-                                        <div class="magic-future-slot magic-future-slot--filled">
-                                            <span class="magic-future-label">Capacité actuelle</span>
-                                            <span class="magic-future-note">Peut évoluer vers une version majeure / signature.</span>
-                                        </div>
-                                        <div class="magic-future-slot magic-future-slot--locked">
-                                            <span class="magic-future-label">Slot verrouillé</span>
-                                            <span class="magic-future-note">À débloquer plus tard (XP, arc narratif...).</span>
-                                        </div>
-                                        <div class="magic-future-slot magic-future-slot--locked">
-                                            <span class="magic-future-label">Slot verrouillé</span>
-                                            <span class="magic-future-note">Réservé aux évolutions de haut niveau.</span>
-                                        </div>
-                                    </div>
-                                </article>
-                            </div>
                         </section>
                         <!-- 5. Zone admin -->
                         <section id="magic-admin" class="magic-section magic-section--admin" aria-label="Zone d'administration" hidden>
