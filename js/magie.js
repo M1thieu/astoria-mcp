@@ -1070,9 +1070,10 @@
                         : ascensionCost === 0
                             ? "Gratuit"
                             : `${ascensionCost} parchemins`;
+                const canEditCapacity = isAdmin || !cap.locked;
                 const upgradesSection = isSorcelleriePage ? `
                         <div class="magic-capacity-actions">
-                            <button type="button" class="magic-btn magic-btn-outline tw-press" data-upgrade="${cap.id}">Améliorer</button>
+                            <button type="button" class="magic-btn magic-btn-outline tw-press${canEditCapacity ? "" : " is-disabled"}" data-upgrade="${cap.id}" ${canEditCapacity ? "" : "disabled"}>Améliorer</button>
                         </div>
                         <div class="magic-capacity-upgrade-form" data-upgrade-form="${cap.id}" hidden>
                             <details class="magic-accordion" open>
@@ -1337,6 +1338,7 @@
                     if (upgradeButton) {
                         upgradeButton.addEventListener("click", (event) => {
                             event.stopPropagation();
+                            if (!canEditCapacity) return;
                             toggleUpgradeForm(upgradeForm?.hidden ?? true);
                         });
                     }
@@ -1498,7 +1500,7 @@
             adminNote: "",
             level: 1,
             upgrades: [],
-            locked: false
+            locked: !isAdmin
         };
     }
 
