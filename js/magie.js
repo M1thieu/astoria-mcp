@@ -502,6 +502,19 @@
         capCostPreview.textContent = `Cout d'ascension : ${label}`;
     }
 
+    function syncZoneControls(targetSelect, zoneSelect, zoneDetailInput) {
+        if (!targetSelect || !zoneSelect) return;
+        const isMono = targetSelect.value === "mono";
+        zoneSelect.disabled = isMono;
+        if (zoneDetailInput) {
+            zoneDetailInput.disabled = isMono;
+        }
+        if (isMono) {
+            zoneSelect.value = "";
+            if (zoneDetailInput) zoneDetailInput.value = "";
+        }
+    }
+
     async function applyScrollCost({ category, affinityKey, cost }) {
         if (!currentCharacter?.id || !affinityKey || !Number.isFinite(cost)) {
             return { ok: false, reason: "missing-data" };
@@ -1340,6 +1353,9 @@
                             event.stopPropagation();
                             if (!canEditCapacity) return;
                             toggleUpgradeForm(upgradeForm?.hidden ?? true);
+                            if (upgradeForm?.hidden === false) {
+                                syncZoneControls(upgradeTarget, upgradeZone, upgradeZoneDetail);
+                            }
                         });
                     }
                     if (upgradeCancel) {
@@ -1426,6 +1442,12 @@
                             markDirty();
                         });
                     }
+
+                    if (upgradeTarget) {
+                        upgradeTarget.addEventListener("change", () => {
+                            syncZoneControls(upgradeTarget, upgradeZone, upgradeZoneDetail);
+                        });
+                    }
                 }
 
                 capacityList.appendChild(li);
@@ -1437,6 +1459,7 @@
         capacityForm.hidden = !open;
         if (open) {
             updateNewCapCostPreview();
+            syncZoneControls(capTargetInput, capZoneInput, capZoneDetailInput);
             capNameInput?.focus();
         }
     }
@@ -1463,6 +1486,7 @@
         if (capCostInput) capCostInput.value = "";
         if (capLimitsInput) capLimitsInput.value = "";
         updateNewCapCostPreview();
+        syncZoneControls(capTargetInput, capZoneInput, capZoneDetailInput);
     }
 
     function buildCapacityFromForm() {
@@ -1576,6 +1600,11 @@
 
     if (capRankInput) {
         capRankInput.addEventListener("change", updateNewCapCostPreview);
+    }
+    if (capTargetInput) {
+        capTargetInput.addEventListener("change", () => {
+            syncZoneControls(capTargetInput, capZoneInput, capZoneDetailInput);
+        });
     }
 
     if (capSaveBtn) {
