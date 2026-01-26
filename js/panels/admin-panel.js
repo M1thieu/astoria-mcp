@@ -38,6 +38,30 @@ export const adminPanel = {
     adminContext.append(adminContextTitle, adminContextBody, adminContextHint);
     wrapper.appendChild(adminContext);
 
+    const disabledUsersKey = "astoria_admin_disabled_users";
+    const disabledCharactersKey = "astoria_admin_disabled_characters";
+
+    const loadDisabledMap = (key) => {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        console.warn("Admin panel: unable to load disabled map.", error);
+        return {};
+      }
+    };
+
+    const saveDisabledMap = (key, map) => {
+      try {
+        localStorage.setItem(key, JSON.stringify(map));
+      } catch (error) {
+        console.warn("Admin panel: unable to save disabled map.", error);
+      }
+    };
+
+    const disabledUsers = loadDisabledMap(disabledUsersKey);
+    const disabledCharacters = loadDisabledMap(disabledCharactersKey);
+
     const status = el("p", "panel-muted", "Loading admin data...");
     wrapper.appendChild(status);
 
@@ -73,6 +97,35 @@ export const adminPanel = {
     characterSection.append(characterLabel, characterInput, characterHint, characterList);
     wrapper.appendChild(characterSection);
 
+    const accountSection = el("div", "panel-admin-actions");
+    const accountLabel = document.createElement("label");
+    accountLabel.textContent = "Compte joueur";
+    accountLabel.setAttribute("for", "adminAccountStatus");
+
+    const accountStatus = el("div", "panel-admin-status", "Aucun compte selectionne.");
+    accountStatus.id = "adminAccountStatus";
+
+    const accountToggle = document.createElement("button");
+    accountToggle.type = "button";
+    accountToggle.className = "auth-button secondary";
+    accountToggle.textContent = "Desactiver le compte";
+    accountToggle.disabled = true;
+
+    const characterToggle = document.createElement("button");
+    characterToggle.type = "button";
+    characterToggle.className = "auth-button secondary";
+    characterToggle.textContent = "Desactiver le personnage";
+    characterToggle.disabled = true;
+
+    const accountHint = el(
+      "p",
+      "panel-admin-hint",
+      "Stub local: ces actions sont enregistrees en local en attendant le back-end."
+    );
+
+    accountSection.append(accountLabel, accountStatus, accountToggle, characterToggle, accountHint);
+    wrapper.appendChild(accountSection);
+
     const editSection = el("div", "panel-admin-actions");
     const kaelsLabel = document.createElement("label");
     kaelsLabel.textContent = "Kaels (admin)";
@@ -105,6 +158,9 @@ export const adminPanel = {
         kaelsInput.value = "";
         kaelsInput.disabled = true;
         kaelsSave.disabled = true;
+        accountStatus.textContent = "Aucun compte selectionne.";
+        accountToggle.disabled = true;
+        characterToggle.disabled = true;
         return;
       }
       const shortId = activeCharacter.user_id
@@ -114,7 +170,38 @@ export const adminPanel = {
       kaelsInput.value = Number.isFinite(activeCharacter.kaels) ? String(activeCharacter.kaels) : "";
       kaelsInput.disabled = false;
       kaelsSave.disabled = false;
+
+      const userId = activeCharacter.user_id;
+      const accountDisabled = Boolean(userId && disabledUsers[userId]);
+      accountStatus.textContent = accountDisabled ? "Compte: desactive" : "Compte: actif";
+      accountStatus.dataset.state = accountDisabled ? "disabled" : "active";
+      accountToggle.textContent = accountDisabled ? "Activer le compte" : "Desactiver le compte";
+      accountToggle.disabled = !userId;
+
+      const characterDisabled = Boolean(disabledCharacters[activeCharacter.id]);
+      characterToggle.textContent = characterDisabled ? "Activer le personnage" : "Desactiver le personnage";
+      characterToggle.disabled = false;
     }
+
+    accountToggle.addEventListener("click", () => {
+      const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
+      if (!active?.user_id) return;
+      const userId = active.user_id;
+      const nextValue = !disabledUsers[userId];
+      disabledUsers[userId] = nextValue;
+      saveDisabledMap(disabledUsersKey, disabledUsers);
+      updateAdminContext(active);
+    });
+
+    characterToggle.addEventListener("click", () => {
+      const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
+      if (!active?.id) return;
+      const nextValue = !disabledCharacters[active.id];
+      disabledCharacters[active.id] = nextValue;
+      saveDisabledMap(disabledCharactersKey, disabledCharacters);
+      updateAdminContext(active);
+      renderCharacters(characterInput.value);
+    });
 
     kaelsSave.addEventListener("click", async () => {
       const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
@@ -248,7 +335,8 @@ export const adminPanel = {
       characterList.innerHTML = "";
       filtered.slice(0, 8).forEach((character) => {
         const row = document.createElement("div");
-        row.className = "panel-user-row panel-character-card";
+        const characterDisabled = Boolean(disabledCharacters[character.id]);
+        row.className = `panel-user-row panel-character-card${characterDisabled ? " panel-character-card--disabled" : ""}`;
 
         const avatar = document.createElement("div");
         avatar.className = "panel-character-avatar";
@@ -275,6 +363,9 @@ export const adminPanel = {
 
         const actions = document.createElement("div");
         actions.className = "panel-character-actions";
+        const statusPill = document.createElement("span");
+        statusPill.className = `panel-admin-pill${characterDisabled ? " is-disabled" : ""}`;
+        statusPill.textContent = characterDisabled ? "Desactive" : "Actif";
         const activateBtn = document.createElement("button");
         activateBtn.type = "button";
         activateBtn.className = "auth-button secondary";
@@ -290,7 +381,21 @@ export const adminPanel = {
         deleteBtn.className = "auth-button secondary";
         deleteBtn.textContent = "Supprimer";
         deleteBtn.addEventListener("click", () => openDeleteModal(character));
-        actions.append(activateBtn, deleteBtn);
+        const toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.className = "auth-button secondary";
+        toggleBtn.textContent = characterDisabled ? "Activer" : "Desactiver";
+        toggleBtn.addEventListener("click", () => {
+          const nextValue = !disabledCharacters[character.id];
+          disabledCharacters[character.id] = nextValue;
+          saveDisabledMap(disabledCharactersKey, disabledCharacters);
+          renderCharacters(characterInput.value);
+          const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
+          if (active?.id === character.id) {
+            updateAdminContext(active);
+          }
+        });
+        actions.append(statusPill, activateBtn, toggleBtn, deleteBtn);
 
         row.append(avatar, info, actions);
         characterList.appendChild(row);
