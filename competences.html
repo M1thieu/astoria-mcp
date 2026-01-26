@@ -937,28 +937,28 @@
                         <button type="button" class="skills-confirm-btn tw-press" id="skillsConfirmBtn" aria-label="Valider mes points" title="Valider mes points"></button>
                     </div>
                 </div>
-                <div class="skills-add-modal" id="skillsAddForm" hidden>
-                    <div class="skills-add-modal-backdrop" data-close-modal></div>
-                    <div class="skills-add-modal-card" role="dialog" aria-modal="true" aria-labelledby="skillsAddTitle">
-                        <h3 class="skills-add-title" id="skillsAddTitle">Ajouter une compétence</h3>
-                        <div class="skills-add-row">
-                            <input type="text" id="skillsAddName" placeholder="Nom de compétence">
-                            <input type="text" id="skillsAddIcon" placeholder="Emoji (optionnel)">
-                            <select id="skillsAddCategory" aria-label="Catégorie"></select>
-                            <input type="number" id="skillsAddCap" placeholder="Cap (max)" min="1" max="99" inputmode="numeric">
-                        </div>
-                        <div class="skills-add-actions">
-                            <button type="button" class="skills-add-cancel" id="skillsAddCancel">Annuler</button>
-                            <button type="button" class="skills-add-submit" id="skillsAddSubmit">Ajouter</button>
-                        </div>
-                    </div>
-                </div>
                 <ul class="skills-list" id="skillsList">
                     <!-- Lignes de compétences injectées par JavaScript -->
                 </ul>
                 <div class="skills-validation" id="skillsValidationFeedback" role="status" aria-live="polite"></div>
             </section>
         </section>
+        <div class="skills-add-modal" id="skillsAddForm" hidden>
+            <div class="skills-add-modal-backdrop" data-close-modal></div>
+            <div class="skills-add-modal-card" role="dialog" aria-modal="true" aria-labelledby="skillsAddTitle">
+                <h3 class="skills-add-title" id="skillsAddTitle">Ajouter une compétence</h3>
+                <div class="skills-add-row">
+                    <input type="text" id="skillsAddName" placeholder="Nom de compétence">
+                    <input type="text" id="skillsAddIcon" placeholder="Emoji (optionnel)">
+                    <select id="skillsAddCategory" aria-label="Catégorie"></select>
+                    <input type="number" id="skillsAddCap" placeholder="Cap (max)" min="1" max="99" inputmode="numeric">
+                </div>
+                <div class="skills-add-actions">
+                    <button type="button" class="skills-add-cancel" id="skillsAddCancel">Annuler</button>
+                    <button type="button" class="skills-add-submit" id="skillsAddSubmit">Ajouter</button>
+                </div>
+            </div>
+        </div>
     </main>
     <script type="module" src="js/ui/app-shell.js"></script>
     <script type="module">
