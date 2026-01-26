@@ -160,55 +160,16 @@
         }
         .skills-title {
             margin: 0;
-            color: #ffffff;
+            color: var(--color-primary);
             font-size: var(--text-3xl);
             font-weight: var(--font-semibold);
             letter-spacing: var(--letter-spacing-wide);
-            background-image: url('assets/images/Bouton_Onglet_Pink.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 100% 100%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: var(--skills-pill-height);
-            padding: 0 calc(var(--space-8) + var(--space-6));
-            border-radius: var(--radius-md);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
         }
         .skills-back-link {
-            text-decoration: none;
-            color: #ffffff;
-            font-size: var(--text-sm-plus);
-            font-weight: var(--font-semibold);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: var(--skills-pill-height);
-            padding: 0 calc(var(--space-6) + var(--space-4));
-            border-radius: var(--radius-md);
-            background-image: url('assets/images/Bouton_Onglet_Pink.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 100% 100%;
-            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), filter 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-            white-space: nowrap;
-            letter-spacing: var(--letter-spacing-wide);
-        }
-        .skills-back-link:hover {
-            transform: translateY(-1px);
-            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18));
+            /* Uses tw-back styles from style.css */
         }
         .skills-separator {
-            width: 100%;
-            height: min(10vw, calc(var(--space-14) * 3));
-            min-height: calc(var(--space-14) * 2);
-            background-image: url('assets/images/Webcam_Bar_pinky.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            margin-bottom: var(--space-2);
+            display: none;
         }
         /* Colonne d'onglets ronds à gauche */
         .skills-sidebar {
