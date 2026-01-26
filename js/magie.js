@@ -56,6 +56,8 @@
     let hasPendingChanges = false;
     let summaryModule = null;
 
+    const ENABLE_PAGE_ADD = false;
+
     const defaultCapacities = [
         {
             id: "cap-signature",
@@ -784,7 +786,6 @@
 
     function renderPageTabs() {
         if (!pageTabs) return;
-        const addBtn = addPageBtn || document.createElement("button");
         const visiblePages = pages.filter((page) => !isPageHidden(page));
         const specializationCounts = {};
         const specializationIndexes = {};
@@ -795,15 +796,6 @@
             if (!specialization || !numberedSpecializations.has(specialization)) return;
             specializationCounts[specialization] = (specializationCounts[specialization] || 0) + 1;
         });
-
-        if (!addPageBtn) {
-            addBtn.type = "button";
-            addBtn.id = "magicAddPageBtn";
-            addBtn.className = "magic-page-tab magic-page-tab--add tw-press";
-            addBtn.textContent = "+";
-            addBtn.setAttribute("aria-label", "Ajouter une page");
-            addBtn.addEventListener("click", handleAddPage);
-        }
 
         pageTabs.innerHTML = "";
 
@@ -835,7 +827,9 @@
             pageTabs.appendChild(tab);
         });
 
-        pageTabs.appendChild(addBtn);
+        if (ENABLE_PAGE_ADD && addPageBtn) {
+            pageTabs.appendChild(addPageBtn);
+        }
     }
 
     const specializationLabels = {
@@ -854,19 +848,24 @@
             return;
         }
 
+        const progress = loadMagicProgress();
+
         pages.forEach((page, index) => {
             if (isPageHidden(page)) return;
             const fields = page?.fields || {};
             const name = String(fields.magicName || "").trim() || `Magie ${index + 1}`;
             const specValue = String(fields.magicSpecialization || "").trim();
             const specLabel = specializationLabels[specValue] || "Sans specialisation";
+            const affinityKey = fields.magicAffinityKey;
+            const affinityEntry = affinityKey ? progress.affinities[affinityKey] : null;
+            const levelLabel = affinityEntry ? `Niveau ${Number(affinityEntry.ascensionLevel) || 0}` : "";
 
             const pill = document.createElement("button");
             pill.type = "button";
             pill.className = "magic-page-pill" + (index === activePageIndex ? " magic-page-pill--active" : "");
             pill.innerHTML = `
                 <span class="magic-page-pill-title">${name}</span>
-                <span class="magic-page-pill-meta">${specLabel}</span>
+                <span class="magic-page-pill-meta">${specLabel}${levelLabel ? ` • ${levelLabel}` : ""}</span>
             `;
             pill.addEventListener("click", () => setActivePage(index));
             pagesOverview.appendChild(pill);
@@ -1586,7 +1585,7 @@
         });
     }
 
-    if (addPageBtn) {
+    if (ENABLE_PAGE_ADD && addPageBtn) {
         addPageBtn.addEventListener("click", handleAddPage);
     }
 
