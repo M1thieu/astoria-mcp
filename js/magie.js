@@ -1075,7 +1075,6 @@
                             <button type="button" class="magic-btn magic-btn-outline tw-press" data-upgrade="${cap.id}">Améliorer</button>
                         </div>
                         <div class="magic-capacity-upgrade-form" data-upgrade-form="${cap.id}" hidden>
-                            <div class="magic-capacity-upgrade-meta">Coût d'ascension : ${costLabel}</div>
                             <details class="magic-accordion" open>
                                 <summary>Identite du sort</summary>
                                 <div class="magic-accordion-body">
