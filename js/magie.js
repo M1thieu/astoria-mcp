@@ -397,13 +397,25 @@
         return Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
     }
 
+    function getActiveAffinityKey() {
+        const page = pages[activePageIndex];
+        return page?.fields?.magicAffinityKey || "";
+    }
+
+    function getScrollCountForAffinity(counts, affinityKey) {
+        if (!counts || typeof counts !== "object") return 0;
+        if (!affinityKey) return sumScrollCounts(counts);
+        return Number(counts[affinityKey]) || 0;
+    }
+
     function renderScrollMeter() {
         if (!scrollEveilCountEl || !scrollAscensionCountEl) return;
         const profileData = currentCharacter?.profile_data || {};
         const eveilCounts = getScrollCounts(profileData, "eveil");
         const ascensionCounts = getScrollCounts(profileData, "ascension");
-        scrollEveilCountEl.textContent = String(sumScrollCounts(eveilCounts));
-        scrollAscensionCountEl.textContent = String(sumScrollCounts(ascensionCounts));
+        const affinityKey = getActiveAffinityKey();
+        scrollEveilCountEl.textContent = String(getScrollCountForAffinity(eveilCounts, affinityKey));
+        scrollAscensionCountEl.textContent = String(getScrollCountForAffinity(ascensionCounts, affinityKey));
     }
 
     async function applyScrollCost({ category, affinityKey, cost }) {
@@ -581,6 +593,7 @@
             }
         });
         updateAffinityDisplay(values);
+        renderScrollMeter();
     }
 
     function buildPayload() {

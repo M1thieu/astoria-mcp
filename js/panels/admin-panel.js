@@ -6,6 +6,7 @@ import {
   getActiveCharacter,
   updateCharacter,
   getCurrentUser,
+  setUserRoleByUsername,
 } from "../auth.js";
 
 export const adminPanel = {
@@ -126,6 +127,24 @@ export const adminPanel = {
     accountSection.append(accountLabel, accountStatus, accountToggle, characterToggle, accountHint);
     wrapper.appendChild(accountSection);
 
+    const staffSection = el("div", "panel-admin-actions");
+    const staffLabel = document.createElement("label");
+    staffLabel.textContent = "Droits staff";
+    const staffUser = el("div", "panel-admin-status", "Utilisateur: -");
+    const staffRole = el("div", "panel-admin-status", "Role: -");
+    const staffToggle = document.createElement("button");
+    staffToggle.type = "button";
+    staffToggle.className = "auth-button secondary";
+    staffToggle.textContent = "Donner admin";
+    staffToggle.disabled = true;
+    const staffHint = el(
+      "p",
+      "panel-admin-hint",
+      "Ce role donne l'acces a toutes les actions admin."
+    );
+    staffSection.append(staffLabel, staffUser, staffRole, staffToggle, staffHint);
+    wrapper.appendChild(staffSection);
+
     const editSection = el("div", "panel-admin-actions");
     const kaelsLabel = document.createElement("label");
     kaelsLabel.textContent = "Kaels (admin)";
@@ -152,6 +171,49 @@ export const adminPanel = {
 
 
 
+    let activeUser = null;
+
+    function updateStaffUi() {
+      if (!activeUser) {
+        staffUser.textContent = "Utilisateur: -";
+        staffRole.textContent = "Role: -";
+        staffToggle.disabled = true;
+        return;
+      }
+      staffUser.textContent = `Utilisateur: ${activeUser.username}`;
+      staffRole.textContent = `Role: ${activeUser.role === "admin" ? "admin" : "joueur"}`;
+      staffToggle.textContent = activeUser.role === "admin" ? "Retirer admin" : "Donner admin";
+      staffToggle.disabled = false;
+    }
+
+    async function refreshActiveUser(userId) {
+      if (!userId) {
+        activeUser = null;
+        updateStaffUi();
+        return;
+      }
+      try {
+        if (!supabaseRef) {
+          supabaseRef = await getSupabaseClient();
+        }
+        const { data, error } = await supabaseRef
+          .from("users")
+          .select("id, username, role")
+          .eq("id", userId)
+          .single();
+        if (error) {
+          console.error("Admin panel: unable to load user.", error);
+          activeUser = null;
+        } else {
+          activeUser = data;
+        }
+      } catch (error) {
+        console.error("Admin panel: unable to load user.", error);
+        activeUser = null;
+      }
+      updateStaffUi();
+    }
+
     function updateAdminContext(activeCharacter) {
       if (!activeCharacter || !activeCharacter.id) {
         adminContextBody.textContent = "No active character selected.";
@@ -161,6 +223,8 @@ export const adminPanel = {
         accountStatus.textContent = "Aucun compte selectionne.";
         accountToggle.disabled = true;
         characterToggle.disabled = true;
+        activeUser = null;
+        updateStaffUi();
         return;
       }
       const shortId = activeCharacter.user_id
@@ -181,7 +245,22 @@ export const adminPanel = {
       const characterDisabled = Boolean(disabledCharacters[activeCharacter.id]);
       characterToggle.textContent = characterDisabled ? "Activer le personnage" : "Desactiver le personnage";
       characterToggle.disabled = false;
+
+      void refreshActiveUser(userId);
     }
+
+    staffToggle.addEventListener("click", async () => {
+      if (!activeUser?.username) return;
+      const nextRole = activeUser.role === "admin" ? "player" : "admin";
+      const result = await setUserRoleByUsername(activeUser.username, nextRole);
+      if (!result || !result.success) {
+        staffHint.textContent = "Impossible de modifier le role.";
+        return;
+      }
+      staffHint.textContent = "Role mis a jour.";
+      activeUser = { ...activeUser, role: nextRole };
+      updateStaffUi();
+    });
 
     accountToggle.addEventListener("click", () => {
       const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
