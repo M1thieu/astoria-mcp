@@ -12,6 +12,34 @@
     color: var(--color-gray-600);
 }
 
+.fiche-import {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-top: var(--space-2);
+}
+
+.fiche-import-status {
+    font-size: var(--text-xs);
+    color: var(--color-gray-600);
+}
+
+.fiche-import-status.is-success {
+    color: #2e7d32;
+    font-weight: var(--font-semibold);
+}
+
+.fiche-import-status.is-error {
+    color: #c62828;
+    font-weight: var(--font-semibold);
+}
+
+.fiche-import-status.is-info {
+    color: var(--color-primary);
+    font-weight: var(--font-semibold);
+}
+
 .relations-header {
     display: flex;
     align-items: center;

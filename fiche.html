@@ -15,6 +15,11 @@
             <div class="page-header-main">
                 <div class="page-title-block">
                     <h1 class="page-title" id="fichePageTitle">Fiche de personnage</h1>
+                    <div class="fiche-import">
+                        <input id="ficheImportInput" type="file" accept=".txt,.md" hidden>
+                        <button type="button" class="btn-secondary tw-press" id="ficheImportBtn">Importer fiche</button>
+                        <span class="fiche-import-status" id="ficheImportStatus" aria-live="polite"></span>
+                    </div>
                 </div>
                 <div class="character-summary" aria-label="Résumé du personnage">
                     <div class="character-avatar-wrapper">
@@ -2010,6 +2015,286 @@
             });
             // ====================================================================
             // END PROFILE TAGS SYNCHRONIZATION EVENT LISTENERS
+            // ====================================================================
+            // ====================================================================
+            // FICHE IMPORTER (TXT / MD)
+            // ====================================================================
+            const ficheImportBtn = document.getElementById('ficheImportBtn');
+            const ficheImportInput = document.getElementById('ficheImportInput');
+            const ficheImportStatus = document.getElementById('ficheImportStatus');
+            let ficheImportStatusTimer = null;
+
+            function setImportStatus(message, type = '') {
+                if (!ficheImportStatus) return;
+                ficheImportStatus.textContent = message;
+                ficheImportStatus.classList.toggle('is-success', type === 'success');
+                ficheImportStatus.classList.toggle('is-error', type === 'error');
+                ficheImportStatus.classList.toggle('is-info', type === 'info');
+                if (ficheImportStatusTimer) {
+                    clearTimeout(ficheImportStatusTimer);
+                }
+                ficheImportStatusTimer = setTimeout(() => {
+                    ficheImportStatus.textContent = '';
+                    ficheImportStatus.classList.remove('is-success', 'is-error', 'is-info');
+                }, 6000);
+            }
+
+            function normalizeImportText(value) {
+                if (!value) return '';
+                return value
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, ' ')
+                    .trim();
+            }
+
+            function detectImportSection(line) {
+                const normalized = normalizeImportText(line);
+                if (!normalized) return null;
+                const sectionMap = {
+                    identite: ['identite'],
+                    appartenance: ['appartenance'],
+                    combat: ['combat'],
+                    alice: ['alice'],
+                    sorcellerie: ['sorcellerie'],
+                    eater: ['eater'],
+                    religion: ['religion'],
+                    mental: ['mental'],
+                    physique: ['physique'],
+                    background: ['background']
+                };
+                for (const [section, keys] of Object.entries(sectionMap)) {
+                    if (keys.some((key) => normalized.includes(key))) {
+                        return section;
+                    }
+                }
+                return null;
+            }
+
+            function setSelectByText(select, value) {
+                const normalized = normalizeImportText(value);
+                if (!normalized) return;
+                const options = Array.from(select.options || []);
+                const match = options.find((option) => normalizeImportText(option.value) === normalized)
+                    || options.find((option) => normalizeImportText(option.textContent) === normalized)
+                    || options.find((option) => normalizeImportText(option.textContent).includes(normalized));
+                if (match) {
+                    select.value = match.value;
+                } else {
+                    select.value = value;
+                }
+            }
+
+            function setFieldValue(id, value) {
+                const el = document.getElementById(id);
+                if (!el || value === undefined || value === null) return;
+                if (el.tagName === 'SELECT') {
+                    setSelectByText(el, value);
+                } else if (el.type === 'checkbox') {
+                    el.checked = Boolean(value);
+                } else {
+                    el.value = value;
+                }
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            function setCheckboxValue(id, checked) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.checked = checked;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            function applyWeaponValue(value, typeId, descId, imageId) {
+                if (!value) return;
+                let remaining = value;
+                const urlMatch = value.match(/https?:\/\/\S+/i);
+                if (urlMatch && imageId) {
+                    setFieldValue(imageId, urlMatch[0]);
+                    remaining = remaining.replace(urlMatch[0], '').trim();
+                }
+                const parts = remaining.split('|').map((part) => part.trim()).filter(Boolean);
+                if (parts.length > 0 && typeId) {
+                    setFieldValue(typeId, parts[0]);
+                }
+                if (parts.length > 1 && descId) {
+                    setFieldValue(descId, parts.slice(1).join(' | '));
+                } else if (parts.length === 1 && descId) {
+                    setFieldValue(descId, parts[0]);
+                }
+            }
+
+            function applyImageList(value, ids) {
+                if (!value || !ids?.length) return;
+                const urls = value.match(/https?:\/\/\S+/gi) || [];
+                if (urls.length > 0) {
+                    ids.forEach((id, index) => {
+                        if (urls[index]) setFieldValue(id, urls[index]);
+                    });
+                    return;
+                }
+                setFieldValue(ids[0], value);
+            }
+
+            const importLabelEntries = [
+                { section: 'identite', match: /nom prenom/, apply: (value) => setFieldValue('identiteNomPrenom', value) },
+                { section: 'identite', match: /^age$/, apply: (value) => setFieldValue('identiteAge', value) },
+                { section: 'identite', match: /^sexe$/, apply: (value) => setFieldValue('identiteSexe', value) },
+                { section: 'identite', match: /^race$/, apply: (value) => setFieldValue('identiteRace', value) },
+                { section: 'identite', match: /hierarchie sociale/, apply: (value) => setFieldValue('identiteHierarchieSociale', value) },
+                { section: 'identite', match: /pays d origine/, apply: (value) => setFieldValue('identitePaysOrigine', value) },
+
+                { section: 'appartenance', match: /^role$/, apply: (value) => setFieldValue('appRole', value) },
+                { section: 'appartenance', match: /niveau scolaire/, apply: (value) => setFieldValue('appNiveauScolaire', value) },
+                { section: 'appartenance', match: /affection/, apply: (value) => setFieldValue('appAffection', value) },
+                { section: 'appartenance', match: /house/, apply: (value) => setFieldValue('appHouse', value) },
+                { section: 'appartenance', match: /hierarchie/, apply: (value) => setFieldValue('appHierarchie', value) },
+
+                { section: 'combat', match: /style de combat/, apply: (value) => setFieldValue('combatStyle', value) },
+                { section: 'combat', match: /type d arme/, apply: (value) => applyWeaponValue(value, 'combatArme', 'combatArmeDescription', 'combatArmeImage') },
+
+                { section: 'alice', match: /^nom$/, apply: (value) => setFieldValue('aliceNom', value) },
+                { section: 'alice', match: /^type$/, apply: (value) => setFieldValue('aliceType', value) },
+                { section: 'alice', match: /forme/, apply: (value) => setFieldValue('aliceForme', value) },
+                { section: 'alice', match: /fiche/, apply: (value) => setFieldValue('aliceFiche', value) },
+
+                { section: 'sorcellerie', match: /magie principale/, apply: (value) => setFieldValue('sorcelleriePrincipale', value) },
+                { section: 'sorcellerie', match: /magie secondaire/, apply: (value) => setFieldValue('sorcellerieSecondaire', value) },
+                { section: 'sorcellerie', match: /magie cachee/, apply: (value) => setFieldValue('sorcellerieCachee', value) },
+
+                { section: 'eater', match: /^role$/, apply: (value) => setFieldValue('eaterRole', value) },
+                { section: 'eater', match: /type d arme/, apply: (value) => setFieldValue('eaterTypeArme', value) },
+                { section: 'eater', match: /description de l arme/, apply: (value) => applyWeaponValue(value, null, 'eaterDescriptionArme', 'eaterImageArme') },
+
+                { section: 'religion', match: /croyance/, apply: (value) => setFieldValue('religionCroyance', value) },
+                { section: 'religion', match: /prophetie/, apply: (value) => setFieldValue('religionProphetie', value) },
+                { section: 'religion', match: /benediction/, apply: (value) => setFieldValue('religionBenediction', value) },
+                { section: 'religion', match: /malediction/, apply: (value) => setFieldValue('religionMalediction', value) },
+
+                { section: 'mental', match: /caractere/, apply: (value) => setFieldValue('mentalCaractere', value) },
+                { section: 'mental', match: /but/, apply: (value) => setFieldValue('mentalButsReves', value) },
+                { section: 'mental', match: /autre/, apply: (value) => setFieldValue('mentalAutre', value) },
+
+                { section: 'physique', match: /description physique/, apply: (value) => setFieldValue('physiqueDescription', value) },
+                { section: 'physique', match: /sante/, apply: (value) => setFieldValue('physiqueSante', value) },
+
+                { section: 'background', match: /parents|famille/, apply: (value) => setFieldValue('backgroundFamille', value) },
+                { section: 'background', match: /histoire/, apply: (value) => setFieldValue('backgroundHistoire', value) },
+                { section: 'background', match: /image/, apply: (value) => applyImageList(value, ['backgroundImage1', 'backgroundImage2', 'backgroundImage3']) }
+            ];
+
+            function parseFicheImport(text) {
+                const lines = text.split(/\r?\n/);
+                let currentSection = null;
+                let currentEntry = null;
+                let currentLines = [];
+                const matches = [];
+
+                function flushEntry() {
+                    if (!currentEntry) return;
+                    const value = currentLines.join('\n').trim();
+                    if (value) {
+                        matches.push({ entry: currentEntry, value });
+                    }
+                    currentEntry = null;
+                    currentLines = [];
+                }
+
+                for (const rawLine of lines) {
+                    const line = rawLine.trim();
+                    if (!line) {
+                        if (currentEntry) currentLines.push('');
+                        continue;
+                    }
+                    const section = detectImportSection(line);
+                    if (section) {
+                        flushEntry();
+                        currentSection = section;
+                        continue;
+                    }
+                    const labelMatch = line.match(/^([^:]{2,80}):\s*(.*)$/);
+                    if (labelMatch) {
+                        const labelText = labelMatch[1].trim();
+                        const labelNormalized = normalizeImportText(labelText);
+                        const entry = importLabelEntries.find((item) => {
+                            if (item.section && currentSection && item.section !== currentSection) return false;
+                            return item.match.test(labelNormalized);
+                        });
+                        if (entry) {
+                            flushEntry();
+                            currentEntry = entry;
+                            if (labelMatch[2]) {
+                                currentLines.push(labelMatch[2].trim());
+                            }
+                            continue;
+                        }
+                    }
+                    if (currentEntry) {
+                        currentLines.push(line);
+                    }
+                }
+                flushEntry();
+                return matches;
+            }
+
+            function applyFicheImport(items) {
+                if (!items.length) return { ok: false, message: 'Aucune info trouvee.' };
+                const touchedTabs = new Set();
+                let hasMagic = false;
+                let hasEater = false;
+                let hasAlice = false;
+
+                items.forEach(({ entry, value }) => {
+                    entry.apply(value);
+                    touchedTabs.add(entry.section);
+                    if (entry.section === 'sorcellerie') hasMagic = true;
+                    if (entry.section === 'eater') hasEater = true;
+                    if (entry.section === 'alice') hasAlice = true;
+                });
+
+                if (hasMagic) setCheckboxValue('hasMagic', true);
+                if (hasEater) setCheckboxValue('hasEater', true);
+                if (hasAlice) setFieldValue('aliceStatus', 'simple');
+
+                touchedTabs.forEach((tab) => markTabDirty(tab));
+                if (hasMagic) {
+                    syncMagicSelections({ persistProfile: false });
+                }
+
+                return { ok: true, message: `Import ok: ${items.length} champ(s).` };
+            }
+
+            if (ficheImportBtn && ficheImportInput) {
+                ficheImportBtn.addEventListener('click', () => {
+                    ficheImportInput.value = '';
+                    ficheImportInput.click();
+                });
+                ficheImportInput.addEventListener('change', () => {
+                    const file = ficheImportInput.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const content = event.target?.result;
+                        if (typeof content !== 'string') return;
+                        const items = parseFicheImport(content);
+                        const result = applyFicheImport(items);
+                        if (result.ok) {
+                            setImportStatus(`${result.message} (${file.name})`, 'success');
+                        } else {
+                            setImportStatus(result.message, 'error');
+                        }
+                    };
+                    reader.onerror = () => {
+                        setImportStatus('Import impossible.', 'error');
+                    };
+                    setImportStatus('Import en cours...', 'info');
+                    reader.readAsText(file);
+                });
+            }
+            // ====================================================================
+            // END FICHE IMPORTER
             // ====================================================================
         })();
     </script>
