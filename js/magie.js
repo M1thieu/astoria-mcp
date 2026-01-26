@@ -1213,7 +1213,7 @@
                     <button type="button" class="magic-capacity-header" aria-expanded="false">
                         <div class="magic-capacity-main">
                             <span class="magic-capacity-name">${cap.name}</span>
-                            <span class="magic-capacity-meta">${cap.type.charAt(0).toUpperCase() + cap.type.slice(1)} • ${cap.rank}</span>
+                            <span class="magic-capacity-meta">${cap.type.charAt(0).toUpperCase() + cap.type.slice(1)} • ${cap.rank} • Niv. ${level}</span>
                             <div class="magic-capacity-tags">
                                 ${cap.stats.map((s) => `<span class="magic-tag">${s}</span>`).join("")}
                                 ${capTags.map((tag) => `<span class="magic-tag">${tag}</span>`).join("")}
@@ -1338,12 +1338,24 @@
                         };
                         historyButton.addEventListener("click", (event) => {
                             event.stopPropagation();
+                            if (upgradeForm && !upgradeForm.hidden) {
+                                upgradeForm.hidden = true;
+                            }
                             toggleHistory();
+                            if (historyPanel.classList.contains("is-open")) {
+                                historyPanel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                            }
                         });
                         historyButton.addEventListener("keydown", (event) => {
                             if (event.key === "Enter" || event.key === " ") {
                                 event.preventDefault();
+                                if (upgradeForm && !upgradeForm.hidden) {
+                                    upgradeForm.hidden = true;
+                                }
                                 toggleHistory();
+                                if (historyPanel.classList.contains("is-open")) {
+                                    historyPanel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                                }
                             }
                         });
                     }
