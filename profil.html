@@ -304,7 +304,7 @@
         </section>
     </main>
     <div class="profile-modal-backdrop" id="createCharacterBackdrop" aria-hidden="true">
-        <div class="profile-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
+        <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="createCharacterTitle">
             <div class="profile-modal-title" id="createCharacterTitle">Créer un personnage</div>
             <div class="profile-modal-error" id="createCharacterError" role="alert"></div>
             <form id="createCharacterForm">
@@ -328,7 +328,7 @@
         </div>
     </div>
     <div class="profile-cropper-backdrop" id="avatarCropperBackdrop" aria-hidden="true">
-        <div class="profile-cropper-modal tw-surface" role="dialog" aria-modal="true" aria-labelledby="avatarCropperTitle">
+        <div class="profile-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="avatarCropperTitle">
             <div class="profile-cropper-header">
                 <h2 class="profile-cropper-title" id="avatarCropperTitle">Ajuster l'avatar</h2>
                 <button type="button" class="profile-cropper-close tw-press" id="avatarCropperClose" aria-label="Fermer">×</button>
@@ -353,16 +353,16 @@
         <div class="profile-modal profile-image-modal" role="dialog" aria-modal="true" aria-labelledby="imageInsertTitle">
             <div class="profile-modal-title" id="imageInsertTitle">Inserer une image</div>
             <div class="profile-modal-error" id="imageInsertError" role="alert"></div>
-            <div class="profile-modal-form tw-surface">
-                <div class="profile-modal-field tw-surface">
+            <div class="profile-modal-form">
+                <div class="profile-modal-field">
                     <label class="profile-modal-label" for="imageUrlInput">URL de l'image</label>
                     <input class="profile-modal-input tw-input" id="imageUrlInput" placeholder="https://exemple.com/image.jpg" autocomplete="off">
                 </div>
-                <div class="profile-modal-field tw-surface">
+                <div class="profile-modal-field">
                     <label class="profile-modal-label" for="imageAltInput">Texte alternatif (alt)</label>
                     <input class="profile-modal-input tw-input" id="imageAltInput" placeholder="Description de l'image" autocomplete="off">
                 </div>
-                <div class="profile-modal-grid tw-surface">
+                <div class="profile-modal-grid">
                     <div>
                         <label class="profile-modal-label" for="imageWidthInput">Largeur</label>
                         <input class="profile-modal-input tw-input" id="imageWidthInput" placeholder="300px">

@@ -87,13 +87,13 @@
     <!-- Modal pour voir un item en grand / détails -->
     <div
         id="itemModal"
-        class="modal tw-surface tw-panel"
+        class="modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modalName"
         aria-describedby="modalDescription"
     >
-        <div class="modal-inner tw-surface tw-panel">
+        <div class="modal-inner">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalName"></h2>
                 <div class="modal-admin-actions" id="modalAdminActions" hidden>
@@ -101,9 +101,9 @@
                 </div>
                 <button class="modal-close tw-press" aria-label="Fermer la fenêtre">×</button>
             </div>
-            <div class="modal-body tw-surface tw-panel">
+            <div class="modal-body">
                 <div class="modal-media">
-                    <div class="modal-carousel tw-surface tw-panel" id="modalCarousel">
+                    <div class="modal-carousel" id="modalCarousel">
                         <button class="carousel-btn prev tw-press tw-btn-ghost" id="carouselPrev" aria-label="Image précédente">‹</button>
                         <img id="modalImage" alt="">
                         <button class="carousel-btn next tw-press tw-btn-ghost" id="carouselNext" aria-label="Image suivante">›</button>
@@ -119,7 +119,7 @@
         </div>
     </div>
     <div class="codex-admin-backdrop" id="adminItemBackdrop" aria-hidden="true">
-        <div class="codex-admin-modal tw-surface tw-panel tw-panel" role="dialog" aria-modal="true" aria-labelledby="adminItemTitle">
+        <div class="codex-admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminItemTitle">
             <div class="codex-admin-header">
                 <h2 class="codex-admin-title" id="adminItemTitle">Ajouter un objet</h2>
                 <button type="button" class="codex-admin-close tw-press tw-btn-ghost" id="adminItemClose" aria-label="Fermer">x</button>
@@ -184,7 +184,7 @@
         </div>
     </div>
     <div class="codex-cropper-backdrop" id="itemCropperBackdrop" aria-hidden="true">
-        <div class="codex-cropper-modal tw-surface tw-panel" role="dialog" aria-modal="true" aria-labelledby="itemCropperTitle">
+        <div class="codex-cropper-modal" role="dialog" aria-modal="true" aria-labelledby="itemCropperTitle">
             <div class="codex-cropper-header">
                 <h2 class="codex-cropper-title" id="itemCropperTitle">Recadrer l'image</h2>
                 <button type="button" class="codex-cropper-close tw-press" id="itemCropperClose" aria-label="Fermer">x</button>
@@ -207,7 +207,7 @@
     </div>
     <!-- Delete confirmation modal -->
     <div class="codex-delete-backdrop" id="deleteItemBackdrop" aria-hidden="true">
-        <div class="codex-delete-modal tw-surface tw-panel" role="dialog" aria-modal="true" aria-labelledby="deleteItemTitle">
+        <div class="codex-delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteItemTitle">
             <div class="codex-delete-header">
                 <h2 class="codex-delete-title" id="deleteItemTitle">Supprimer l'objet</h2>
             </div>

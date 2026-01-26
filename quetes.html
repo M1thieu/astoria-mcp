@@ -117,18 +117,18 @@
     </main>
     <div class="quest-modal tw-surface" id="questDetailModal" aria-hidden="true">
         <div class="quest-modal-scrim tw-surface" data-close="true"></div>
-        <div class="quest-modal-card tw-panel tw-surface tw-hover" role="dialog" aria-modal="true" aria-labelledby="questDetailTitle">
+        <div class="quest-modal-card" role="dialog" aria-modal="true" aria-labelledby="questDetailTitle">
             <button class="quest-modal-close tw-press" type="button" data-close="true" aria-label="Fermer">&times;</button>
             <div class="quest-modal-nav tw-surface">
                 <button class="quest-modal-arrow tw-press" id="questDetailPrev" type="button" aria-label="Qu&#234;te pr&#233;c&#233;dente">&#10094;</button>
                 <button class="quest-modal-arrow tw-press" id="questDetailNext" type="button" aria-label="Qu&#234;te suivante">&#10095;</button>
             </div>
             <div class="quest-modal-content tw-surface">
-                <aside class="quest-modal-panel quest-modal-panel--rewards tw-panel tw-surface">
+                <aside class="quest-modal-panel quest-modal-panel--rewards">
                     <h4>R&#233;compenses :</h4>
                     <ul id="questDetailRewards"></ul>
                 </aside>
-                <div class="quest-modal-center tw-panel tw-surface">
+                <div class="quest-modal-center">
                     <div class="quest-modal-top tw-surface">
                         <span class="quest-modal-type" id="questDetailType"></span>
                         <h3 class="quest-modal-title" id="questDetailTitle">Qu&#234;te</h3>
@@ -148,7 +148,7 @@
                         <p id="questDetailDescription"></p>
                     </div>
                 </div>
-                <aside class="quest-modal-panel quest-modal-panel--side tw-panel tw-surface">
+                <aside class="quest-modal-panel quest-modal-panel--side">
                     <div class="quest-info-block tw-surface">
                         <h4>Lieu(x) :</h4>
                         <ul id="questDetailLocations"></ul>
@@ -171,7 +171,7 @@
     </div>
     <div class="quest-modal quest-modal--editor tw-surface" id="questEditorModal" aria-hidden="true">
         <div class="quest-modal-scrim tw-surface" data-close="true"></div>
-        <div class="quest-modal-card tw-panel quest-editor-card tw-surface tw-hover" role="dialog" aria-modal="true" aria-labelledby="questEditorTitle">
+        <div class="quest-modal-card quest-editor-card" role="dialog" aria-modal="true" aria-labelledby="questEditorTitle">
             <button class="quest-modal-close tw-press" type="button" data-close="true" aria-label="Fermer">&times;</button>
             <h3 class="quest-modal-title" id="questEditorTitle">Cr&#233;ation de Qu&#234;tes</h3>
             <form id="questEditorForm" class="quest-editor-form">

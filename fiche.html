@@ -2307,15 +2307,15 @@
     </script>
     <!-- Combat Technique Modal -->
     <div class="combat-modal-backdrop" id="combatTechniqueBackdrop" aria-hidden="true">
-        <div class="combat-modal tw-surface" role="dialog" aria-modal="true">
+        <div class="combat-modal" role="dialog" aria-modal="true">
             <div class="combat-modal-header">
                 <h2 class="combat-modal-title" id="combatModalTitle">Ajouter une technique</h2>
                 <button type="button" class="combat-modal-close tw-press" id="combatModalClose" aria-label="Fermer">×</button>
             </div>
             <form id="combatTechniqueForm">
-                <div class="combat-modal-section tw-surface">
+                <div class="combat-modal-section">
                     <div class="combat-modal-section-title">Informations de base</div>
-                    <div class="combat-modal-grid tw-surface">
+                    <div class="combat-modal-grid">
                         <input name="name" id="techniqueName" placeholder="Nom de la technique" required>
                         <select name="type" id="techniqueType" required>
                             <option value="">-- Type --</option>
@@ -2326,15 +2326,15 @@
                         </select>
                     </div>
                 </div>
-                <div class="combat-modal-section tw-surface">
+                <div class="combat-modal-section">
                     <label class="combat-modal-label">Description RP</label>
                     <textarea name="rp" id="techniqueRp" placeholder="Description narrative de la technique..." rows="3"></textarea>
                 </div>
-                <div class="combat-modal-section tw-surface">
+                <div class="combat-modal-section">
                     <label class="combat-modal-label">Effet mécanique</label>
                     <textarea name="effect" id="techniqueEffect" placeholder="Effets mécaniques, dégâts, durée..." rows="3" required></textarea>
                 </div>
-                <div class="combat-modal-section tw-surface">
+                <div class="combat-modal-section">
                     <label class="combat-modal-label">Limites / Conditions</label>
                     <textarea name="limits" id="techniqueLimits" placeholder="Conditions d'utilisation, contraintes..." rows="2"></textarea>
                 </div>
