@@ -524,6 +524,41 @@
     gap: var(--space-3);
 }
 
+.magic-accordion {
+    border: 1px solid rgba(216, 27, 96, 0.18);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.9);
+    padding: var(--space-2) var(--space-3);
+}
+
+.magic-accordion summary {
+    font-weight: var(--font-semibold);
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    list-style: none;
+}
+
+.magic-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.magic-accordion summary::after {
+    content: "▾";
+    float: right;
+    color: var(--color-primary);
+    transition: transform var(--transition-fast);
+}
+
+.magic-accordion[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.magic-accordion-body {
+    margin-top: var(--space-3);
+    display: grid;
+    gap: var(--space-3);
+}
+
 .magic-capacity-form-actions {
     display: flex;
     justify-content: flex-end;

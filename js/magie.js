@@ -14,12 +14,26 @@
     const addCapacityBtn = document.getElementById("magicAddCapacityBtn");
     const capacityForm = document.getElementById("magicCapacityForm");
     const capNameInput = document.getElementById("magicNewCapName");
+    const capSummaryInput = document.getElementById("magicNewCapSummary");
     const capTypeInput = document.getElementById("magicNewCapType");
     const capRankInput = document.getElementById("magicNewCapRank");
+    const capTargetInput = document.getElementById("magicNewCapTarget");
+    const capZoneInput = document.getElementById("magicNewCapZone");
+    const capZoneDetailInput = document.getElementById("magicNewCapZoneDetail");
+    const capDistanceInput = document.getElementById("magicNewCapDistance");
+    const capActivationInput = document.getElementById("magicNewCapActivation");
+    const capDurationInput = document.getElementById("magicNewCapDuration");
+    const capCooldownInput = document.getElementById("magicNewCapCooldown");
     const capRpInput = document.getElementById("magicNewCapRp");
+    const capPerceptionInput = document.getElementById("magicNewCapPerception");
+    const capTellInput = document.getElementById("magicNewCapTell");
     const capEffectInput = document.getElementById("magicNewCapEffect");
+    const capConditionsInput = document.getElementById("magicNewCapConditions");
+    const capStrengthsInput = document.getElementById("magicNewCapStrengths");
+    const capWeaknessesInput = document.getElementById("magicNewCapWeaknesses");
     const capCostInput = document.getElementById("magicNewCapCost");
     const capLimitsInput = document.getElementById("magicNewCapLimits");
+    const capCostPreview = document.getElementById("magicNewCapCostPreview");
     const capSaveBtn = document.getElementById("magicCapacitySave");
     const capCancelBtn = document.getElementById("magicCapacityCancel");
     const adminSection = document.getElementById("magic-admin");
@@ -49,8 +63,21 @@
             type: "offensif",
             rank: "signature",
             stats: ["Combat", "Pouvoirs"],
+            summary: "Onde astrale en cône qui renverse les ennemis proches.",
+            target: "zone",
+            zoneType: "cone",
+            zoneDetail: "Cône 8m",
+            distance: "moyenne",
+            activationTime: "court",
+            duration: "instantane",
+            cooldown: "moyen",
             rp: "Le meister fait vibrer son arme et libère une onde astrale qui déchire l'air.",
+            perception: "L'air se met à vibrer, des étincelles bleutées longent la lame.",
+            tell: "Un souffle grave et une posture fixe annoncent la charge.",
             effect: "Attaque de zone en cône, dégâts moyens, peut déséquilibrer les adversaires proches.",
+            conditions: "Requiert l'arme en main et une posture d'ancrage.",
+            strengths: "Contrôle de zone, bon impact visuel.",
+            weaknesses: "Temps d'activation visible, contrable par bouclier.",
             cost: "Consomme une grande partie de la réserve magique, utilisable 1 à 2 fois par scène.",
             limits: "Inefficace contre les protections mentales ou purement spirituelles.",
             adminNote: "Capacité signature à surveiller selon le niveau global du personnage.",
@@ -88,6 +115,25 @@
         { value: "ultime", label: "Ultime" }
     ];
 
+    const CAPACITY_DISTANCE_LABELS = {
+        cac: "Corps-a-corps",
+        courte: "Courte portee",
+        moyenne: "Portee moyenne",
+        longue: "Longue portee"
+    };
+
+    const CAPACITY_TARGET_LABELS = {
+        mono: "Mono-cible",
+        zone: "Zone"
+    };
+
+    const CAPACITY_ZONE_LABELS = {
+        cone: "Cone",
+        cercle: "Cercle",
+        ligne: "Ligne",
+        autre: "Zone"
+    };
+
     const FALLBACK_SCROLL_EMOJI = String.fromCodePoint(0x2728);
     const FALLBACK_MAGIC_AFFINITIES = [
         { key: "feu", label: "Feu", emoji: String.fromCodePoint(0x1F525) },
@@ -107,6 +153,8 @@
         hidden: [15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
         none: [25, 30, 35, 40, 45, 50, 55, 60, 65, 70]
     };
+
+    const getUltimeAscensionCost = (level) => 100 + Math.max(0, Number(level) - 1) * 50;
 
     const normalizeText = window.astoriaListHelpers?.normalizeText || ((value) => String(value || "")
         .normalize("NFD")
@@ -418,6 +466,26 @@
         scrollAscensionCountEl.textContent = String(getScrollCountForAffinity(ascensionCounts, affinityKey));
     }
 
+    function getAscensionCostLabel(page, rank, nextLevel) {
+        const specialization = page?.fields?.magicSpecialization;
+        if (specialization && specialization !== "sorcellerie") return "Indisponible";
+        if (rank === "ultime") {
+            return `${getUltimeAscensionCost(nextLevel)} parchemins`;
+        }
+        const ascensionCost = getAscensionCostForPage(page);
+        if (ascensionCost == null) return "Indisponible";
+        if (ascensionCost === 0) return "Gratuit";
+        return `${ascensionCost} parchemins`;
+    }
+
+    function updateNewCapCostPreview() {
+        if (!capCostPreview) return;
+        const page = pages[activePageIndex];
+        const rank = capRankInput?.value || "mineur";
+        const label = getAscensionCostLabel(page, rank, 1);
+        capCostPreview.textContent = `Cout d'ascension : ${label}`;
+    }
+
     async function applyScrollCost({ category, affinityKey, cost }) {
         if (!currentCharacter?.id || !affinityKey || !Number.isFinite(cost)) {
             return { ok: false, reason: "missing-data" };
@@ -538,6 +606,28 @@
         return true;
     }
 
+    async function consumeAscensionForRank(page, rank, nextLevel) {
+        const specialization = page?.fields?.magicSpecialization;
+        if (specialization && specialization !== "sorcellerie") {
+            return true;
+        }
+        if (rank !== "ultime") {
+            return consumeAscensionForTechnique(page);
+        }
+        const affinityKey = page?.fields?.magicAffinityKey;
+        if (!affinityKey) {
+            alert("Affinite manquante pour calculer l'ascension.");
+            return false;
+        }
+        const cost = getUltimeAscensionCost(nextLevel || 1);
+        const result = await applyScrollCost({ category: "ascension", affinityKey, cost });
+        if (!result.ok) {
+            alert("Parchemins d'ascension insuffisants.");
+            return false;
+        }
+        return true;
+    }
+
     async function initSummary() {
         try {
             summaryModule = await import("./ui/character-summary.js");
@@ -594,6 +684,7 @@
         });
         updateAffinityDisplay(values);
         renderScrollMeter();
+        updateNewCapCostPreview();
     }
 
     function buildPayload() {
@@ -867,6 +958,16 @@
                 const level = Math.max(1, Number(cap.level) || normalizedUpgrades.length + 1);
                 cap.level = level;
                 cap.upgrades = normalizedUpgrades;
+                const capTags = [];
+                if (cap.target) {
+                    capTags.push(CAPACITY_TARGET_LABELS[cap.target] || cap.target);
+                }
+                if (cap.zoneType) {
+                    capTags.push(CAPACITY_ZONE_LABELS[cap.zoneType] || cap.zoneType);
+                }
+                if (cap.distance) {
+                    capTags.push(CAPACITY_DISTANCE_LABELS[cap.distance] || cap.distance);
+                }
                 const historyHtml = normalizedUpgrades.length
                     ? normalizedUpgrades.map((entry) => {
                         if (entry.snapshot) {
@@ -876,8 +977,13 @@
                                 <div class="magic-capacity-field-label">Niveau ${entry.level}</div>
                                 <div class="magic-capacity-field-value">${snap.name || cap.name}</div>
                                 <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.type || cap.type} • ${snap.rank || cap.rank}</div>
+                                <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.summary || cap.summary || "-"}</div>
+                                <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.target || cap.target || "-"} ${snap.zoneType || cap.zoneType || ""} ${snap.distance || cap.distance || ""}</div>
                                 <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.rp || "-"}</div>
                                 <div class="magic-capacity-field-value">${snap.effect || "-"}</div>
+                                <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.conditions || "-"}</div>
+                                <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.strengths || "-"}</div>
+                                <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.weaknesses || "-"}</div>
                                 <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.cost || "-"}</div>
                                 <div class="magic-capacity-field-value magic-capacity-field-value--dim">${snap.limits || "-"}</div>
                             </div>
@@ -897,45 +1003,150 @@
                 const rankOptions = CAPACITY_RANKS.map((option) =>
                     `<option value="${option.value}" ${option.value === cap.rank ? "selected" : ""}>${option.label}</option>`
                 ).join("");
+                const targetOptions = [
+                    { value: "mono", label: "Mono-cible" },
+                    { value: "zone", label: "Zone" }
+                ].map((option) => `<option value="${option.value}" ${option.value === cap.target ? "selected" : ""}>${option.label}</option>`).join("");
+                const zoneOptions = [
+                    { value: "", label: "Aucune" },
+                    { value: "cone", label: "Cone" },
+                    { value: "cercle", label: "Cercle" },
+                    { value: "ligne", label: "Ligne" },
+                    { value: "autre", label: "Autre" }
+                ].map((option) => `<option value="${option.value}" ${option.value === cap.zoneType ? "selected" : ""}>${option.label}</option>`).join("");
+                const distanceOptions = [
+                    { value: "cac", label: "Corps-a-corps (0-5m)" },
+                    { value: "courte", label: "Courte (5-10m)" },
+                    { value: "moyenne", label: "Moyenne (10-20m)" },
+                    { value: "longue", label: "Longue (20m+)" }
+                ].map((option) => `<option value="${option.value}" ${option.value === cap.distance ? "selected" : ""}>${option.label}</option>`).join("");
+                const activationOptions = [
+                    { value: "instantane", label: "Instantane" },
+                    { value: "court", label: "Court" },
+                    { value: "long", label: "Long" }
+                ].map((option) => `<option value="${option.value}" ${option.value === cap.activationTime ? "selected" : ""}>${option.label}</option>`).join("");
+                const durationOptions = [
+                    { value: "instantane", label: "Instantane" },
+                    { value: "persistant", label: "Persistant" }
+                ].map((option) => `<option value="${option.value}" ${option.value === cap.duration ? "selected" : ""}>${option.label}</option>`).join("");
+                const cooldownOptions = [
+                    { value: "aucun", label: "Aucun" },
+                    { value: "court", label: "Court" },
+                    { value: "moyen", label: "Moyen" },
+                    { value: "long", label: "Long" }
+                ].map((option) => `<option value="${option.value}" ${option.value === cap.cooldown ? "selected" : ""}>${option.label}</option>`).join("");
+                const nextLevel = level + 1;
                 const costLabel = ascensionCost == null
                     ? "Indisponible"
-                    : ascensionCost === 0
-                        ? "Gratuit"
-                        : `${ascensionCost} parchemins`;
+                    : cap.rank === "ultime"
+                        ? `${getUltimeAscensionCost(nextLevel)} parchemins`
+                        : ascensionCost === 0
+                            ? "Gratuit"
+                            : `${ascensionCost} parchemins`;
                 const upgradesSection = isSorcelleriePage ? `
                         <div class="magic-capacity-actions">
                             <button type="button" class="magic-btn magic-btn-outline tw-press" data-upgrade="${cap.id}">Améliorer</button>
                         </div>
                         <div class="magic-capacity-upgrade-form" data-upgrade-form="${cap.id}" hidden>
                             <div class="magic-capacity-upgrade-meta">Coût d'ascension : ${costLabel}</div>
-                            <div class="magic-capacity-upgrade-grid">
-                                <label class="magic-label magic-upgrade-field" for="magicUpgradeName-${cap.id}">Nom
-                                    <input id="magicUpgradeName-${cap.id}" class="magic-input tw-input" type="text" value="${cap.name}">
-                                </label>
-                                <label class="magic-label magic-upgrade-field" for="magicUpgradeType-${cap.id}">Type
-                                    <select id="magicUpgradeType-${cap.id}" class="magic-input tw-input">${typeOptions}</select>
-                                </label>
-                                <label class="magic-label magic-upgrade-field" for="magicUpgradeRank-${cap.id}">Rang
-                                    <select id="magicUpgradeRank-${cap.id}" class="magic-input tw-input">${rankOptions}</select>
-                                </label>
-                                <label class="magic-label magic-upgrade-field" for="magicUpgradeNote-${cap.id}">Note d'amélioration
-                                    <textarea id="magicUpgradeNote-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Ajoutez un rappel de l'amélioration (optionnel)."></textarea>
-                                </label>
-                            </div>
-                            <label class="magic-label magic-upgrade-field" for="magicUpgradeRp-${cap.id}">Description RP
-                                <textarea id="magicUpgradeRp-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.rp || ""}</textarea>
-                            </label>
-                            <label class="magic-label magic-upgrade-field" for="magicUpgradeEffect-${cap.id}">Effet mécanique
-                                <textarea id="magicUpgradeEffect-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.effect || ""}</textarea>
-                            </label>
-                            <div class="magic-capacity-upgrade-grid">
-                                <label class="magic-label magic-upgrade-field" for="magicUpgradeCost-${cap.id}">Coût
-                                    <input id="magicUpgradeCost-${cap.id}" class="magic-input tw-input" type="text" value="${cap.cost || ""}">
-                                </label>
-                                <label class="magic-label magic-upgrade-field" for="magicUpgradeLimits-${cap.id}">Limites
-                                    <input id="magicUpgradeLimits-${cap.id}" class="magic-input tw-input" type="text" value="${cap.limits || ""}">
-                                </label>
-                            </div>
+                            <details class="magic-accordion" open>
+                                <summary>Identite du sort</summary>
+                                <div class="magic-accordion-body">
+                                    <div class="magic-capacity-upgrade-grid">
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeName-${cap.id}">Nom
+                                            <input id="magicUpgradeName-${cap.id}" class="magic-input tw-input" type="text" value="${cap.name}">
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeSummary-${cap.id}">Apercu
+                                            <input id="magicUpgradeSummary-${cap.id}" class="magic-input tw-input" type="text" value="${cap.summary || ""}">
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeType-${cap.id}">Type
+                                            <select id="magicUpgradeType-${cap.id}" class="magic-input tw-input">${typeOptions}</select>
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeRank-${cap.id}">Rang
+                                            <select id="magicUpgradeRank-${cap.id}" class="magic-input tw-input">${rankOptions}</select>
+                                        </label>
+                                    </div>
+                                    <label class="magic-label magic-upgrade-field" for="magicUpgradeNote-${cap.id}">Note d'amélioration
+                                        <textarea id="magicUpgradeNote-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Ajoutez un rappel de l'amélioration (optionnel)."></textarea>
+                                    </label>
+                                </div>
+                            </details>
+                            <details class="magic-accordion">
+                                <summary>Portee &amp; zone</summary>
+                                <div class="magic-accordion-body">
+                                    <div class="magic-capacity-upgrade-grid">
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeTarget-${cap.id}">Ciblage
+                                            <select id="magicUpgradeTarget-${cap.id}" class="magic-input tw-input">${targetOptions}</select>
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeZone-${cap.id}">Type de zone
+                                            <select id="magicUpgradeZone-${cap.id}" class="magic-input tw-input">${zoneOptions}</select>
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeDistance-${cap.id}">Distance
+                                            <select id="magicUpgradeDistance-${cap.id}" class="magic-input tw-input">${distanceOptions}</select>
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeZoneDetail-${cap.id}">Precision
+                                            <input id="magicUpgradeZoneDetail-${cap.id}" class="magic-input tw-input" type="text" value="${cap.zoneDetail || ""}">
+                                        </label>
+                                    </div>
+                                </div>
+                            </details>
+                            <details class="magic-accordion">
+                                <summary>Temporalite</summary>
+                                <div class="magic-accordion-body">
+                                    <div class="magic-capacity-upgrade-grid">
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeActivation-${cap.id}">Activation
+                                            <select id="magicUpgradeActivation-${cap.id}" class="magic-input tw-input">${activationOptions}</select>
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeDuration-${cap.id}">Temps actif
+                                            <select id="magicUpgradeDuration-${cap.id}" class="magic-input tw-input">${durationOptions}</select>
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeCooldown-${cap.id}">Recharge
+                                            <select id="magicUpgradeCooldown-${cap.id}" class="magic-input tw-input">${cooldownOptions}</select>
+                                        </label>
+                                    </div>
+                                </div>
+                            </details>
+                            <details class="magic-accordion">
+                                <summary>Effets &amp; equilibre</summary>
+                                <div class="magic-accordion-body">
+                                    <label class="magic-label magic-upgrade-field" for="magicUpgradeEffect-${cap.id}">Effet mecanique
+                                        <textarea id="magicUpgradeEffect-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.effect || ""}</textarea>
+                                    </label>
+                                    <label class="magic-label magic-upgrade-field" for="magicUpgradeConditions-${cap.id}">Conditions
+                                        <textarea id="magicUpgradeConditions-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.conditions || ""}</textarea>
+                                    </label>
+                                    <div class="magic-capacity-upgrade-grid">
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeStrengths-${cap.id}">Forces
+                                            <textarea id="magicUpgradeStrengths-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.strengths || ""}</textarea>
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeWeaknesses-${cap.id}">Faiblesses
+                                            <textarea id="magicUpgradeWeaknesses-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.weaknesses || ""}</textarea>
+                                        </label>
+                                    </div>
+                                    <div class="magic-capacity-upgrade-grid">
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeCost-${cap.id}">Coût
+                                            <input id="magicUpgradeCost-${cap.id}" class="magic-input tw-input" type="text" value="${cap.cost || ""}">
+                                        </label>
+                                        <label class="magic-label magic-upgrade-field" for="magicUpgradeLimits-${cap.id}">Limites
+                                            <input id="magicUpgradeLimits-${cap.id}" class="magic-input tw-input" type="text" value="${cap.limits || ""}">
+                                        </label>
+                                    </div>
+                                </div>
+                            </details>
+                            <details class="magic-accordion">
+                                <summary>RP &amp; lisibilite adverse</summary>
+                                <div class="magic-accordion-body">
+                                    <label class="magic-label magic-upgrade-field" for="magicUpgradeRp-${cap.id}">Description RP
+                                        <textarea id="magicUpgradeRp-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.rp || ""}</textarea>
+                                    </label>
+                                    <label class="magic-label magic-upgrade-field" for="magicUpgradePerception-${cap.id}">Apercu perceptif
+                                        <textarea id="magicUpgradePerception-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.perception || ""}</textarea>
+                                    </label>
+                                    <label class="magic-label magic-upgrade-field" for="magicUpgradeTell-${cap.id}">Lisibilite adverse
+                                        <textarea id="magicUpgradeTell-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.tell || ""}</textarea>
+                                    </label>
+                                </div>
+                            </details>
                             ${isAdmin ? `
                                 <label class="magic-label" for="magicUpgradeAdmin-${cap.id}">Note admin</label>
                                 <textarea id="magicUpgradeAdmin-${cap.id}" class="magic-input tw-input--textarea tw-input" rows="2">${cap.adminNote || ""}</textarea>
@@ -965,6 +1176,7 @@
                             <span class="magic-capacity-meta">${cap.type.charAt(0).toUpperCase() + cap.type.slice(1)} • ${cap.rank}</span>
                             <div class="magic-capacity-tags">
                                 ${cap.stats.map((s) => `<span class="magic-tag">${s}</span>`).join("")}
+                                ${capTags.map((tag) => `<span class="magic-tag">${tag}</span>`).join("")}
                                 <span class="magic-tag magic-tag--rank">${cap.rank}</span>
                                 ${levelTag}
                             </div>
@@ -973,12 +1185,45 @@
                     </button>
                     <div class="magic-capacity-body">
                         <div>
+                            <div class="magic-capacity-field-label">Apercu</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.summary || "-"}</div>
+                        </div>
+                        <div>
+                            <div class="magic-capacity-field-label">Portee &amp; zone</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${CAPACITY_TARGET_LABELS[cap.target] || cap.target || "-"}${cap.zoneType ? ` • ${CAPACITY_ZONE_LABELS[cap.zoneType] || cap.zoneType}` : ""}${cap.distance ? ` • ${CAPACITY_DISTANCE_LABELS[cap.distance] || cap.distance}` : ""}</div>
+                            ${cap.zoneDetail ? `<div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.zoneDetail}</div>` : ""}
+                        </div>
+                        <div>
+                            <div class="magic-capacity-field-label">Temporalite</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.activationTime || "-"} • ${cap.duration || "-"} • ${cap.cooldown || "-"}</div>
+                        </div>
+                        <div>
                             <div class="magic-capacity-field-label">Description RP</div>
                             <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.rp}</div>
                         </div>
                         <div>
+                            <div class="magic-capacity-field-label">Apercu perceptif</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.perception || "-"}</div>
+                        </div>
+                        <div>
+                            <div class="magic-capacity-field-label">Lisibilite adverse</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.tell || "-"}</div>
+                        </div>
+                        <div>
                             <div class="magic-capacity-field-label">Effet mécanique</div>
                             <div class="magic-capacity-field-value">${cap.effect}</div>
+                        </div>
+                        <div>
+                            <div class="magic-capacity-field-label">Conditions</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.conditions || "-"}</div>
+                        </div>
+                        <div>
+                            <div class="magic-capacity-field-label">Forces</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.strengths || "-"}</div>
+                        </div>
+                        <div>
+                            <div class="magic-capacity-field-label">Faiblesses</div>
+                            <div class="magic-capacity-field-value magic-capacity-field-value--dim">${cap.weaknesses || "-"}</div>
                         </div>
                         <div>
                             <div class="magic-capacity-field-label">Coût</div>
@@ -1017,11 +1262,24 @@
                     const historyPanel = li.querySelector(`[data-history-panel="${cap.id}"]`);
 
                     const upgradeName = upgradeForm?.querySelector(`#magicUpgradeName-${cap.id}`);
+                    const upgradeSummary = upgradeForm?.querySelector(`#magicUpgradeSummary-${cap.id}`);
                     const upgradeType = upgradeForm?.querySelector(`#magicUpgradeType-${cap.id}`);
                     const upgradeRank = upgradeForm?.querySelector(`#magicUpgradeRank-${cap.id}`);
                     const upgradeNote = upgradeForm?.querySelector(`#magicUpgradeNote-${cap.id}`);
+                    const upgradeTarget = upgradeForm?.querySelector(`#magicUpgradeTarget-${cap.id}`);
+                    const upgradeZone = upgradeForm?.querySelector(`#magicUpgradeZone-${cap.id}`);
+                    const upgradeZoneDetail = upgradeForm?.querySelector(`#magicUpgradeZoneDetail-${cap.id}`);
+                    const upgradeDistance = upgradeForm?.querySelector(`#magicUpgradeDistance-${cap.id}`);
+                    const upgradeActivation = upgradeForm?.querySelector(`#magicUpgradeActivation-${cap.id}`);
+                    const upgradeDuration = upgradeForm?.querySelector(`#magicUpgradeDuration-${cap.id}`);
+                    const upgradeCooldown = upgradeForm?.querySelector(`#magicUpgradeCooldown-${cap.id}`);
                     const upgradeRp = upgradeForm?.querySelector(`#magicUpgradeRp-${cap.id}`);
+                    const upgradePerception = upgradeForm?.querySelector(`#magicUpgradePerception-${cap.id}`);
+                    const upgradeTell = upgradeForm?.querySelector(`#magicUpgradeTell-${cap.id}`);
                     const upgradeEffect = upgradeForm?.querySelector(`#magicUpgradeEffect-${cap.id}`);
+                    const upgradeConditions = upgradeForm?.querySelector(`#magicUpgradeConditions-${cap.id}`);
+                    const upgradeStrengths = upgradeForm?.querySelector(`#magicUpgradeStrengths-${cap.id}`);
+                    const upgradeWeaknesses = upgradeForm?.querySelector(`#magicUpgradeWeaknesses-${cap.id}`);
                     const upgradeCost = upgradeForm?.querySelector(`#magicUpgradeCost-${cap.id}`);
                     const upgradeLimits = upgradeForm?.querySelector(`#magicUpgradeLimits-${cap.id}`);
                     const upgradeAdmin = upgradeForm?.querySelector(`#magicUpgradeAdmin-${cap.id}`);
@@ -1066,29 +1324,61 @@
                         upgradeSave.addEventListener("click", async (event) => {
                             event.stopPropagation();
                             const nextName = upgradeName?.value.trim() || cap.name;
-                            if (!nextName) {
-                                alert("Ajoutez un nom pour la capacité.");
+                            const nextSummary = upgradeSummary?.value.trim() || "";
+                            const nextRp = upgradeRp?.value.trim() || "";
+                            const nextEffect = upgradeEffect?.value.trim() || "";
+                            if (!nextName || !nextSummary || !nextRp || !nextEffect) {
+                                alert("Nom, aperçu, description RP et effet mécanique sont requis.");
                                 return;
                             }
-                            const ok = await consumeAscensionForTechnique(pages[activePageIndex]);
+                            const previousLevel = Math.max(1, Number(cap.level) || normalizedUpgrades.length + 1);
+                            const nextRank = upgradeRank?.value || cap.rank;
+                            const nextLevel = previousLevel + 1;
+                            const ok = await consumeAscensionForRank(pages[activePageIndex], nextRank, nextLevel);
                             if (!ok) return;
                             const snapshot = {
                                 name: cap.name,
                                 type: cap.type,
                                 rank: cap.rank,
+                                summary: cap.summary,
+                                target: cap.target,
+                                zoneType: cap.zoneType,
+                                zoneDetail: cap.zoneDetail,
+                                distance: cap.distance,
+                                activationTime: cap.activationTime,
+                                duration: cap.duration,
+                                cooldown: cap.cooldown,
                                 rp: cap.rp,
+                                perception: cap.perception,
+                                tell: cap.tell,
                                 effect: cap.effect,
+                                conditions: cap.conditions,
+                                strengths: cap.strengths,
+                                weaknesses: cap.weaknesses,
                                 cost: cap.cost,
                                 limits: cap.limits,
                                 adminNote: cap.adminNote
                             };
-                            const previousLevel = Math.max(1, Number(cap.level) || normalizedUpgrades.length + 1);
+                            
                             cap.level = previousLevel + 1;
                             cap.name = nextName;
+                            cap.summary = nextSummary;
                             cap.type = upgradeType?.value || cap.type;
                             cap.rank = upgradeRank?.value || cap.rank;
-                            cap.rp = upgradeRp?.value.trim() || "";
-                            cap.effect = upgradeEffect?.value.trim() || "";
+                            cap.target = upgradeTarget?.value || cap.target || "mono";
+                            cap.zoneType = upgradeZone?.value || cap.zoneType || "";
+                            cap.zoneDetail = upgradeZoneDetail?.value.trim() || "";
+                            cap.distance = upgradeDistance?.value || cap.distance || "cac";
+                            cap.activationTime = upgradeActivation?.value || cap.activationTime || "instantane";
+                            cap.duration = upgradeDuration?.value || cap.duration || "instantane";
+                            cap.cooldown = upgradeCooldown?.value || cap.cooldown || "aucun";
+                            cap.rp = nextRp;
+                            cap.perception = upgradePerception?.value.trim() || "";
+                            cap.tell = upgradeTell?.value.trim() || "";
+                            cap.effect = nextEffect;
+                            cap.conditions = upgradeConditions?.value.trim() || "";
+                            cap.strengths = upgradeStrengths?.value.trim() || "";
+                            cap.weaknesses = upgradeWeaknesses?.value.trim() || "";
                             cap.cost = upgradeCost?.value.trim() || "";
                             cap.limits = upgradeLimits?.value.trim() || "";
                             if (upgradeAdmin) {
@@ -1117,30 +1407,66 @@
     function setCapacityFormOpen(open) {
         if (!capacityForm) return;
         capacityForm.hidden = !open;
-        if (open && capNameInput) capNameInput.focus();
+        if (open) {
+            updateNewCapCostPreview();
+            capNameInput?.focus();
+        }
     }
 
     function resetCapacityForm() {
         if (capNameInput) capNameInput.value = "";
+        if (capSummaryInput) capSummaryInput.value = "";
         if (capTypeInput) capTypeInput.value = "offensif";
         if (capRankInput) capRankInput.value = "mineur";
+        if (capTargetInput) capTargetInput.value = "mono";
+        if (capZoneInput) capZoneInput.value = "";
+        if (capZoneDetailInput) capZoneDetailInput.value = "";
+        if (capDistanceInput) capDistanceInput.value = "cac";
+        if (capActivationInput) capActivationInput.value = "instantane";
+        if (capDurationInput) capDurationInput.value = "instantane";
+        if (capCooldownInput) capCooldownInput.value = "aucun";
         if (capRpInput) capRpInput.value = "";
+        if (capPerceptionInput) capPerceptionInput.value = "";
+        if (capTellInput) capTellInput.value = "";
         if (capEffectInput) capEffectInput.value = "";
+        if (capConditionsInput) capConditionsInput.value = "";
+        if (capStrengthsInput) capStrengthsInput.value = "";
+        if (capWeaknessesInput) capWeaknessesInput.value = "";
         if (capCostInput) capCostInput.value = "";
         if (capLimitsInput) capLimitsInput.value = "";
+        updateNewCapCostPreview();
     }
 
     function buildCapacityFromForm() {
         const name = capNameInput?.value.trim();
-        if (!name) return null;
+        const summary = capSummaryInput?.value.trim() || "";
+        const rp = capRpInput?.value.trim() || "";
+        const effect = capEffectInput?.value.trim() || "";
+        if (!name || !summary || !rp || !effect) {
+            alert("Nom, aperçu, description RP et effet mécanique sont requis.");
+            return null;
+        }
         return {
             id: `cap-${Date.now()}`,
             name,
             type: capTypeInput?.value || "offensif",
             rank: capRankInput?.value || "mineur",
             stats: [],
-            rp: capRpInput?.value.trim() || "",
-            effect: capEffectInput?.value.trim() || "",
+            summary,
+            target: capTargetInput?.value || "mono",
+            zoneType: capZoneInput?.value || "",
+            zoneDetail: capZoneDetailInput?.value.trim() || "",
+            distance: capDistanceInput?.value || "cac",
+            activationTime: capActivationInput?.value || "instantane",
+            duration: capDurationInput?.value || "instantane",
+            cooldown: capCooldownInput?.value || "aucun",
+            rp,
+            perception: capPerceptionInput?.value.trim() || "",
+            tell: capTellInput?.value.trim() || "",
+            effect,
+            conditions: capConditionsInput?.value.trim() || "",
+            strengths: capStrengthsInput?.value.trim() || "",
+            weaknesses: capWeaknessesInput?.value.trim() || "",
             cost: capCostInput?.value.trim() || "",
             limits: capLimitsInput?.value.trim() || "",
             adminNote: "",
@@ -1220,6 +1546,10 @@
         });
     }
 
+    if (capRankInput) {
+        capRankInput.addEventListener("change", updateNewCapCostPreview);
+    }
+
     if (capSaveBtn) {
         capSaveBtn.addEventListener("click", async () => {
             const newCap = buildCapacityFromForm();
@@ -1228,7 +1558,7 @@
                 return;
             }
             if (!pages[activePageIndex]) return;
-            const ok = await consumeAscensionForTechnique(pages[activePageIndex]);
+            const ok = await consumeAscensionForRank(pages[activePageIndex], newCap.rank, newCap.level);
             if (!ok) return;
             pages[activePageIndex].capacities = pages[activePageIndex].capacities || [];
             pages[activePageIndex].capacities.push(newCap);

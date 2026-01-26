@@ -224,47 +224,157 @@
                                 </div>
                             </div>
                             <div class="magic-capacity-form" id="magicCapacityForm" hidden>
-                                <div class="magic-form-row">
-                                    <label class="magic-label" for="magicNewCapName">Nom de la capacite</label>
-                                    <input id="magicNewCapName" class="magic-input tw-input" type="text" placeholder="Ex : Lame eclipse" />
-                                </div>
-                                <div class="magic-form-row magic-form-row--split">
-                                    <div class="magic-form-field">
-                                        <label class="magic-label" for="magicNewCapType">Type</label>
-                                        <select id="magicNewCapType" class="magic-input tw-input">
-                                            <option value="offensif">Offensif</option>
-                                            <option value="defensif">Defensif</option>
-                                            <option value="soutien">Soutien</option>
-                                            <option value="utilitaire">Utilitaire</option>
-                                        </select>
+                                <details class="magic-accordion" open>
+                                    <summary>Identite du sort</summary>
+                                    <div class="magic-accordion-body">
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapName">Nom du sort</label>
+                                            <input id="magicNewCapName" class="magic-input tw-input" type="text" placeholder="Ex : Lame eclipse" />
+                                        </div>
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapSummary">Apercu synthetique</label>
+                                            <input id="magicNewCapSummary" class="magic-input tw-input" type="text" placeholder="Resume court pour lecture rapide" />
+                                        </div>
+                                        <div class="magic-form-row magic-form-row--split">
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapType">Type</label>
+                                                <select id="magicNewCapType" class="magic-input tw-input">
+                                                    <option value="offensif">Offensif</option>
+                                                    <option value="defensif">Defensif</option>
+                                                    <option value="soutien">Soutien</option>
+                                                    <option value="utilitaire">Utilitaire</option>
+                                                </select>
+                                            </div>
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapRank">Rang</label>
+                                                <select id="magicNewCapRank" class="magic-input tw-input">
+                                                    <option value="mineur">Mineur</option>
+                                                    <option value="signature">Signature</option>
+                                                    <option value="ultime">Ultime</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="magic-form-field">
-                                        <label class="magic-label" for="magicNewCapRank">Rang</label>
-                                        <select id="magicNewCapRank" class="magic-input tw-input">
-                                            <option value="mineur">Mineur</option>
-                                            <option value="signature">Signature</option>
-                                            <option value="ultime">Ultime</option>
-                                        </select>
+                                </details>
+                                <details class="magic-accordion">
+                                    <summary>Portee &amp; zone</summary>
+                                    <div class="magic-accordion-body">
+                                        <div class="magic-form-row magic-form-row--split">
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapTarget">Ciblage</label>
+                                                <select id="magicNewCapTarget" class="magic-input tw-input">
+                                                    <option value="mono">Mono-cible</option>
+                                                    <option value="zone">Zone</option>
+                                                </select>
+                                            </div>
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapZone">Type de zone</label>
+                                                <select id="magicNewCapZone" class="magic-input tw-input">
+                                                    <option value="">Aucune</option>
+                                                    <option value="cone">Cone</option>
+                                                    <option value="cercle">Cercle</option>
+                                                    <option value="ligne">Ligne</option>
+                                                    <option value="autre">Autre</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapDistance">Distance</label>
+                                            <select id="magicNewCapDistance" class="magic-input tw-input">
+                                                <option value="cac">Corps-a-corps (0-5m)</option>
+                                                <option value="courte">Courte (5-10m)</option>
+                                                <option value="moyenne">Moyenne (10-20m)</option>
+                                                <option value="longue">Longue (20m+)</option>
+                                            </select>
+                                        </div>
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapZoneDetail">Precision de zone (optionnel)</label>
+                                            <input id="magicNewCapZoneDetail" class="magic-input tw-input" type="text" placeholder="Ex : cone 10m, cercle 6m..." />
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="magic-form-row">
-                                    <label class="magic-label" for="magicNewCapRp">Description RP</label>
-                                    <textarea id="magicNewCapRp" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Declenchement, ambiance, etc."></textarea>
-                                </div>
-                                <div class="magic-form-row">
-                                    <label class="magic-label" for="magicNewCapEffect">Effet mecanique</label>
-                                    <textarea id="magicNewCapEffect" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Degats, effets, duree..."></textarea>
-                                </div>
-                                <div class="magic-form-row magic-form-row--split">
-                                    <div class="magic-form-field">
-                                        <label class="magic-label" for="magicNewCapCost">Cout</label>
-                                        <input id="magicNewCapCost" class="magic-input tw-input" type="text" placeholder="Mana, fatigue..." />
+                                </details>
+                                <details class="magic-accordion">
+                                    <summary>Temporalite</summary>
+                                    <div class="magic-accordion-body">
+                                        <div class="magic-form-row magic-form-row--split">
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapActivation">Temps d'activation</label>
+                                                <select id="magicNewCapActivation" class="magic-input tw-input">
+                                                    <option value="instantane">Instantane</option>
+                                                    <option value="court">Court</option>
+                                                    <option value="long">Long</option>
+                                                </select>
+                                            </div>
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapDuration">Temps actif</label>
+                                                <select id="magicNewCapDuration" class="magic-input tw-input">
+                                                    <option value="instantane">Instantane</option>
+                                                    <option value="persistant">Persistant</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapCooldown">Temps de recharge</label>
+                                            <select id="magicNewCapCooldown" class="magic-input tw-input">
+                                                <option value="aucun">Aucun</option>
+                                                <option value="court">Court</option>
+                                                <option value="moyen">Moyen</option>
+                                                <option value="long">Long</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="magic-form-field">
-                                        <label class="magic-label" for="magicNewCapLimits">Limites</label>
-                                        <input id="magicNewCapLimits" class="magic-input tw-input" type="text" placeholder="Conditions, contraintes..." />
+                                </details>
+                                <details class="magic-accordion">
+                                    <summary>Effets &amp; equilibre</summary>
+                                    <div class="magic-accordion-body">
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapEffect">Effet mecanique</label>
+                                            <textarea id="magicNewCapEffect" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Degats, effets, duree..."></textarea>
+                                        </div>
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapConditions">Conditions d'utilisation</label>
+                                            <textarea id="magicNewCapConditions" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Arme, posture, etat requis..."></textarea>
+                                        </div>
+                                        <div class="magic-form-row magic-form-row--split">
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapStrengths">Forces</label>
+                                                <textarea id="magicNewCapStrengths" class="magic-input tw-input--textarea tw-input" rows="2"></textarea>
+                                            </div>
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapWeaknesses">Faiblesses</label>
+                                                <textarea id="magicNewCapWeaknesses" class="magic-input tw-input--textarea tw-input" rows="2"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="magic-form-row magic-form-row--split">
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapCost">Cout</label>
+                                                <input id="magicNewCapCost" class="magic-input tw-input" type="text" placeholder="Mana, fatigue..." />
+                                            </div>
+                                            <div class="magic-form-field">
+                                                <label class="magic-label" for="magicNewCapLimits">Limites</label>
+                                                <input id="magicNewCapLimits" class="magic-input tw-input" type="text" placeholder="Conditions, contraintes..." />
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                </details>
+                                <details class="magic-accordion">
+                                    <summary>RP &amp; lisibilite adverse</summary>
+                                    <div class="magic-accordion-body">
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapRp">Description RP</label>
+                                            <textarea id="magicNewCapRp" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Declenchement, ambiance, etc."></textarea>
+                                        </div>
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapPerception">Apercu perceptif</label>
+                                            <textarea id="magicNewCapPerception" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Signes, aura, posture, chant..."></textarea>
+                                        </div>
+                                        <div class="magic-form-row">
+                                            <label class="magic-label" for="magicNewCapTell">Lisibilite adverse</label>
+                                            <textarea id="magicNewCapTell" class="magic-input tw-input--textarea tw-input" rows="2" placeholder="Comment l'adversaire comprend qu'un sort est lance."></textarea>
+                                        </div>
+                                    </div>
+                                </details>
+                                <div class="magic-capacity-upgrade-meta" id="magicNewCapCostPreview">Cout d'ascension : -</div>
                                 <div class="magic-capacity-form-actions">
                                     <button type="button" class="magic-btn magic-btn-outline tw-press tw-btn-ghost" id="magicCapacityCancel">Annuler</button>
                                     <button type="button" class="magic-btn magic-btn-primary tw-press tw-btn" id="magicCapacitySave">Ajouter</button>
