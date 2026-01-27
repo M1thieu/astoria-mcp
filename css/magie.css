@@ -86,29 +86,48 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    position: relative;
+}
+
+.magic-page-tab::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: -1;
 }
 
 .magic-page-tab:hover {
     transform: translateY(-2px) scale(1.05);
-    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
     color: var(--color-primary);
+}
+
+.magic-page-tab:hover::before {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 }
 
 .magic-page-tab:active {
     transform: translateY(0) scale(0.98);
-    transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.magic-page-tab:active::before {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .magic-page-tab--active {
     background-image: url("../assets/images/Bouton_Competences.png");
     color: var(--color-white);
     transform: scale(1.1);
-    filter: drop-shadow(0 8px 16px rgba(216, 27, 96, 0.4));
-    text-shadow: 0 2px 6px rgba(216, 27, 96, 0.35);
+}
+
+.magic-page-tab--active::before {
+    box-shadow: 0 8px 16px rgba(216, 27, 96, 0.4);
 }
 
 .magic-page-tab--add {

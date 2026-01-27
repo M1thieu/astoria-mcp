@@ -445,12 +445,9 @@ function buildRow(item, globalIndex) {
             </td>
             <td class="effect-cell" data-label="Effet">${highlightedEffect}</td>
             <td class="action-cell" data-label="Action">
-                ${(() => {
-                    console.log('[CODEX DEBUG] buildRow - astoriaIsAdmin:', window.astoriaIsAdmin, 'for item:', name);
-                    return window.astoriaIsAdmin
-                        ? `<button class="edit-btn" type="button" data-edit-index="${globalIndex}" title="Modifier l'objet">Modifier</button>`
-                        : `<button class="copy-btn" type="button" data-copy-text="${escapeForAttribute(copyText)}">Copy</button>`;
-                })()}
+                ${window.astoriaIsAdmin
+                    ? `<button class="edit-btn" type="button" data-edit-index="${globalIndex}" title="Modifier l'objet">Modifier</button>`
+                    : `<button class="copy-btn" type="button" data-copy-text="${escapeForAttribute(copyText)}">Copy</button>`}
             </td>
         </tr>
     `;
@@ -1199,7 +1196,6 @@ window.astoriaCodex = {
         return currentData[index];
     },
     refresh() {
-        console.log('[CODEX DEBUG] refresh() called - clearing rowCache');
         rowCache.clear();
         applyFilters();
         populateCategoryCounts();
