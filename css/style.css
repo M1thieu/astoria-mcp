@@ -2819,3 +2819,41 @@ button:hover .shortcut-icon {
     gap: var(--space-2);
     margin-top: var(--space-3);
 }
+
+/* =====================================================================
+   PAGE BACK BUTTON - Based on nokorah style (the good one!)
+   ===================================================================== */
+.page-back {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+
+/* =====================================================================
+   PAGE BACK BUTTON - Good looking style (like nokorah)
+   ===================================================================== */
+.page-back {
+    text-decoration: none;
+    font-weight: 700;
+    background: #fff;
+    border-radius: 999px;
+    padding: 0.65rem 1.2rem;
+    border: 2px solid rgba(216, 27, 96, 0.2);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-primary-dark);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    font-size: var(--text-sm-plus);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+}
+
+.page-back:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.page-back:active {
+    transform: translateY(0);
+}
