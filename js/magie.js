@@ -297,7 +297,13 @@
                 affinities: { ...(profileProgress.affinities || {}) },
                 enabledAffinities: Array.isArray(profileProgress.enabledAffinities)
                     ? [...profileProgress.enabledAffinities]
-                    : []
+                    : [],
+                aliceStats: {
+                    puissanceMinorUsed: Number(profileProgress.aliceStats?.puissanceMinorUsed) || 0,
+                    puissanceUltimateUsed: Number(profileProgress.aliceStats?.puissanceUltimateUsed) || 0,
+                    controleMinorUsed: Number(profileProgress.aliceStats?.controleMinorUsed) || 0,
+                    controleUltimateUsed: Number(profileProgress.aliceStats?.controleUltimateUsed) || 0
+                }
             };
         }
         try {
@@ -309,12 +315,27 @@
                         affinities: { ...(parsed.affinities || {}) },
                         enabledAffinities: Array.isArray(parsed.enabledAffinities)
                             ? [...parsed.enabledAffinities]
-                            : []
+                            : [],
+                        aliceStats: {
+                            puissanceMinorUsed: Number(parsed.aliceStats?.puissanceMinorUsed) || 0,
+                            puissanceUltimateUsed: Number(parsed.aliceStats?.puissanceUltimateUsed) || 0,
+                            controleMinorUsed: Number(parsed.aliceStats?.controleMinorUsed) || 0,
+                            controleUltimateUsed: Number(parsed.aliceStats?.controleUltimateUsed) || 0
+                        }
                     };
                 }
             }
         } catch {}
-        return { affinities: {}, enabledAffinities: [] };
+        return {
+            affinities: {},
+            enabledAffinities: [],
+            aliceStats: {
+                puissanceMinorUsed: 0,
+                puissanceUltimateUsed: 0,
+                controleMinorUsed: 0,
+                controleUltimateUsed: 0
+            }
+        };
     }
 
     function persistMagicProgress(progress, { persistProfile = false } = {}) {
@@ -487,10 +508,23 @@
         const puissance = Number(competencesData?.alicePuissance) || 0;
         const controle = Number(competencesData?.aliceControle) || 0;
 
-        const puissanceMinor = Math.floor(puissance / 5);
-        const puissanceUltimate = Math.floor(puissance / 10);
-        const controleMinor = Math.floor(controle / 5);
-        const controleUltimate = Math.floor(controle / 10);
+        const progress = loadMagicProgress();
+        const used = progress.aliceStats || {
+            puissanceMinorUsed: 0,
+            puissanceUltimateUsed: 0,
+            controleMinorUsed: 0,
+            controleUltimateUsed: 0
+        };
+
+        const puissanceMinorTotal = Math.floor(puissance / 5);
+        const puissanceUltimateTotal = Math.floor(puissance / 10);
+        const controleMinorTotal = Math.floor(controle / 5);
+        const controleUltimateTotal = Math.floor(controle / 10);
+
+        const puissanceMinor = Math.max(0, puissanceMinorTotal - used.puissanceMinorUsed);
+        const puissanceUltimate = Math.max(0, puissanceUltimateTotal - used.puissanceUltimateUsed);
+        const controleMinor = Math.max(0, controleMinorTotal - used.controleMinorUsed);
+        const controleUltimate = Math.max(0, controleUltimateTotal - used.controleUltimateUsed);
 
         return {
             puissance,
@@ -773,17 +807,45 @@
     async function consumeAscensionForRank(page, rank, nextLevel) {
         const specialization = page?.fields?.magicSpecialization;
 
-        // Alice validation
+        // Alice validation and consumption
         if (specialization === "alice") {
-            // For Alice: check if they have available upgrades OR spells
-            const hasUpgrades = checkAliceUpgradesAvailable(rank);
-            const hasSpells = checkAliceSpellsAvailable(rank);
+            const isMinor = rank === "mineur";
+            const isNewSpell = nextLevel === 1;
+            const stats = getAliceStats();
+            const progress = loadMagicProgress();
 
-            if (!hasUpgrades && !hasSpells) {
-                const rankLabel = rank === "mineur" ? "mineur" : "ultime";
-                alert(`Vous n'avez pas de points disponibles pour ajouter un sort ${rankLabel}.\n\nAugmentez votre Puissance Alice ou Contrôle Alice dans la fiche de compétences.`);
-                return false;
+            if (isNewSpell) {
+                // Creating new spell - consume Contrôle
+                const availableSpells = isMinor ? stats.controleMinor : stats.controleUltimate;
+                if (availableSpells <= 0) {
+                    const rankLabel = isMinor ? "mineur" : "ultime";
+                    alert(`Vous n'avez pas de sorts ${rankLabel} disponibles.\n\nAugmentez votre Contrôle Alice dans la fiche de compétences.`);
+                    return false;
+                }
+                // Consume one spell point
+                if (isMinor) {
+                    progress.aliceStats.controleMinorUsed = (progress.aliceStats.controleMinorUsed || 0) + 1;
+                } else {
+                    progress.aliceStats.controleUltimateUsed = (progress.aliceStats.controleUltimateUsed || 0) + 1;
+                }
+            } else {
+                // Upgrading existing spell - consume Puissance
+                const availableUpgrades = isMinor ? stats.puissanceMinor : stats.puissanceUltimate;
+                if (availableUpgrades <= 0) {
+                    const rankLabel = isMinor ? "mineure" : "ultime";
+                    alert(`Vous n'avez pas d'améliorations ${rankLabel} disponibles.\n\nAugmentez votre Puissance Alice dans la fiche de compétences.`);
+                    return false;
+                }
+                // Consume one upgrade point
+                if (isMinor) {
+                    progress.aliceStats.puissanceMinorUsed = (progress.aliceStats.puissanceMinorUsed || 0) + 1;
+                } else {
+                    progress.aliceStats.puissanceUltimateUsed = (progress.aliceStats.puissanceUltimateUsed || 0) + 1;
+                }
             }
+
+            persistMagicProgress(progress, { persistProfile: true });
+            renderScrollMeter(); // Update the display
             return true;
         }
 
@@ -1243,7 +1305,11 @@
                             ? "Gratuit"
                             : `${ascensionCost} parchemins`;
                 const canEditCapacity = isAdmin || !cap.locked;
-                const upgradesSection = isSorcelleriePage ? `
+                const showUpgrades = isSorcelleriePage
+                    || currentPage?.fields?.magicSpecialization === "alice"
+                    || currentPage?.fields?.magicSpecialization === "meister"
+                    || currentPage?.fields?.magicSpecialization === "eater";
+                const upgradesSection = showUpgrades ? `
                         <div class="magic-capacity-actions">
                             <button type="button" class="magic-btn magic-btn-outline tw-press${canEditCapacity ? "" : " is-disabled"}" data-upgrade="${cap.id}" ${canEditCapacity ? "" : "disabled"}>Améliorer</button>
                         </div>
@@ -1361,7 +1427,7 @@
                         </div>
                     `
                     : "";
-                const levelTag = isSorcelleriePage
+                const levelTag = showUpgrades
                     ? `<span class="magic-tag magic-tag--level" data-history="${cap.id}" role="button" tabindex="0">Niveau ${level}</span>`
                     : "";
                 const li = document.createElement("li");
