@@ -2821,16 +2821,7 @@ button:hover .shortcut-icon {
 }
 
 /* =====================================================================
-   PAGE BACK BUTTON - Based on nokorah style (the good one!)
-   ===================================================================== */
-.page-back {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-
-/* =====================================================================
-   PAGE BACK BUTTON - Good looking style (like nokorah)
+   PAGE BACK BUTTON
    ===================================================================== */
 .page-back {
     text-decoration: none;
