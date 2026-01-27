@@ -116,6 +116,8 @@ const state = {
     uploadDataUrl: ""
 };
 
+let bonusesExpanded = false;
+
 function readJson(key, fallback) {
     try {
         const raw = localStorage.getItem(key);
@@ -432,39 +434,27 @@ function buildBonusChips() {
         return (a.name || "").localeCompare(b.name || "");
     });
 
-    // Show first 5 bonuses
     const MAX_DISPLAY = 5;
-    const displayBonuses = sorted.slice(0, MAX_DISPLAY);
     const hasMore = sorted.length > MAX_DISPLAY;
+
+    // Show all or first 5 based on expanded state
+    const displayBonuses = bonusesExpanded ? sorted : sorted.slice(0, MAX_DISPLAY);
 
     const chips = displayBonuses
         .map((bonus) => `<span class="bonus-chip">+${bonus.points} ${bonus.name}</span>`)
         .join("");
 
-    const moreButton = hasMore
-        ? `<span class="bonus-chip bonus-chip--more" role="button" tabindex="0" data-action="show-all-bonuses">...</span>`
+    // Show expand/collapse button if there are more than 5
+    const toggleButton = hasMore
+        ? `<span class="bonus-chip bonus-chip--more" role="button" tabindex="0" data-action="toggle-bonuses">${bonusesExpanded ? '−' : '...'}</span>`
         : '';
 
-    return chips + moreButton;
+    return chips + toggleButton;
 }
 
-function showAllBonuses() {
-    if (!state.bonuses.length) return;
-
-    // Sort by points descending, then alphabetically
-    const sorted = [...state.bonuses].sort((a, b) => {
-        const pointsDiff = (Number(b.points) || 0) - (Number(a.points) || 0);
-        if (pointsDiff !== 0) return pointsDiff;
-        return (a.name || "").localeCompare(b.name || "");
-    });
-
-    const bonusList = sorted
-        .map((bonus) => `+${bonus.points} ${bonus.name}`)
-        .join('\n');
-
-    const totalPoints = sorted.reduce((sum, bonus) => sum + (Number(bonus.points) || 0), 0);
-
-    alert(`Tous les bonus (${sorted.length})\nTotal: ${totalPoints} points\n\n${bonusList}`);
+function toggleBonuses() {
+    bonusesExpanded = !bonusesExpanded;
+    renderAll();
 }
 
 function buildAccessoryTag(active) {
@@ -569,18 +559,18 @@ function renderActive(root) {
     const appearanceBtn = root.querySelector("[data-action='appearance']");
     const abandonBtn = root.querySelector("[data-action='abandon']");
     const rainbowToggle = root.querySelector("#legendaryRainbowToggle");
-    const showAllBonusesBtn = root.querySelector("[data-action='show-all-bonuses']");
+    const toggleBonusesBtn = root.querySelector("[data-action='toggle-bonuses']");
 
     if (rarityBtn) rarityBtn.addEventListener("click", handleRarityUpgrade);
     if (statsBtn) statsBtn.addEventListener("click", handleStatsUpgrade);
     if (appearanceBtn) appearanceBtn.addEventListener("click", openAppearanceModal);
     if (abandonBtn) abandonBtn.addEventListener("click", openFarewellModal);
-    if (showAllBonusesBtn) {
-        showAllBonusesBtn.addEventListener("click", showAllBonuses);
-        showAllBonusesBtn.addEventListener("keydown", (e) => {
+    if (toggleBonusesBtn) {
+        toggleBonusesBtn.addEventListener("click", toggleBonuses);
+        toggleBonusesBtn.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                showAllBonuses();
+                toggleBonuses();
             }
         });
     }
