@@ -79,8 +79,9 @@
                         </div>
                     </div>
                     <div class="magic-scroll-meter" id="magicMeisterSoulsMeter" aria-label="Âmes Meister" style="display: none;">
-                        <span class="magic-scroll-pill">Âmes de progression: <strong id="magicMeisterProgSouls">0</strong>%</span>
-                        <span class="magic-scroll-pill">Âmes d'utilisation: <strong id="magicMeisterConsoSouls">0</strong></span>
+                        <span class="magic-scroll-pill">Fragments mineurs: <strong id="magicMeisterMinorFragments">0</strong></span>
+                        <span class="magic-scroll-pill">Fragments ultimes: <strong id="magicMeisterUltimateFragments">0</strong></span>
+                        <span class="magic-scroll-pill magic-scroll-pill--dim">Âmes prog: <strong id="magicMeisterProgSouls">0</strong></span>
                     </div>
                     <div class="magic-top-nav" aria-label="Sections de la fiche" role="navigation">
                         <button class="magic-nav-btn magic-nav-btn--active tw-press tw-btn-ghost" data-target="magic-summary">
@@ -90,7 +91,7 @@
                             Paramètres de fonctionnement
                         </button>
                         <button class="magic-nav-btn tw-press tw-btn-ghost" data-target="magic-capacities">
-                            Capacités &amp; sorts
+                            Fragments &amp; sorts
                         </button>
                         <button class="magic-nav-btn magic-nav-btn--admin tw-press tw-btn-ghost" data-target="magic-admin">
                             Zone admin
@@ -195,11 +196,11 @@
                                 </article>
                             </div>
                         </section>
-                        <!-- 3. Capacités / sorts -->
+                        <!-- 3. Fragments / sorts -->
                         <section id="magic-capacities" class="magic-section" aria-label="Capacités et sorts">
                             <div class="magic-section-header">
                                 <div>
-                                    <h2 class="magic-section-title">Capacités &amp; sorts</h2>
+                                    <h2 class="magic-section-title">Fragments &amp; sorts</h2>
                                     <p class="magic-section-help">
                                         Listez ici chaque technique : nom, type, rang, effet RP et technique, coût, limites.
                                     </p>
@@ -217,7 +218,7 @@
                                         <option value="utilitaire">Utilitaire</option>
                                     </select>
                                     <button type="button" class="magic-btn magic-btn-primary tw-press tw-btn" id="magicAddCapacityBtn">
-                                        + Ajouter une capacité
+                                        + Ajouter un fragment
                                     </button>
                                 </div>
                             </div>
@@ -393,7 +394,7 @@
                                 </div>
                             </div>
                             <ul class="magic-capacity-list" id="magicCapacityList" aria-label="Liste des capacités">
-                                <!-- Capacités exemple : purement placeholders -->
+                                <!-- Fragments exemple : purement placeholders -->
                             </ul>
                         </section>
                         <!-- 5. Zone admin -->

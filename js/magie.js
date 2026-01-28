@@ -53,7 +53,8 @@
     const aliceControleUltimateEl = document.getElementById("magicAliceControleUltimate");
     const meisterSoulsMeterEl = document.getElementById("magicMeisterSoulsMeter");
     const meisterProgSoulsEl = document.getElementById("magicMeisterProgSouls");
-    const meisterConsoSoulsEl = document.getElementById("magicMeisterConsoSouls");
+    const meisterMinorFragmentsEl = document.getElementById("magicMeisterMinorFragments");
+    const meisterUltimateFragmentsEl = document.getElementById("magicMeisterUltimateFragments");
     const formFields = Array.from(
         document.querySelectorAll(".magic-content input[id], .magic-content textarea[id], .magic-content select[id]")
     );
@@ -545,15 +546,15 @@
         const progSouls = Number(eaterData?.eaterAmesProgression) || 0;
         const consoSouls = Number(eaterData?.eaterAmesConso) || 0;
 
-        const minorUpgrades = [40, 80, 120, 200, 250, 375, 425].filter(threshold => progSouls >= threshold).length;
-        const ultimateLevel = progSouls >= 475 ? 3 : progSouls >= 325 ? 2 : progSouls >= 150 ? 1 : 0;
+        const minorUpgrades = [40, 80, 120, 150, 200, 325, 475].filter(threshold => progSouls >= threshold).length;
+        const ultimateUpgrades = [100, 250, 400].filter(threshold => progSouls >= threshold).length;
 
         return {
             progSouls,
             consoSouls,
             minorUpgrades,
-            ultimateLevel,
-            totalUpgrades: minorUpgrades + ultimateLevel
+            ultimateUpgrades,
+            totalUpgrades: minorUpgrades + ultimateUpgrades
         };
     }
 
@@ -584,8 +585,15 @@
             if (meisterSoulsMeterEl) {
                 meisterSoulsMeterEl.style.display = "";
                 const souls = getMeisterSouls();
+                const progress = loadMagicProgress();
+                const minorUsed = progress.meisterFragments?.minorUsed || 0;
+                const ultimateUsed = progress.meisterFragments?.ultimateUsed || 0;
+                const minorAvailable = souls.minorUpgrades - minorUsed;
+                const ultimateAvailable = souls.ultimateUpgrades - ultimateUsed;
+
+                if (meisterMinorFragmentsEl) meisterMinorFragmentsEl.textContent = String(minorAvailable);
+                if (meisterUltimateFragmentsEl) meisterUltimateFragmentsEl.textContent = String(ultimateAvailable);
                 if (meisterProgSoulsEl) meisterProgSoulsEl.textContent = String(souls.progSouls);
-                if (meisterConsoSoulsEl) meisterConsoSoulsEl.textContent = String(souls.consoSouls);
             }
             return;
         }
@@ -788,24 +796,6 @@
         return availableSpells > 0;
     }
 
-    function getMeisterFragmentsAvailable(rank) {
-        const souls = getMeisterSouls();
-        const progPercent = souls.progSouls;
-
-        if (rank === "ultime") {
-            // Check if any ultimate is unlocked
-            if (progPercent >= 475) return true; // Ultime III
-            if (progPercent >= 325) return true; // Ultime II
-            if (progPercent >= 150) return true; // Ultime I
-            return false;
-        }
-
-        // Minor fragments unlock at: 40%, 80%, 120%, 200%, 250%, 375%, 425%
-        const minorMilestones = [40, 80, 120, 200, 250, 375, 425];
-        const unlockedMinors = minorMilestones.filter(m => progPercent >= m).length;
-        return unlockedMinors > 0;
-    }
-
     async function consumeAscensionForRank(page, rank, nextLevel) {
         const specialization = page?.fields?.magicSpecialization;
 
@@ -851,14 +841,34 @@
             return true;
         }
 
-        // Meister validation
+        // Meister validation and consumption
         if (specialization === "meister") {
-            const hasFragments = getMeisterFragmentsAvailable(rank);
-            if (!hasFragments) {
+            const souls = getMeisterSouls();
+            const isMinor = rank === "mineur";
+            const progress = loadMagicProgress();
+
+            if (!progress.meisterFragments) {
+                progress.meisterFragments = { minorUsed: 0, ultimateUsed: 0 };
+            }
+
+            const available = isMinor ? souls.minorUpgrades : souls.ultimateUpgrades;
+            const used = isMinor ? progress.meisterFragments.minorUsed : progress.meisterFragments.ultimateUsed;
+
+            if (available <= used) {
                 const rankLabel = rank === "mineur" ? "mineur" : "ultime";
-                alert(`Vous n'avez pas de fragments disponibles pour ajouter une capacité ${rankLabel}.\n\nConsommez plus d'âmes de progression pour débloquer des fragments.`);
+                alert(`Vous n'avez pas de fragments ${rankLabel} disponibles.\n\nConsommez plus d'âmes de progression pour débloquer des fragments.`);
                 return false;
             }
+
+            // Consume fragment
+            if (isMinor) {
+                progress.meisterFragments.minorUsed += 1;
+            } else {
+                progress.meisterFragments.ultimateUsed += 1;
+            }
+
+            persistMagicProgress(progress, { persistProfile: true });
+            renderScrollMeter();
             return true;
         }
 
@@ -1957,7 +1967,7 @@
         capSaveBtn.addEventListener("click", async () => {
             const newCap = buildCapacityFromForm();
             if (!newCap) {
-                alert("Ajoutez un nom pour la capacité.");
+                alert("Ajoutez un nom pour le fragment.");
                 return;
             }
             if (!pages[activePageIndex]) return;
