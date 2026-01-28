@@ -550,20 +550,52 @@
         };
     }
 
-    function getArmeSouls() {
+    function getWeaponFragments() {
+        const competencesData = getFicheTabData("competences");
         const eaterData = getFicheTabData("eater");
-        const progSouls = Number(eaterData?.eaterAmesProgression) || 0;
-        const consoSouls = Number(eaterData?.eaterAmesConso) || 0;
 
-        const minorUpgrades = [40, 80, 120, 150, 200, 325, 475].filter(threshold => progSouls >= threshold).length;
-        const ultimateUpgrades = [100, 250, 400].filter(threshold => progSouls >= threshold).length;
+        // Compétences Weapon
+        const puissanceCapacite = Number(competencesData?.weaponPuissanceCapacite) || 0;
+        const maitriseCapacite = Number(competencesData?.weaponMaitriseCapacite) || 0;
+
+        // Âmes de progression
+        const progSouls = Number(eaterData?.eaterAmesProgression) || 0;
+
+        const progress = loadMagicProgress();
+        const used = progress.weaponFragments || {
+            puissanceUsed: 0,
+            maitriseUsed: 0,
+            soulsMinorUsed: 0,
+            soulsUltimateUsed: 0
+        };
+
+        // Compétences: Puissance (tous les 5pts → améliorer mineur)
+        const puissanceTotal = Math.floor(puissanceCapacite / 5);
+        const puissanceAvailable = Math.max(0, puissanceTotal - used.puissanceUsed);
+
+        // Compétences: Maîtrise (tous les 10pts → ajouter OU améliorer mineur)
+        const maitriseTotal = Math.floor(maitriseCapacite / 10);
+        const maitriseAvailable = Math.max(0, maitriseTotal - used.maitriseUsed);
+
+        // Âmes: mineurs aux seuils 40,80,120,150,200,325,475
+        const soulsMinorTotal = [40, 80, 120, 150, 200, 325, 475].filter(threshold => progSouls >= threshold).length;
+        const soulsMinorAvailable = Math.max(0, soulsMinorTotal - used.soulsMinorUsed);
+
+        // Âmes: ultimes aux seuils 100,250,400
+        const soulsUltimateTotal = [100, 250, 400].filter(threshold => progSouls >= threshold).length;
+        const soulsUltimateAvailable = Math.max(0, soulsUltimateTotal - used.soulsUltimateUsed);
 
         return {
             progSouls,
-            consoSouls,
-            minorUpgrades,
-            ultimateUpgrades,
-            totalUpgrades: minorUpgrades + ultimateUpgrades
+            puissanceCapacite,
+            maitriseCapacite,
+            puissanceAvailable,
+            maitriseAvailable,
+            soulsMinorAvailable,
+            soulsUltimateAvailable,
+            // Total fragments = compétences + âmes
+            minorFragments: puissanceAvailable + maitriseAvailable + soulsMinorAvailable,
+            ultimateFragments: soulsUltimateAvailable
         };
     }
 
@@ -660,16 +692,11 @@
         if (specialization === "arme") {
             if (armeSoulsMeterEl) {
                 armeSoulsMeterEl.style.display = "";
-                const souls = getArmeSouls();
-                const progress = loadMagicProgress();
-                const minorUsed = progress.armeFragments?.minorUsed || 0;
-                const ultimateUsed = progress.armeFragments?.ultimateUsed || 0;
-                const minorAvailable = souls.minorUpgrades - minorUsed;
-                const ultimateAvailable = souls.ultimateUpgrades - ultimateUsed;
+                const weapon = getWeaponFragments();
 
-                if (armeMinorFragmentsEl) armeMinorFragmentsEl.textContent = String(minorAvailable);
-                if (armeUltimateFragmentsEl) armeUltimateFragmentsEl.textContent = String(ultimateAvailable);
-                if (armeProgSoulsEl) armeProgSoulsEl.textContent = String(souls.progSouls);
+                if (armeMinorFragmentsEl) armeMinorFragmentsEl.textContent = String(weapon.minorFragments);
+                if (armeUltimateFragmentsEl) armeUltimateFragmentsEl.textContent = String(weapon.ultimateFragments);
+                if (armeProgSoulsEl) armeProgSoulsEl.textContent = `P:${weapon.puissanceCapacite} M:${weapon.maitriseCapacite} Â:${weapon.progSouls}`;
             }
             return;
         }
@@ -985,30 +1012,62 @@
             return true;
         }
 
-        // Arme validation and consumption (uses soul thresholds)
+        // Weapon validation and consumption (compétences + âmes)
         if (specialization === "arme") {
-            const souls = getArmeSouls();
+            const weapon = getWeaponFragments();
             const isMinor = rank === "mineur";
+            const isNewFragment = nextLevel === 1;
             const progress = loadMagicProgress();
 
-            if (!progress.armeFragments) {
-                progress.armeFragments = { minorUsed: 0, ultimateUsed: 0 };
+            if (!progress.weaponFragments) {
+                progress.weaponFragments = {
+                    puissanceUsed: 0,
+                    maitriseUsed: 0,
+                    soulsMinorUsed: 0,
+                    soulsUltimateUsed: 0
+                };
             }
 
-            const available = isMinor ? souls.minorUpgrades : souls.ultimateUpgrades;
-            const used = isMinor ? progress.armeFragments.minorUsed : progress.armeFragments.ultimateUsed;
-
-            if (available <= used) {
-                const rankLabel = rank === "mineur" ? "mineur" : "ultime";
-                alert(`Vous n'avez pas de fragments ${rankLabel} disponibles.\n\nConsommez plus d'âmes de progression pour débloquer des fragments.`);
-                return false;
-            }
-
-            // Consume fragment
             if (isMinor) {
-                progress.armeFragments.minorUsed += 1;
+                if (isNewFragment) {
+                    // Ajouter un fragment mineur: consommer Maîtrise (priorité) ou âme
+                    if (weapon.maitriseAvailable > 0) {
+                        progress.weaponFragments.maitriseUsed += 1;
+                    } else if (weapon.soulsMinorAvailable > 0) {
+                        progress.weaponFragments.soulsMinorUsed += 1;
+                    } else {
+                        alert(`Vous n'avez pas de fragments mineurs disponibles.\n\nAugmentez "Maîtrise de la capacité unique" ou consommez des âmes de progression.`);
+                        return false;
+                    }
+                } else {
+                    // Améliorer un fragment mineur: consommer Puissance (priorité), Maîtrise, ou âme
+                    if (weapon.puissanceAvailable > 0) {
+                        progress.weaponFragments.puissanceUsed += 1;
+                    } else if (weapon.maitriseAvailable > 0) {
+                        progress.weaponFragments.maitriseUsed += 1;
+                    } else if (weapon.soulsMinorAvailable > 0) {
+                        progress.weaponFragments.soulsMinorUsed += 1;
+                    } else {
+                        alert(`Vous n'avez pas de fragments mineurs disponibles.\n\nAugmentez vos compétences ou consommez des âmes de progression.`);
+                        return false;
+                    }
+                }
             } else {
-                progress.armeFragments.ultimateUsed += 1;
+                // Fragment ultime: uniquement via âmes
+                if (isNewFragment) {
+                    if (weapon.soulsUltimateAvailable <= 0) {
+                        alert(`Vous n'avez pas de fragments ultimes disponibles.\n\nConsommez des âmes de progression (seuils: 100, 250, 400).`);
+                        return false;
+                    }
+                    progress.weaponFragments.soulsUltimateUsed += 1;
+                } else {
+                    // Améliorer ultime
+                    if (weapon.soulsUltimateAvailable <= 0) {
+                        alert(`Vous n'avez pas de fragments ultimes disponibles.\n\nConsommez des âmes de progression (seuils: 100, 250, 400).`);
+                        return false;
+                    }
+                    progress.weaponFragments.soulsUltimateUsed += 1;
+                }
             }
 
             persistMagicProgress(progress, { persistProfile: true });
