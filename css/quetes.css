@@ -404,8 +404,11 @@ body.quest-board {
     gap: 12px;
     padding: 18px 18px 16px;
     border-radius: 22px;
-    background: rgba(255, 255, 255, 0.84);
-    backdrop-filter: blur(2px);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 244, 251, 0.7)),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 6px, rgba(255, 255, 255, 0) 6px 12px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(3px);
     overflow: hidden;
 }
 
