@@ -670,8 +670,7 @@ async function loadItemCatalog() {
                 rarity: row.rarity,
                 description: row.description,
                 effect: row.effect,
-                buyPrice: row.price_po,
-                sellPrice: row.price_pa,
+                price: row.price_kaels || 0,
                 images: row.images
             }));
             return;
@@ -690,8 +689,7 @@ async function loadItemCatalog() {
                 rarity: item.rarity ?? match.rarity,
                 description: item.description ?? match.description,
                 effect: item.effect ?? match.effect,
-                buyPrice: item.buyPrice ?? match.price_po,
-                sellPrice: item.sellPrice ?? match.price_pa,
+                price: item.price ?? match.price_kaels ?? 0,
                 images: item.images ?? match.images
             };
         });

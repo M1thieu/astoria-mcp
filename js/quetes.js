@@ -669,8 +669,7 @@ async function syncLocalItemsToDb() {
                 description: item.description || "",
                 effect: item.effect || "",
                 category: String(item.category || "").toLowerCase(),
-                price_po: item.sellPrice || null,
-                price_pa: item.buyPrice || null,
+                price_kaels: item.price || null,
                 images: item.image ? { primary: item.image } : null
             }));
 
@@ -727,8 +726,7 @@ async function loadItemCatalog() {
                 rarity: row.rarity,
                 description: row.description,
                 effect: row.effect,
-                buyPrice: row.price_po,
-                sellPrice: row.price_pa,
+                price: row.price_kaels || 0,
                 images: row.images
             });
         });

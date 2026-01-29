@@ -137,8 +137,7 @@ function safeJson(value) {
 function mapDbItem(row) {
     const images = safeJson(row.images);
     const primary = images.primary || images.url || '';
-    const buyText = row.price_pa ? `${row.price_pa} pa` : '';
-    const sellText = row.price_po ? `${row.price_po} po` : '';
+    const priceText = row.price_kaels ? `${row.price_kaels} kaels` : '';
     return {
         id: row.id,
         _dbId: row.id,
@@ -526,8 +525,7 @@ async function saveItem(event) {
         description: dom.descriptionInput.value.trim(),
         effect: dom.effectInput.value.trim(),
         category: dom.categoryInput.value.trim().toLowerCase(),
-        price_po: parsePrice(dom.sellInput.value),
-        price_pa: parsePrice(dom.buyInput.value)
+        price_kaels: parsePrice(dom.sellInput.value)
     };
 
     dom.saveBtn.disabled = true;
@@ -608,7 +606,7 @@ async function loadDbItems() {
     console.log('[LOAD] Loading items from database...');
     const { data, error } = await supabase
         .from('items')
-        .select('id, name, description, effect, category, price_po, price_pa, images, enabled, created_at')
+        .select('id, name, description, effect, category, price_kaels, images, enabled, created_at')
         .order('created_at', { ascending: true });
 
     if (error) {

@@ -35,8 +35,7 @@ CREATE TABLE IF NOT EXISTS items (
     effect TEXT,
     category TEXT,
     rarity TEXT,
-    price_po INTEGER DEFAULT 0,
-    price_pa INTEGER DEFAULT 0,
+    price_kaels INTEGER DEFAULT 0,
     images JSONB DEFAULT '{}'::jsonb,
     badges JSONB DEFAULT '[]'::jsonb,
     enabled BOOLEAN DEFAULT true,
@@ -144,7 +143,7 @@ VALUES (
 -- You'll need to manually insert your existing items from data.js
 -- Example:
 /*
-INSERT INTO items (name, description, effect, category, rarity, price_po, price_pa, images, badges, enabled)
+INSERT INTO items (name, description, effect, category, rarity, price_kaels, images, badges, enabled)
 VALUES (
     'Poudre de Traçage',
     'Une poudre enchantée qui révèle les traces invisibles',
