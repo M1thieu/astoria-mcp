@@ -366,6 +366,14 @@
         window.astoriaBeforeCharacterChange = async () => {
             await flushProfileSave();
         };
+
+        // Force save before page unload to prevent data loss
+        window.addEventListener('beforeunload', (event) => {
+            if (persistState.mode === 'character' && persistState.auth) {
+                // Flush any pending save immediately
+                void flushProfileSave();
+            }
+        });
     }
 
     function scheduleProfileSave() {
@@ -377,7 +385,7 @@
         persistState.saveTimer = setTimeout(() => {
             persistState.saveTimer = null;
             void flushProfileSave();
-        }, 350);
+        }, 150);
     }
 
     async function flushProfileSave() {
@@ -925,6 +933,9 @@
         } else {
             announce(`Points enregistrés. Il reste ${remainingPoints} point(s) à répartir.`);
         }
+
+        // Force immediate save to database when confirming
+        void flushProfileSave();
     });
 
     function updateLockState(isLocked) {
