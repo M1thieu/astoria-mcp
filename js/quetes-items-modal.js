@@ -151,14 +151,25 @@ export function initItemsModal(questesModule) {
         category.className = "quest-items-modal-item-category";
         category.textContent = item.category;
 
+        const descContainer = document.createElement("div");
+        descContainer.className = "quest-items-modal-item-desc-container";
+
         const desc = document.createElement("div");
         desc.className = "quest-items-modal-item-desc";
         desc.textContent = item.description || "Aucune description disponible";
 
+        const plusBtn = document.createElement("button");
+        plusBtn.type = "button";
+        plusBtn.className = "quest-items-modal-more-btn";
+        plusBtn.textContent = "Plus";
+
+        descContainer.appendChild(desc);
+        descContainer.appendChild(plusBtn);
+
         info.appendChild(name);
         info.appendChild(category);
         if (item.description) {
-            info.appendChild(desc);
+            info.appendChild(descContainer);
         }
 
         if (item.price > 0) {
@@ -167,6 +178,13 @@ export function initItemsModal(questesModule) {
             price.textContent = `${item.price} kaels`;
             info.appendChild(price);
         }
+
+        // Click sur Plus pour voir détails complets
+        plusBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            // TODO: Ouvrir modal détails item (réutiliser modal codex?)
+            alert(`${item.name}\n\n${item.description}\n\nPrix: ${item.price} kaels`);
+        });
 
         // Contrôles de quantité (style compétences)
         const qtyControls = document.createElement("div");
