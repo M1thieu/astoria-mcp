@@ -4,6 +4,7 @@
 
 // Cette fonction doit être appelée depuis quetes.js après l'initialisation du dom
 export function initItemsModal(questesModule) {
+    console.log("[Items Modal] Initializing items modal...");
     const { dom, resolveItemByName } = questesModule;
 
     // Éléments du modal
@@ -159,9 +160,15 @@ export function initItemsModal(questesModule) {
 
     // Ouvrir le modal
     function openModal() {
-        if (!modalDom.backdrop) return;
+        console.log("[Items Modal] openModal called");
+        if (!modalDom.backdrop) {
+            console.error("[Items Modal] Backdrop not found!");
+            return;
+        }
 
+        console.log("[Items Modal] Loading items...");
         loadItems();
+        console.log("[Items Modal] Items loaded:", state.allItems.length);
         state.selectedItems.clear();
         renderItems();
         updateSelectedCount();
@@ -242,17 +249,24 @@ export function initItemsModal(questesModule) {
 
     // Remplacer le comportement du bouton trigger
     if (dom.rewardTrigger) {
-        // Supprimer l'ancien listener
+        console.log("[Items Modal] Initializing trigger button");
+
+        // Supprimer l'ancien listener en clonant
         const newTrigger = dom.rewardTrigger.cloneNode(true);
         dom.rewardTrigger.parentNode.replaceChild(newTrigger, dom.rewardTrigger);
-        dom.rewardTrigger = newTrigger;
 
         // Ajouter le nouveau listener qui ouvre le modal
         newTrigger.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
+            console.log("[Items Modal] Opening modal");
             openModal();
         });
+
+        // Mettre à jour la référence dans dom (important!)
+        dom.rewardTrigger = newTrigger;
+    } else {
+        console.error("[Items Modal] Trigger button not found!");
     }
 
     // Retourner l'API publique
