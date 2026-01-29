@@ -158,13 +158,13 @@ export function initItemsModal(questesModule) {
         desc.className = "quest-items-modal-item-desc";
         desc.textContent = item.description || "Aucune description disponible";
 
-        const plusBtn = document.createElement("button");
-        plusBtn.type = "button";
-        plusBtn.className = "quest-items-modal-more-btn";
-        plusBtn.textContent = "Plus";
+        const moreBtn = document.createElement("button");
+        moreBtn.type = "button";
+        moreBtn.className = "quest-items-modal-more-btn";
+        moreBtn.textContent = "Plus";
 
         descContainer.appendChild(desc);
-        descContainer.appendChild(plusBtn);
+        descContainer.appendChild(moreBtn);
 
         info.appendChild(name);
         info.appendChild(category);
@@ -180,7 +180,7 @@ export function initItemsModal(questesModule) {
         }
 
         // Click sur Plus pour voir détails complets
-        plusBtn.addEventListener("click", (e) => {
+        moreBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             // TODO: Ouvrir modal détails item (réutiliser modal codex?)
             alert(`${item.name}\n\n${item.description}\n\nPrix: ${item.price} kaels`);
