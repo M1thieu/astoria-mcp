@@ -1,5 +1,14 @@
 const inventoryData = [
     {
+        name: "Kaels",
+        category: "monnaie",
+        image: "",
+        description: "Monnaie principale du royaume d'Astoria. Utilisée pour les échanges commerciaux et les transactions.",
+        buyPrice: "",
+        sellPrice: "",
+        effect: ""
+    },
+    {
         name: "Poudre de Traçage",
         category: "consommable",
         image: "assets/images/objets/Poudre_de_Tracage.png",

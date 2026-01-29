@@ -1938,11 +1938,9 @@ function renderEditorLists() {
     dom.rewardsList.innerHTML = state.editor.rewards.map((reward, idx) => {
         const item = resolveItemByName(reward.name);
         const label = formatRewardLabel(reward, { showElement: false });
-        const tooltipParts = [];
-        if (item?.description) tooltipParts.push(item.description);
-        const tooltip = tooltipParts.length ? ` data-tooltip="${escapeHtml(tooltipParts.join(" | "))}"` : "";
+        // Tooltip désactivé - causait des glitches dans la liste
         return `
-        <div class="quest-editor-item"${tooltip}>
+        <div class="quest-editor-item">
             <span>${escapeHtml(label)} x${reward.qty}</span>
             <button type="button" data-remove-reward="${idx}">Retirer</button>
         </div>

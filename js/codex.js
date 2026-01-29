@@ -490,9 +490,16 @@ function setupTooltipHandlers() {
                 : window.innerHeight;
 
             const useAbove = (limitBottom - anchorRect.bottom) < tooltipRect.height;
-            const top = useAbove
+            let top = useAbove
                 ? anchorRect.top - tooltipRect.height - 6
                 : anchorRect.bottom + 6;
+
+            // S'assurer que le tooltip reste dans le viewport
+            const maxTop = window.innerHeight - tooltipRect.height - 8;
+            if (top > maxTop) {
+                top = maxTop;
+            }
+
             const left = Math.max(8, Math.min(
                 window.innerWidth - tooltipRect.width - 8,
                 anchorRect.left
