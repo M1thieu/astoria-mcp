@@ -35,7 +35,7 @@ export function initItemsModal(questesModule) {
             category: item.category || "autre",
             description: item.description || "",
             image: item.image || "",
-            price: item.price_kaels || item.sellPrice || item.buyPrice || 0
+            price: item.price_kaels || item.price_po || item.sellPrice || item.buyPrice || 0
         }));
     }
 

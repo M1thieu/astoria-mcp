@@ -153,8 +153,8 @@ function mapDbItem(row) {
         description: row.description || "",
         effect: row.effect || "",
         category: row.category || "",
-        buyPrice: buyText,
-        sellPrice: sellText,
+        buyPrice: priceText,
+        sellPrice: priceText,
         image: primary,
         images: images
     };

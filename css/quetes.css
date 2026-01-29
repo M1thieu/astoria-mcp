@@ -1454,7 +1454,7 @@ body.quest-board {
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(255, 106, 162, 0.2);
     position: relative;
-    z-index: 10;
+    z-index: 200;
 }
 
 .quest-reward-tooltip.is-empty {

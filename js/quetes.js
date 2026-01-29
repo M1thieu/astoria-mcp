@@ -2382,14 +2382,15 @@ async function init() {
     state.history = dedupeHistory(state.history);
     fillFilters();
     syncAdminUI();
+    // Initialiser le modal de sélection des récompenses AVANT bindEvents
+    // pour que le modal remplace le bouton trigger avant que l'ancien listener soit attaché
+    initItemsModal({ dom, resolveItemByName });
+
     bindEvents();
     await initQuestPanelShortcuts();
     renderQuestList();
     renderHistory();
     syncLocalItemsToDb();
-
-    // Initialiser le modal de sélection des récompenses
-    initItemsModal({ dom, resolveItemByName });
 }
 
 init();
