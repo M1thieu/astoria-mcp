@@ -188,17 +188,18 @@ const dom = {
     addImageBtn: document.getElementById("questAddImageBtn"),
     imagesList: document.getElementById("questImagesList"),
     rewardNameInput: document.getElementById("questRewardNameInput"),
-    rewardSelect: document.getElementById("questRewardSelect"),
-    rewardPicker: document.getElementById("questRewardPicker"),
-    rewardTrigger: document.getElementById("questRewardTrigger"),
-    rewardPopover: document.getElementById("questRewardPopover"),
-    rewardOptions: document.getElementById("questRewardOptions"),
-    rewardTooltip: document.getElementById("questRewardTooltip"),
+    // DEPRECATED - Old dropdown system:
+    // rewardSelect: document.getElementById("questRewardSelect"),
+    // rewardPicker: document.getElementById("questRewardPicker"),
+    // rewardTrigger: document.getElementById("questRewardTrigger"),
+    // rewardPopover: document.getElementById("questRewardPopover"),
+    // rewardOptions: document.getElementById("questRewardOptions"),
+    // rewardTooltip: document.getElementById("questRewardTooltip"),
     rewardQtyInput: document.getElementById("questRewardQtyInput"),
     addRewardBtn: document.getElementById("questAddRewardBtn"),
     rewardsList: document.getElementById("questRewardsList"),
     imagePreview: document.querySelector(".quest-editor-image-preview"),
-    rewardPreview: document.getElementById("questRewardPreview"),
+    // rewardPreview: document.getElementById("questRewardPreview"), // DEPRECATED
     cropperBackdrop: document.getElementById("questCropperBackdrop"),
     cropperImage: document.getElementById("questCropperImage"),
     cropperZoom: document.getElementById("questCropperZoom"),
@@ -2298,11 +2299,16 @@ function bindEvents() {
     dom.addImageBtn.addEventListener("click", handleAddImage);
     dom.imageFileInput.addEventListener("change", handleImageFile);
     dom.addRewardBtn.addEventListener("click", handleAddReward);
-    // L'ancien dropdown est remplacé par le modal items
-    // dom.rewardTrigger?.addEventListener("click", (event) => {
-    //     event.preventDefault();
-    //     toggleRewardPopover();
-    // });
+
+    // ==========================================
+    // DEPRECATED - Old dropdown/popover event listeners
+    // Replaced by modal in quetes-items-modal.js
+    // ==========================================
+    /*
+    dom.rewardTrigger?.addEventListener("click", (event) => {
+        event.preventDefault();
+        toggleRewardPopover();
+    });
     dom.rewardOptions?.addEventListener("click", (event) => {
         const option = event.target.closest(".quest-reward-option");
         if (!option) return;
@@ -2329,6 +2335,7 @@ function bindEvents() {
             closeRewardPopover();
         }
     });
+    */
     dom.cropperClose?.addEventListener("click", () => closeCropper());
     dom.cropperCancel?.addEventListener("click", () => closeCropper());
     dom.cropperConfirm?.addEventListener("click", () => applyCropper());
@@ -2378,7 +2385,7 @@ async function init() {
         loadStoredState();
     }
     await loadItemCatalog();
-    populateRewardSelect();
+    // populateRewardSelect(); // DEPRECATED - Old dropdown system
     seedData();
     state.history = dedupeHistory(state.history);
     fillFilters();
