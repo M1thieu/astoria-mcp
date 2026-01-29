@@ -2298,10 +2298,11 @@ function bindEvents() {
     dom.addImageBtn.addEventListener("click", handleAddImage);
     dom.imageFileInput.addEventListener("change", handleImageFile);
     dom.addRewardBtn.addEventListener("click", handleAddReward);
-    dom.rewardTrigger?.addEventListener("click", (event) => {
-        event.preventDefault();
-        toggleRewardPopover();
-    });
+    // L'ancien dropdown est remplacé par le modal items
+    // dom.rewardTrigger?.addEventListener("click", (event) => {
+    //     event.preventDefault();
+    //     toggleRewardPopover();
+    // });
     dom.rewardOptions?.addEventListener("click", (event) => {
         const option = event.target.closest(".quest-reward-option");
         if (!option) return;
