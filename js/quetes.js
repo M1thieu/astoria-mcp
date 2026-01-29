@@ -2300,7 +2300,7 @@ function bindEvents() {
     dom.editorForm.addEventListener("submit", handleEditorSubmit);
     dom.addImageBtn.addEventListener("click", handleAddImage);
     dom.imageFileInput.addEventListener("change", handleImageFile);
-    dom.addRewardBtn.addEventListener("click", handleAddReward);
+    // dom.addRewardBtn?.addEventListener("click", handleAddReward); // DEPRECATED - Modal remplace ce bouton
 
     // ==========================================
     // DEPRECATED - Old dropdown/popover event listeners
