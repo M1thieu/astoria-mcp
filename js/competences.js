@@ -277,6 +277,10 @@
         skillsState.allocationsByCategory[categoryId] = skillsState.allocationsByCategory[categoryId] || {};
         skillsState.baseValuesByCategory[categoryId] = skillsState.baseValuesByCategory[categoryId] || {};
         skillsState.baseValuesByCategory[categoryId][newSkill.name] = 0;
+        if (skillsState.isAdmin) {
+            skillsState.locksByCategory[categoryId] = false;
+            saveToStorage(skillsLocksKey, skillsState.locksByCategory);
+        }
         saveToStorage(skillsCustomKey, skillsState.customSkillsByCategory);
         saveToStorage(skillsBaseValuesKey, skillsState.baseValuesByCategory);
         saveToStorage(skillsAllocStorageKey, skillsState.allocationsByCategory);
@@ -783,16 +787,23 @@
         const isLocked = skillsState.locksByCategory[skillsState.activeCategoryId];
         const bonusBySkill = getNokorahBonuses();
 
-        skillsPointsMinusEl.disabled = !skillsState.isAdmin || !hasPoints || isLocked;
-        skillsPointsPlusEl.disabled = !skillsState.isAdmin || isLocked;
+        if (skillsPointsMinusEl) {
+            skillsPointsMinusEl.disabled = !skillsState.isAdmin || !hasPoints || isLocked;
+        }
+        if (skillsPointsPlusEl) {
+            skillsPointsPlusEl.disabled = !skillsState.isAdmin || isLocked;
+        }
 
+        const activeCategory = getActiveCategory();
         if (!activeCategory) return;
         const allocations = getCategoryAllocations(activeCategory.id);
         const baseValues = skillsState.baseValuesByCategory[activeCategory.id] || {};
         const hasAllocations = Object.values(allocations).some((value) => Number(value) > 0);
         const hasBaseValues = Object.values(baseValues).some((value) => Number(value) > 0);
         const canReset = skillsState.isAdmin && (hasPoints || hasAllocations || hasBaseValues);
-        skillsPointsResetEl.disabled = !canReset;
+        if (skillsPointsResetEl) {
+            skillsPointsResetEl.disabled = !canReset;
+        }
 
         skillsListEl.querySelectorAll(".skills-line").forEach((line) => {
             const nameEl = line.querySelector(".skills-name");
@@ -951,6 +962,10 @@
     function announce(message) {
         if (!skillsFeedbackEl) return;
         skillsFeedbackEl.textContent = message;
+    }
+
+    function updateFeedback(message) {
+        announce(message);
     }
 
     function hasPendingChanges(categoryId) {
