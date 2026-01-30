@@ -4,18 +4,21 @@
 
 .item-details-popover {
     position: fixed;
-    z-index: 1000000;
+    z-index: 10;
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(120, 38, 70, 0.3),
                 0 0 0 1px rgba(255, 106, 162, 0.2);
     width: 320px;
     max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 40px);
     opacity: 0;
     pointer-events: none;
     transform: scale(0.9);
     transition: opacity 0.2s ease, transform 0.2s ease;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .item-details-popover.visible {
@@ -29,6 +32,7 @@
     padding: 20px;
     background: linear-gradient(135deg, #ff6aa2 0%, #ff8eb3 100%);
     color: #fff;
+    flex-shrink: 0;
 }
 
 .item-details-popover-close {
@@ -99,6 +103,9 @@
 
 .item-details-popover-body {
     padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .item-details-popover-section {

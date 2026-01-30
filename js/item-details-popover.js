@@ -16,9 +16,11 @@ export function showItemDetailsPopover(item, anchorElement) {
     const popover = createPopoverElement(item);
     console.log('[Popover] Popover created', popover);
 
-    document.body.appendChild(popover);
+    // Ajouter au backdrop du modal items pour qu'il soit par-dessus le modal blanc
+    const modalBackdrop = document.getElementById('questItemsModalBackdrop') || document.body;
+    modalBackdrop.appendChild(popover);
     popoverInstance = popover;
-    console.log('[Popover] Popover appended to body');
+    console.log('[Popover] Popover appended to:', modalBackdrop);
 
     // Positionner le popover par rapport à l'élément ancre
     positionPopover(popover, anchorElement);
@@ -188,12 +190,15 @@ function createPopoverElement(item) {
 function positionPopover(popover, anchorElement) {
     const anchorRect = anchorElement.getBoundingClientRect();
     const popoverWidth = 320;
-    const popoverHeight = popover.offsetHeight || 400; // Estimation si pas encore rendu
     const gap = 12; // Espace entre l'ancre et le popover
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const scrollX = window.scrollX || window.pageXOffset;
     const scrollY = window.scrollY || window.pageYOffset;
+
+    // Hauteur max du popover est limitée par max-height: calc(100vh - 40px)
+    const maxPopoverHeight = viewportHeight - 40;
+    const popoverHeight = Math.min(popover.offsetHeight || maxPopoverHeight, maxPopoverHeight);
 
     console.log('[Popover] Position debug:', {
         anchorRect,
