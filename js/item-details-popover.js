@@ -5,6 +5,8 @@
 let popoverInstance = null;
 
 export function showItemDetailsPopover(item, anchorElement) {
+    console.log('[Popover] showItemDetailsPopover called', { item, anchorElement });
+
     // Fermer le popover existant s'il y en a un
     if (popoverInstance) {
         closeItemDetailsPopover();
@@ -12,15 +14,20 @@ export function showItemDetailsPopover(item, anchorElement) {
 
     // Créer le popover
     const popover = createPopoverElement(item);
+    console.log('[Popover] Popover created', popover);
+
     document.body.appendChild(popover);
     popoverInstance = popover;
+    console.log('[Popover] Popover appended to body');
 
     // Positionner le popover par rapport à l'élément ancre
     positionPopover(popover, anchorElement);
+    console.log('[Popover] Popover positioned');
 
     // Afficher avec animation
     requestAnimationFrame(() => {
         popover.classList.add('visible');
+        console.log('[Popover] Popover should be visible now');
     });
 
     // Event listeners
@@ -188,6 +195,16 @@ function positionPopover(popover, anchorElement) {
     const scrollX = window.scrollX || window.pageXOffset;
     const scrollY = window.scrollY || window.pageYOffset;
 
+    console.log('[Popover] Position debug:', {
+        anchorRect,
+        popoverWidth,
+        popoverHeight,
+        viewportWidth,
+        viewportHeight,
+        scrollX,
+        scrollY
+    });
+
     let placement = 'right'; // Par défaut
     let top = 0;
     let left = 0;
@@ -234,6 +251,8 @@ function positionPopover(popover, anchorElement) {
     popover.style.left = `${left}px`;
     popover.style.top = `${top}px`;
     popover.setAttribute('data-placement', placement);
+
+    console.log('[Popover] Final position:', { left, top, placement });
 }
 
 // Export de la fonction pour fermer manuellement le popover
