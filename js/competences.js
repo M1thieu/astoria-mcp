@@ -779,6 +779,9 @@
     // Gestion des points à répartir
     // -----------------------------------------------------------------
     function updateSkillsPointsDisplay() {
+        const activeCategory = getActiveCategory();
+        if (!activeCategory) return;
+
         const currentPoints = getCurrentCategoryPoints();
         if (skillsPointsValueEl) {
             skillsPointsValueEl.value = String(currentPoints);
@@ -793,9 +796,6 @@
         if (skillsPointsPlusEl) {
             skillsPointsPlusEl.disabled = !skillsState.isAdmin || isLocked;
         }
-
-        const activeCategory = getActiveCategory();
-        if (!activeCategory) return;
         const allocations = getCategoryAllocations(activeCategory.id);
         const baseValues = skillsState.baseValuesByCategory[activeCategory.id] || {};
         const hasAllocations = Object.values(allocations).some((value) => Number(value) > 0);
