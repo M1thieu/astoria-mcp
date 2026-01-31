@@ -35,13 +35,15 @@
     <style>
         /* Overrides pour aligner les slots symétriquement - FORCÉ */
         .inventory2 .inventory-layout {
-            align-items: start !important;
+            align-items: stretch !important;
         }
 
         .inventory2 .inventory-sidebar {
-            align-self: start !important;
+            align-self: stretch !important;
             margin-top: 0 !important;
             position: static !important;
+            display: flex !important;
+            flex-direction: column !important;
         }
 
         .inventory2 .inventory-main {
@@ -50,11 +52,12 @@
         }
 
         .inventory2 .character-card {
-            height: 460px !important;
+            flex: 1 !important;
             display: flex;
             flex-direction: column;
             margin-top: 0 !important;
             margin-bottom: 0 !important;
+            min-height: 0 !important;
         }
 
         .character-showcase {
