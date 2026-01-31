@@ -379,10 +379,22 @@ function getFirstSentence(text) {
     return plain.slice(0, 80) + (plain.length > 80 ? "…" : "");
 }
 
+function getCategoryIcon(category) {
+    const icons = {
+        'agricole': '🌾',
+        'consommable': '🧪',
+        'equipement': '⚔️',
+        'materiau': '⚒️',
+        'quete': '✨'
+    };
+    return icons[category?.toLowerCase()] || '📦';
+}
+
 function buildRow(item, globalIndex) {
     const name = item.name || item.nom || "";
     const description = item.description || item.desc || "";
     const effect = item.effect || item.effet || "";
+    const category = item.category || item.categorie || "";
     const buy = item.buyPrice || "";
     const sell = item.sellPrice || "";
     const priceText = formatPrice(item);
@@ -392,6 +404,7 @@ function buildRow(item, globalIndex) {
     const images = resolveImages(item);
     const meta = getOrCreateItemMeta(item, globalIndex);
     const keyAttr = escapeHtml(meta.key);
+    const categoryIcon = getCategoryIcon(category);
 
     const badgeMatches = Array.from(name.matchAll(/\[(.*?)\]/g)).map(match => match[1]);
     const displayName = name.replace(/\s*\[.*?\]/g, "").trim() || name;
@@ -431,6 +444,7 @@ function buildRow(item, globalIndex) {
                 <img src="${escapeHtml(images.primary)}" alt="${escapeHtml(name || "Illustration")}" width="86" height="86" decoding="async" fetchpriority="low">
             </td>
             <td class="name-cell" data-label="Nom">
+                <span class="category-icon" title="${escapeHtml(category || 'Autre')}">${categoryIcon}</span>
                 ${nameContent}
                 ${badgesHtml}
             </td>

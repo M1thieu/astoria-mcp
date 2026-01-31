@@ -415,6 +415,15 @@
     border-color: #bd2130;
 }
 
+/* Icône de catégorie dans le tableau */
+.category-icon {
+    display: inline-block;
+    font-size: 1.1rem;
+    margin-right: 8px;
+    vertical-align: middle;
+    opacity: 0.7;
+}
+
 /* Badge de catégorie dans le modal */
 .modal-category-badge {
     display: inline-block;
