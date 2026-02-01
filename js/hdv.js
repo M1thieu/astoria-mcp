@@ -17,6 +17,7 @@ import {
     searchListings
 } from './market.js';
 import { getInventoryRows, setInventoryItem } from './api/inventory-service.js';
+import { getCategories, getCategoriesMap } from './api/categories-service.js';
 import { initCharacterSummary } from './ui/character-summary.js';
 
 const dom = {
@@ -78,7 +79,9 @@ const state = {
     character: null,
     profile: null,
     items: [],
-    inventory: []
+    inventory: [],
+    categories: [], // Categories from database
+    categoriesMap: new Map() // For quick lookups
 };
 
 const INVENTORY_SYNC_KEY = 'astoria_inventory_sync';
@@ -719,53 +722,32 @@ function setActiveTab(tabId) {
 }
 
 function buildCategories() {
-    const categories = new Set();
+    // Return database categories + 'all' option
+    const slugs = state.categories
+        .filter(cat => cat.is_active)
+        .map(cat => cat.slug);
 
-    // Always include standard categories
-    categories.add('agricole');
-    categories.add('consommable');
-    categories.add('equipement');
-    categories.add('materiau');
-    categories.add('quete');
-
-    // Add categories from items
-    for (const item of state.items) {
-        if (!item) continue;
-
-        const raw =
-            item.category ??
-            item.type ??
-            item.kind ??
-            item.item_category ??
-            null;
-
-        if (raw) {
-            const normalized = String(raw).trim().toLowerCase();
-            // Skip "monnaie" category
-            if (normalized !== 'monnaie') {
-                categories.add(normalized);
-            }
-        } else if (Array.isArray(item.tags) && item.tags.length) {
-            const normalized = String(item.tags[0]).trim().toLowerCase();
-            if (normalized !== 'monnaie') {
-                categories.add(normalized);
-            }
-        }
-    }
-
-    return ['all', ...Array.from(categories).filter(Boolean).sort((a, b) => String(a).localeCompare(String(b), 'fr'))];
+    return ['all', ...slugs];
 }
 
 function categoryLabel(category) {
     if (category === 'all') return 'Toutes';
-    if (category === 'agricole') return 'Agricole';
-    if (category === 'consommable') return 'Consommable';
-    if (category === 'equipement') return '\u00c9quipement';
-    if (category === 'materiau') return 'Matériaux';
-    if (category === 'quete') return 'Quêtes';
+
+    // Look up category from database
+    const cat = state.categoriesMap.get(category);
+    if (cat) return cat.name;
+
+    // Fallback for unknown categories
     return String(category)
         .replace(/[_-]+/g, ' ')
         .replace(/^\w/, (m) => m.toUpperCase());
+}
+
+function categoryIcon(category) {
+    if (category === 'all') return '📦';
+
+    const cat = state.categoriesMap.get(category);
+    return cat?.icon || '';
 }
 
 function renderCategories() {
@@ -776,7 +758,12 @@ function renderCategories() {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'hdv-category-btn' + (state.category === category ? ' active' : '');
-        btn.textContent = categoryLabel(category);
+
+        // Add icon + label
+        const icon = categoryIcon(category);
+        const label = categoryLabel(category);
+        btn.textContent = icon ? `${icon} ${label}` : label;
+
         btn.addEventListener('click', () => {
             state.category = category;
             state.page = 1;
@@ -1611,11 +1598,31 @@ function wireEvents() {
     });
 }
 
+async function loadCategories() {
+    try {
+        state.categories = await getCategories();
+        state.categoriesMap = await getCategoriesMap();
+        console.log(`[HDV] Loaded ${state.categories.length} categories from database`);
+    } catch (error) {
+        console.error('[HDV] Failed to load categories:', error);
+        // Fallback to hardcoded categories
+        state.categories = [
+            { slug: 'agricole', name: 'Agricole', icon: '🌾', is_active: true, display_order: 1 },
+            { slug: 'consommable', name: 'Consommable', icon: '🧪', is_active: true, display_order: 2 },
+            { slug: 'equipement', name: 'Équipement', icon: '⚔️', is_active: true, display_order: 3 },
+            { slug: 'materiau', name: 'Matériaux', icon: '⚒️', is_active: true, display_order: 4 },
+            { slug: 'quete', name: 'Quêtes', icon: '✨', is_active: true, display_order: 5 }
+        ];
+        state.categoriesMap = new Map(state.categories.map(cat => [cat.slug, cat]));
+    }
+}
+
 async function init() {
     console.log('[HDV] ========== INIT HDV ==========');
     console.log('[HDV] Location:', window.location.href);
     console.log('[HDV] Origin:', window.location.origin);
 
+    await loadCategories();
     await loadItemCatalog();
     populateSellSelect();
 
