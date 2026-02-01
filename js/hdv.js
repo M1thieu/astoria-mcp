@@ -721,6 +721,14 @@ function setActiveTab(tabId) {
 function buildCategories() {
     const categories = new Set();
 
+    // Always include standard categories
+    categories.add('agricole');
+    categories.add('consommable');
+    categories.add('equipement');
+    categories.add('materiau');
+    categories.add('quete');
+
+    // Add categories from items
     for (const item of state.items) {
         if (!item) continue;
 
@@ -731,9 +739,17 @@ function buildCategories() {
             item.item_category ??
             null;
 
-        if (raw) categories.add(String(raw).trim());
-        else if (Array.isArray(item.tags) && item.tags.length) {
-            categories.add(String(item.tags[0]).trim());
+        if (raw) {
+            const normalized = String(raw).trim().toLowerCase();
+            // Skip "monnaie" category
+            if (normalized !== 'monnaie') {
+                categories.add(normalized);
+            }
+        } else if (Array.isArray(item.tags) && item.tags.length) {
+            const normalized = String(item.tags[0]).trim().toLowerCase();
+            if (normalized !== 'monnaie') {
+                categories.add(normalized);
+            }
         }
     }
 
