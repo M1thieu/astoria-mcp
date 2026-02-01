@@ -45,7 +45,6 @@ function resolveItemMeta(itemId, item) {
         (/\[.+\]/.test(found.name || '') ? 'Rare' : 'Inconnue');
 
     return {
-        item_name: found.name || itemId,
         item_category: found.category || found.type || null,
         item_level: level,
         item_rarity: rarity
@@ -62,13 +61,13 @@ export async function searchListings(filters = {}, sort = 'price_asc', page = 1,
 
     let query = supabase
         .from('market')
-        .select('*, seller_character:characters!market_seller_character_id_fkey(id,name)', { count: 'exact' })
+        .select('*, items(id,name,description,category,rarity), seller_character:characters!market_seller_character_id_fkey(id,name)', { count: 'exact' })
         .eq('status', 'active');
 
     const q = String(filters.q || '').trim();
     if (q) {
         const needle = escapeIlike(q);
-        query = query.or(`item_name.ilike.%${needle}%,item_id.ilike.%${needle}%`);
+        query = query.or(`items.name.ilike.%${needle}%`);
     }
 
     if (filters.category && filters.category !== 'all') {
@@ -174,7 +173,7 @@ export async function getMyListings() {
 
     const { data, error } = await supabase
         .from('market')
-        .select('*')
+        .select('*, items(id,name,description,category,rarity)')
         .in('status', ['active'])
         .or(`seller_id.eq.${user.id},seller_character_id.eq.${character.id}`)
         .order('created_at', { ascending: false });
@@ -206,7 +205,7 @@ export async function getMyHistory() {
 
     const { data, error } = await supabase
         .from('market')
-        .select('*, seller_character:characters!market_seller_character_id_fkey(id,name), buyer_character:characters!market_buyer_character_id_fkey(id,name)')
+        .select('*, items(id,name,description,category,rarity), seller_character:characters!market_seller_character_id_fkey(id,name), buyer_character:characters!market_buyer_character_id_fkey(id,name)')
         .eq('status', 'sold')
         .or(`buyer_character_id.eq.${character.id},seller_character_id.eq.${character.id}`)
         .order('sold_at', { ascending: false });

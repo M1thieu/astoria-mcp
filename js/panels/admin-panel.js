@@ -165,8 +165,38 @@ export const adminPanel = {
     kaelsSave.textContent = "Mettre a jour";
     kaelsSave.disabled = true;
 
-    const kaelsStatus = el("p", "panel-admin-hint", "");
-    editSection.append(kaelsLabel, kaelsInput, kaelsSave, kaelsStatus);
+    const kaelsDeltaLabel = document.createElement("label");
+    kaelsDeltaLabel.textContent = "Ajouter kaels";
+    kaelsDeltaLabel.setAttribute("for", "adminPanelKaelsDelta");
+
+    const kaelsDeltaInput = document.createElement("input");
+    kaelsDeltaInput.type = "number";
+    kaelsDeltaInput.id = "adminPanelKaelsDelta";
+    kaelsDeltaInput.step = "1";
+    kaelsDeltaInput.className = "panel-select";
+    kaelsDeltaInput.placeholder = "Delta";
+    kaelsDeltaInput.disabled = true;
+
+    const kaelsDeltaSave = document.createElement("button");
+    kaelsDeltaSave.type = "button";
+    kaelsDeltaSave.className = "auth-button secondary";
+    kaelsDeltaSave.textContent = "Ajouter";
+    kaelsDeltaSave.disabled = true;
+
+    const kaelsStatus = el(
+      "p",
+      "panel-admin-hint",
+      "Valeur exacte ou ajout rapide."
+    );
+    editSection.append(
+      kaelsLabel,
+      kaelsInput,
+      kaelsSave,
+      kaelsDeltaLabel,
+      kaelsDeltaInput,
+      kaelsDeltaSave,
+      kaelsStatus
+    );
     wrapper.appendChild(editSection);
 
 
@@ -220,6 +250,8 @@ export const adminPanel = {
         kaelsInput.value = "";
         kaelsInput.disabled = true;
         kaelsSave.disabled = true;
+        kaelsDeltaInput.disabled = true;
+        kaelsDeltaSave.disabled = true;
         accountStatus.textContent = "Aucun compte selectionne.";
         accountToggle.disabled = true;
         characterToggle.disabled = true;
@@ -234,6 +266,9 @@ export const adminPanel = {
       kaelsInput.value = Number.isFinite(activeCharacter.kaels) ? String(activeCharacter.kaels) : "";
       kaelsInput.disabled = false;
       kaelsSave.disabled = false;
+      kaelsDeltaInput.disabled = false;
+      kaelsDeltaSave.disabled = false;
+      kaelsDeltaInput.value = "";
 
       const userId = activeCharacter.user_id;
       const accountDisabled = Boolean(userId && disabledUsers[userId]);
@@ -299,7 +334,7 @@ export const adminPanel = {
           kaelsStatus.textContent = "Mise a jour impossible.";
           return;
         }
-        kaelsStatus.textContent = "Kaels mis a jour.";
+        kaelsStatus.textContent = `Kaels definis a ${nextKaels}.`;
         window.dispatchEvent(
           new CustomEvent("astoria:character-updated", { detail: { kaels: nextKaels } })
         );
@@ -308,8 +343,45 @@ export const adminPanel = {
           badge.textContent = `${nextKaels} kaels`;
           badge.hidden = false;
         }
+        kaelsDeltaInput.value = "";
       } catch (error) {
         console.error("Admin panel kaels update error:", error);
+        kaelsStatus.textContent = "Erreur pendant la mise a jour.";
+      }
+    });
+
+    kaelsDeltaSave.addEventListener("click", async () => {
+      const active = typeof getActiveCharacter === "function" ? getActiveCharacter() : null;
+      if (!active || !active.id) {
+        kaelsStatus.textContent = "Selectionnez un personnage d'abord.";
+        return;
+      }
+      const delta = Number.parseInt(kaelsDeltaInput.value, 10);
+      if (!Number.isFinite(delta)) {
+        kaelsStatus.textContent = "Valeur d'ajout invalide.";
+        return;
+      }
+      const base = Number.isFinite(active.kaels) ? active.kaels : 0;
+      const nextKaels = Math.max(0, base + delta);
+      try {
+        const result = await updateCharacter(active.id, { kaels: nextKaels });
+        if (!result || !result.success) {
+          kaelsStatus.textContent = "Mise a jour impossible.";
+          return;
+        }
+        kaelsStatus.textContent = `Ajoute ${delta}. Total: ${nextKaels}.`;
+        window.dispatchEvent(
+          new CustomEvent("astoria:character-updated", { detail: { kaels: nextKaels } })
+        );
+        const badge = document.getElementById("characterKaelsBadge");
+        if (badge) {
+          badge.textContent = `${nextKaels} kaels`;
+          badge.hidden = false;
+        }
+        kaelsInput.value = String(nextKaels);
+        kaelsDeltaInput.value = "";
+      } catch (error) {
+        console.error("Admin panel kaels delta error:", error);
         kaelsStatus.textContent = "Erreur pendant la mise a jour.";
       }
     });

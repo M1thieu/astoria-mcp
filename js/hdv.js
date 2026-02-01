@@ -503,8 +503,8 @@ function resolveCharacterName(relation) {
 }
 
 function resolveListingItem(listing) {
-    return getItemById(listing.item_id) || {
-        name: listing.item_name || listing.item_id,
+    return getItemById(listing.item_id) || listing.items || {
+        name: listing.item_id,
         category: listing.item_category,
         description: listing.item_description,
         effect: listing.item_effect
@@ -1359,7 +1359,7 @@ function renderHistory(transactions) {
     }
 
     for (const tx of transactions) {
-        const itemName = tx.item_name || tx.item_id || 'Item inconnu';
+        const itemName = tx.items?.name || tx.item_id || 'Item inconnu';
         const scrollLabel = tx.scroll_type ? getScrollTypeLabel(tx.scroll_type) : '';
         const isBuy = state.character && tx.buyer_character_id === state.character.id;
         const type = isBuy ? 'Achat' : 'Vente';

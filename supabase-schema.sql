@@ -27,6 +27,19 @@ CREATE TABLE IF NOT EXISTS characters (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Categories table (for item categorization)
+CREATE TABLE IF NOT EXISTS categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    icon TEXT,
+    description TEXT,
+    display_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Items table (migrated from data.js)
 CREATE TABLE IF NOT EXISTS items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -37,7 +50,6 @@ CREATE TABLE IF NOT EXISTS items (
     rarity TEXT,
     price_kaels INTEGER DEFAULT 0,
     images JSONB DEFAULT '{}'::jsonb,
-    badges JSONB DEFAULT '[]'::jsonb,
     enabled BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -45,6 +57,9 @@ CREATE TABLE IF NOT EXISTS items (
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_characters_user_id ON characters(user_id);
+CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+CREATE INDEX IF NOT EXISTS idx_categories_active ON categories(is_active);
+CREATE INDEX IF NOT EXISTS idx_categories_display_order ON categories(display_order);
 CREATE INDEX IF NOT EXISTS idx_items_category ON items(category);
 CREATE INDEX IF NOT EXISTS idx_items_enabled ON items(enabled);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -52,6 +67,7 @@ CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 -- Row Level Security (RLS) Policies
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE characters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE items ENABLE ROW LEVEL SECURITY;
 
 -- Users: Users can read their own data
@@ -63,6 +79,20 @@ CREATE POLICY "Users can read own data"
 CREATE POLICY "Anyone can insert users"
     ON users FOR INSERT
     WITH CHECK (true);
+
+-- Categories: Everyone can read categories
+CREATE POLICY "Anyone can read categories"
+    ON categories FOR SELECT
+    USING (true);
+
+CREATE POLICY "Admins can manage categories"
+    ON categories FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM users
+            WHERE users.role = 'admin'
+        )
+    );
 
 -- Characters: Users can manage their own characters
 CREATE POLICY "Users can read own characters"
@@ -272,8 +302,7 @@ CREATE TABLE IF NOT EXISTS market (
     seller_character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
     buyer_id UUID NULL REFERENCES users(id) ON DELETE RESTRICT,
     buyer_character_id UUID NULL REFERENCES characters(id) ON DELETE RESTRICT,
-    item_id TEXT NOT NULL,
-    item_name TEXT,
+    item_id UUID NOT NULL REFERENCES items(id) ON DELETE RESTRICT,
     item_category TEXT,
     item_level INTEGER NOT NULL DEFAULT 0,
     item_rarity TEXT NOT NULL DEFAULT 'Inconnue',
@@ -290,7 +319,7 @@ CREATE INDEX IF NOT EXISTS idx_market_status ON market(status);
 CREATE INDEX IF NOT EXISTS idx_market_seller_id ON market(seller_id);
 CREATE INDEX IF NOT EXISTS idx_market_seller_character_id ON market(seller_character_id);
 CREATE INDEX IF NOT EXISTS idx_market_buyer_character_id ON market(buyer_character_id);
-CREATE INDEX IF NOT EXISTS idx_market_item_name ON market(item_name);
+CREATE INDEX IF NOT EXISTS idx_market_item_id ON market(item_id);
 CREATE INDEX IF NOT EXISTS idx_market_item_category ON market(item_category);
 CREATE INDEX IF NOT EXISTS idx_market_total_price ON market(total_price);
 
@@ -454,11 +483,18 @@ CREATE TABLE IF NOT EXISTS quests (
     locations TEXT[] DEFAULT '{}',
     rewards JSONB DEFAULT '[]'::jsonb,
     images TEXT[] DEFAULT '{}',
-    participants JSONB DEFAULT '[]'::jsonb,
     max_participants INTEGER DEFAULT 1 CHECK (max_participants > 0),
     completed_by TEXT[] DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Quest participants table (normalized from quests.participants JSONB)
+CREATE TABLE IF NOT EXISTS quest_participants (
+    quest_id TEXT NOT NULL REFERENCES quests(id) ON DELETE CASCADE,
+    character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (quest_id, character_id)
 );
 
 -- Quest history table
@@ -480,6 +516,10 @@ CREATE INDEX IF NOT EXISTS idx_quests_status ON quests(status);
 CREATE INDEX IF NOT EXISTS idx_quests_type ON quests(type);
 CREATE INDEX IF NOT EXISTS idx_quests_rank ON quests(rank);
 CREATE INDEX IF NOT EXISTS idx_quests_created_at ON quests(created_at);
+
+-- Indexes for quest_participants
+CREATE INDEX IF NOT EXISTS idx_quest_participants_quest ON quest_participants(quest_id);
+CREATE INDEX IF NOT EXISTS idx_quest_participants_character ON quest_participants(character_id);
 
 -- Indexes for quest_history
 CREATE INDEX IF NOT EXISTS idx_quest_history_character_id ON quest_history(character_id);
@@ -505,6 +545,21 @@ CREATE POLICY "Admins can delete quests"
     ON quests FOR DELETE
     USING (true);
 
+-- RLS for quest_participants
+ALTER TABLE quest_participants ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can read quest participants"
+    ON quest_participants FOR SELECT
+    USING (true);
+
+CREATE POLICY "Anyone can join quests"
+    ON quest_participants FOR INSERT
+    WITH CHECK (true);
+
+CREATE POLICY "Anyone can leave quests"
+    ON quest_participants FOR DELETE
+    USING (true);
+
 -- RLS for quest_history
 ALTER TABLE quest_history ENABLE ROW LEVEL SECURITY;
 
@@ -521,6 +576,34 @@ CREATE TRIGGER quests_updated_at
     BEFORE UPDATE ON quests
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER categories_updated_at
+    BEFORE UPDATE ON categories
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================================
+-- FOREIGN KEY CONSTRAINTS
+-- ============================================================================
+
+-- Add FK constraint from items.category to categories.slug
+-- This ensures all item categories exist in the categories table
+ALTER TABLE items
+    ADD CONSTRAINT IF NOT EXISTS fk_items_category
+    FOREIGN KEY (category) REFERENCES categories(slug) ON DELETE SET NULL;
+
+-- ============================================================================
+-- INITIAL DATA
+-- ============================================================================
+
+-- Insert standard categories
+INSERT INTO categories (slug, name, icon, display_order) VALUES
+    ('agricole', 'Agricole', '🌾', 1),
+    ('consommable', 'Consommable', '🧪', 2),
+    ('equipement', 'Équipement', '⚔️', 3),
+    ('materiau', 'Matériaux', '⚒️', 4),
+    ('quete', 'Quêtes', '✨', 5)
+ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================================================
 -- NOTES

@@ -519,7 +519,7 @@ function mapQuestRow(row) {
         locations: parseJsonArray(row.locations),
         rewards: parseJsonArray(row.rewards),
         images: parseJsonArray(row.images),
-        participants: parseJsonArray(row.participants),
+        participants: [], // Will be populated separately from quest_participants table
         maxParticipants: Number(row.max_participants) || 1,
         completedBy: parseJsonArray(row.completed_by)
     };
@@ -538,6 +538,50 @@ function mapHistoryRow(row) {
     };
 }
 
+async function loadParticipantsForQuests() {
+    try {
+        const supabase = await getSupabaseClient();
+        const { data, error } = await supabase
+            .from("quest_participants")
+            .select(`
+                quest_id,
+                character_id,
+                joined_at,
+                characters (
+                    id,
+                    name
+                )
+            `);
+        if (error) throw error;
+
+        // Build a map of quest_id → participants array
+        const participantsMap = new Map();
+        if (Array.isArray(data)) {
+            data.forEach(row => {
+                if (!participantsMap.has(row.quest_id)) {
+                    participantsMap.set(row.quest_id, []);
+                }
+                participantsMap.get(row.quest_id).push({
+                    id: row.character_id,
+                    key: row.character_id,
+                    label: row.characters?.name || "Unknown",
+                    joinedAt: new Date(row.joined_at).getTime()
+                });
+            });
+        }
+
+        // Assign participants to each quest
+        state.quests.forEach(quest => {
+            quest.participants = participantsMap.get(quest.id) || [];
+        });
+
+        return true;
+    } catch (error) {
+        console.warn("[Quetes] Failed to load quest participants:", error);
+        return false;
+    }
+}
+
 async function loadQuestsFromDb() {
     try {
         const supabase = await getSupabaseClient();
@@ -548,6 +592,7 @@ async function loadQuestsFromDb() {
         if (error) throw error;
         if (Array.isArray(data) && data.length) {
             state.quests = data.map(mapQuestRow);
+            await loadParticipantsForQuests();
             return true;
         }
     } catch (error) {
@@ -574,6 +619,38 @@ async function loadHistoryFromDb() {
     return false;
 }
 
+async function upsertQuestParticipants(questId, participants) {
+    if (!questId || !Array.isArray(participants)) return;
+    try {
+        const supabase = await getSupabaseClient();
+
+        // First, delete all existing participants for this quest
+        await supabase
+            .from("quest_participants")
+            .delete()
+            .eq("quest_id", questId);
+
+        // Then insert the new participants
+        if (participants.length > 0) {
+            const payload = participants.map(p => ({
+                quest_id: questId,
+                character_id: p.id || p.key,
+                joined_at: p.joinedAt ? new Date(p.joinedAt).toISOString() : new Date().toISOString()
+            }));
+
+            const { error } = await supabase
+                .from("quest_participants")
+                .insert(payload);
+            if (error) throw error;
+        }
+
+        return true;
+    } catch (error) {
+        console.warn("[Quetes] Failed to upsert quest participants:", error);
+        return false;
+    }
+}
+
 async function upsertQuestToDb(quest) {
     if (!quest) return;
     try {
@@ -589,7 +666,6 @@ async function upsertQuestToDb(quest) {
             locations: quest.locations,
             rewards: quest.rewards,
             images: quest.images,
-            participants: quest.participants,
             max_participants: quest.maxParticipants,
             completed_by: quest.completedBy
         };
@@ -597,6 +673,10 @@ async function upsertQuestToDb(quest) {
             .from(QUESTS_TABLE)
             .upsert([payload], { onConflict: "id" });
         if (error) throw error;
+
+        // Separately handle participants
+        await upsertQuestParticipants(quest.id, quest.participants);
+
         return true;
     } catch (error) {
         console.warn("[Quetes] Failed to upsert quest:", error);
