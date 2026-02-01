@@ -830,9 +830,11 @@ function filterByCategory() {
     // Mise à jour du titre
     const titles = {
         '': 'Liste d\'objets',
-        'equipement': '\u00c9quipements',
+        'agricole': 'Agricole',
         'consommable': 'Consommables',
-        'agricole': 'Agricole'
+        'equipement': '\u00c9quipements',
+        'materiau': 'Matériaux',
+        'quete': 'Quêtes'
     };
     if (pageTitle) {
         pageTitle.textContent = titles[currentCategory] || 'Liste d\'objets';

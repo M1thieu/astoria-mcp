@@ -3127,11 +3127,17 @@
 
 
 
+                console.log('[Inventory Storage] Init:', { user: !!user, character: !!character, characterId: character?.id, isAdmin });
+
                 if (user && character && character.id) {
 
 
 
                     inventoryStorageMode = 'character';
+
+
+
+                    console.log('[Inventory Storage] Mode set to CHARACTER - items will save to database');
 
 
 
@@ -3147,6 +3153,16 @@
 
 
 
+                } else {
+
+
+
+                    console.warn('[Inventory Storage] Mode remains LOCAL - items will only save to localStorage', {
+                        reason: !user ? 'No user logged in' : !character ? 'No active character' : 'No character ID'
+                    });
+
+
+
                 }
 
 
@@ -3156,6 +3172,10 @@
 
 
                 // No server / module blocked / auth module unavailable => stay in local mode
+
+
+
+                console.error('[Inventory Storage] Failed to initialize - staying in LOCAL mode:', error);
 
 
 
@@ -3507,7 +3527,14 @@
 
 
 
-            if (inventoryStorageMode !== 'character' || !authApi || !inventoryApi) return;
+            if (inventoryStorageMode !== 'character' || !authApi || !inventoryApi) {
+                console.warn('[Inventory Storage] Backend save skipped:', {
+                    mode: inventoryStorageMode,
+                    hasAuth: !!authApi,
+                    hasInventoryApi: !!inventoryApi
+                });
+                return;
+            }
 
 
 
@@ -3515,11 +3542,16 @@
 
 
 
-            if (!character || !character.id) return;
+            if (!character || !character.id) {
+                console.warn('[Inventory Storage] Backend save skipped: No character or character ID');
+                return;
+            }
 
 
 
             const rows = buildInventoryRows(character.id);
+
+            console.log(`[Inventory Storage] Saving ${rows.length} items to database for character ${character.id}...`);
 
 
 
@@ -3536,6 +3568,8 @@
 
 
                 saved = true;
+
+                console.log('[Inventory Storage] ✅ Successfully saved to database!');
 
 
 
@@ -3583,7 +3617,12 @@
 
 
 
-            if (inventoryStorageMode !== 'character') return;
+            if (inventoryStorageMode !== 'character') {
+                console.log('[Inventory Storage] Persist: Mode is LOCAL - only saved to localStorage (not database)');
+                return;
+            }
+
+            console.log('[Inventory Storage] Persist: Scheduling database save...');
 
 
 
@@ -8656,6 +8695,11 @@
 
 
             currency.quantity = Math.max(0, Math.floor(next));
+
+
+
+            // Persist kaels changes to database
+            persistInventory();
 
 
 

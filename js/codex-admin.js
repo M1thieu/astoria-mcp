@@ -158,6 +158,14 @@ function normalizeCategory(value) {
 }
 
 function collectCategories(items) {
+    // Toujours inclure les catégories standards
+    knownCategories.add('agricole');
+    knownCategories.add('consommable');
+    knownCategories.add('equipement');
+    knownCategories.add('materiau');
+    knownCategories.add('quete');
+
+    // Ajouter les catégories des items existants
     (items || []).forEach((item) => {
         const category = normalizeCategory(item?.category);
         if (category) knownCategories.add(category);
